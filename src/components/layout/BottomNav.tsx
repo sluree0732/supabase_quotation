@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Building2, FileText } from 'lucide-react'
+import { Home, Building2, FileText, FileSignature } from 'lucide-react'
 
 const NAV_ITEMS = [
   { href: '/', label: '홈', icon: Home },
   { href: '/companies', label: '업체', icon: Building2 },
   { href: '/quotations', label: '견적서', icon: FileText },
+  { href: '/contracts', label: '계약서', icon: FileSignature },
 ]
 
 interface BottomNavProps {
