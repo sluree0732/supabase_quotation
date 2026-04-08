@@ -1,65 +1,96 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { Building2, FileText, ChevronRight } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
+
+export default function HomePage() {
+  const [draftCount, setDraftCount] = useState(0)
+  const [companyCount, setCompanyCount] = useState(0)
+
+  useEffect(() => {
+    async function fetchCounts() {
+      const [draftRes, companyRes] = await Promise.all([
+        supabase
+          .from('quotations')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'draft'),
+        supabase
+          .from('companies')
+          .select('id', { count: 'exact', head: true }),
+      ])
+      setDraftCount(draftRes.count ?? 0)
+      setCompanyCount(companyRes.count ?? 0)
+    }
+    fetchCounts()
+  }, [])
+
+  const cards = [
+    {
+      href: '/companies',
+      icon: Building2,
+      color: '#2980b9',
+      label: '업체 등록',
+      desc: '거래처 정보 관리',
+      badge: companyCount > 0 ? `${companyCount}개` : null,
+    },
+    {
+      href: '/quotations',
+      icon: FileText,
+      color: '#27ae60',
+      label: '견적서 작성',
+      desc: '견적서 작성 및 PDF 출력',
+      badge: draftCount > 0 ? `임시저장 ${draftCount}건` : null,
+      badgeColor: 'bg-red-500',
+    },
+  ]
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] md:min-h-screen px-6 py-12">
+      {/* 헤더 */}
+      <div className="text-center mb-10">
+        <h1 className="text-3xl font-bold text-[#1e2a3a] mb-2">
+          견적서 / 계약서 관리
+        </h1>
+        <p className="text-[#718096] text-sm">삼원기업 문서 관리 시스템</p>
+      </div>
+
+      {/* 카드 */}
+      <div className="flex flex-col sm:flex-row gap-5 w-full max-w-lg">
+        {cards.map(({ href, icon: Icon, color, label, desc, badge, badgeColor }) => (
+          <Link
+            key={href}
+            href={href}
+            className="flex-1 bg-white rounded-2xl border-2 border-[#e2e8f0] p-6 flex flex-col gap-3 hover:border-[#2980b9] transition-colors shadow-sm active:scale-95"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+            <div className="flex items-center justify-between">
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center"
+                style={{ backgroundColor: `${color}18` }}
+              >
+                <Icon size={24} style={{ color }} />
+              </div>
+              <ChevronRight size={18} className="text-[#a0aec0]" />
+            </div>
+            <div>
+              <div className="font-semibold text-[#1e2a3a] text-base">{label}</div>
+              <div className="text-[#718096] text-xs mt-0.5">{desc}</div>
+            </div>
+            {badge && (
+              <span
+                className={`self-start text-xs text-white px-2 py-0.5 rounded-full ${
+                  badgeColor ?? 'bg-[#2980b9]'
+                }`}
+              >
+                {badge}
+              </span>
+            )}
+          </Link>
+        ))}
+      </div>
+
+      <p className="mt-10 text-[#a0aec0] text-xs">좌측 메뉴 또는 하단 탭을 선택하세요</p>
     </div>
-  );
+  )
 }
