@@ -29,7 +29,7 @@ export default function ItemModal({ item, onSave, onDelete, onClose, items, onAi
   const [addedCount, setAddedCount] = useState(0)   // 이번 모달 오픈에서 새로 추가한 수
   const [showList, setShowList] = useState(false)
 
-  const existingCount = items?.length ?? 0           // 모달 열 때 이미 있던 항목 수
+  const [existingCount] = useState(items?.length ?? 0) // 모달 열 때 한 번만 캡처
   const displayCount = existingCount + addedCount    // 헤더 표시용 전체 수
   const sessionItems = items ?? []                   // 목록 패널 + AI용 전체 항목
 
