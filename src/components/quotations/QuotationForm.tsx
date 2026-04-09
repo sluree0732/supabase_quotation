@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Building2, ChevronRight, X, Plus, Sparkles, Loader2, FileDown, Save, FileSignature } from 'lucide-react'
+import { Building2, ChevronRight, X, Plus, Sparkles, Loader2, FileDown, Save, FileSignature, Sheet } from 'lucide-react'
 import type { Company, QuotationItem, VatType } from '@/types'
 import CompanyPickerModal from './CompanyPickerModal'
 import ItemModal from './ItemModal'
@@ -23,6 +23,8 @@ interface Props {
   onSave: (state: QuotationFormState, status: 'draft' | 'saved') => Promise<void>
   onPdf: (state: QuotationFormState) => Promise<void>
   pdfLoading: boolean
+  onExcel: (state: QuotationFormState) => Promise<void>
+  excelLoading: boolean
   onSaveSuccess: (status: 'draft' | 'saved') => void
   quotationId?: string
 }
@@ -41,7 +43,7 @@ const VAT_LABEL: Record<VatType, string> = {
 
 const CATEGORIES = ['기획', '디자인', '개발', '마케팅', '광고', '영상', '운영', '유지보수', '기타']
 
-export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, pdfLoading, onSaveSuccess, quotationId }: Props) {
+export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, pdfLoading, onExcel, excelLoading, onSaveSuccess, quotationId }: Props) {
   const [state, setState] = useState<QuotationFormState>(initial)
   const [showCompany, setShowCompany] = useState(false)
   const [editIdx, setEditIdx] = useState<number | null>(null)
@@ -245,17 +247,27 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
 
           {/* 액션 버튼 */}
           <div className="space-y-2 pb-8">
-            {/* PDF + 계약서: saved 상태일 때만 표시 */}
+            {/* 엑셀 + PDF + 계약서: saved 상태일 때만 표시 */}
             {isSaved && (
               <>
-                <button
-                  onClick={() => onPdf(state)}
-                  disabled={pdfLoading}
-                  className="w-full py-3.5 rounded-xl bg-[#2980b9] text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-40"
-                >
-                  {pdfLoading ? <Loader2 size={16} className="animate-spin" /> : <FileDown size={16} />}
-                  {pdfLoading ? 'PDF 생성 중...' : 'PDF 다운로드'}
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => onExcel(state)}
+                    disabled={excelLoading}
+                    className="flex-1 py-3.5 rounded-xl bg-[#27ae60] text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-40"
+                  >
+                    {excelLoading ? <Loader2 size={16} className="animate-spin" /> : <Sheet size={16} />}
+                    {excelLoading ? '생성 중...' : '엑셀'}
+                  </button>
+                  <button
+                    onClick={() => onPdf(state)}
+                    disabled={pdfLoading}
+                    className="flex-1 py-3.5 rounded-xl bg-[#2980b9] text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-40"
+                  >
+                    {pdfLoading ? <Loader2 size={16} className="animate-spin" /> : <FileDown size={16} />}
+                    {pdfLoading ? '생성 중...' : 'PDF'}
+                  </button>
+                </div>
                 {quotationId && (
                   <a
                     href={`/contracts/new?quotationId=${quotationId}`}

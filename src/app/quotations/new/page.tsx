@@ -27,6 +27,7 @@ function QuotationPage() {
   const [formState, setFormState] = useState<QuotationFormState>(INITIAL)
   const [saving, setSaving] = useState(false)
   const [pdfLoading, setPdfLoading] = useState(false)
+  const [excelLoading, setExcelLoading] = useState(false)
   const [loading, setLoading] = useState(!!editId)
 
   // 편집 모드: 기존 데이터 로드
@@ -85,6 +86,37 @@ function QuotationPage() {
     // 페이지 이동 없이 폼에서 토스트로 처리
   }
 
+  async function handleExcel(state: QuotationFormState) {
+    if (!state.items.length) { alert('항목을 먼저 추가해주세요.'); return }
+    setExcelLoading(true)
+    try {
+      const total = state.items.reduce((s, i) => s + i.total_price, 0)
+      const res = await fetch('/api/excel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          quoteDate: state.quoteDate,
+          recipient: state.recipient,
+          items: state.items,
+          totalAmount: total,
+          vatType: state.vatType,
+        }),
+      })
+      if (!res.ok) throw new Error('엑셀 생성 실패')
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${state.company?.name ?? '견적서'}_${state.quoteDate.replace(/-/g, '')}.xlsx`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (e: any) {
+      alert(e.message ?? '엑셀 생성 실패')
+    } finally {
+      setExcelLoading(false)
+    }
+  }
+
   async function handlePdf(state: QuotationFormState) {
     if (!state.items.length) { alert('항목을 먼저 추가해주세요.'); return }
     setPdfLoading(true)
@@ -141,6 +173,8 @@ function QuotationPage() {
         pdfLoading={pdfLoading}
         onSave={handleSave}
         onPdf={handlePdf}
+        onExcel={handleExcel}
+        excelLoading={excelLoading}
         onSaveSuccess={handleSaveSuccess}
         quotationId={editId ?? undefined}
       />
