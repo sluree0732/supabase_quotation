@@ -10,7 +10,7 @@ interface Props {
   item?: QuotationItem | null
   onSave: (item: Omit<QuotationItem, 'id' | 'quotation_id' | 'sort_order'>) => void
   onDelete?: () => void
-  onClose: () => void
+  onClose: (addedCount?: number) => void
 }
 
 export default function ItemModal({ item, onSave, onDelete, onClose }: Props) {
@@ -22,6 +22,7 @@ export default function ItemModal({ item, onSave, onDelete, onClose }: Props) {
   const [note, setNote] = useState(item?.note ?? '')
   const [aiLoading, setAiLoading] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [addedCount, setAddedCount] = useState(0)
 
   const totalPrice = period * unitPrice
 
@@ -30,9 +31,43 @@ export default function ItemModal({ item, onSave, onDelete, onClose }: Props) {
     return () => { document.body.style.overflow = '' }
   }, [])
 
+  function validate() {
+    if (!category) { alert('대분류를 선택해주세요.'); return false }
+    if (!itemName.trim()) { alert('상품명을 입력해주세요.'); return false }
+    return true
+  }
+
+  function resetForm() {
+    setCategory('')
+    setItemName('')
+    setPeriod(1)
+    setUnitPrice(0)
+    setNote('')
+  }
+
+  // [항목 추가] — 저장 후 폼 초기화, 모달 유지
+  function handleAddMore() {
+    if (!validate()) return
+    onSave({ category, item_name: itemName.trim(), period, unit_price: unitPrice, total_price: totalPrice, note })
+    resetForm()
+    setAddedCount(c => c + 1)
+  }
+
+  // [완료] — 폼에 내용 있으면 저장 후 닫기, 없으면 그냥 닫기
+  function handleFinish() {
+    const hasContent = category || itemName.trim()
+    if (hasContent) {
+      if (!validate()) return
+      onSave({ category, item_name: itemName.trim(), period, unit_price: unitPrice, total_price: totalPrice, note })
+      onClose(addedCount + 1)
+    } else {
+      onClose(addedCount > 0 ? addedCount : undefined)
+    }
+  }
+
+  // 수정 모드용 (기존 동작 유지)
   function handleSave() {
-    if (!category) { alert('대분류를 선택해주세요.'); return }
-    if (!itemName.trim()) { alert('상품명을 입력해주세요.'); return }
+    if (!validate()) return
     onSave({ category, item_name: itemName.trim(), period, unit_price: unitPrice, total_price: totalPrice, note })
     onClose()
   }
@@ -65,7 +100,7 @@ export default function ItemModal({ item, onSave, onDelete, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/50" onClick={() => onClose()} />
       <div
         className="relative z-10 w-full md:w-[500px] bg-white rounded-t-2xl md:rounded-2xl shadow-xl flex flex-col max-h-[calc(100dvh-3.5rem)] md:max-h-[85vh]"
         onTouchMove={e => e.stopPropagation()}
@@ -76,8 +111,15 @@ export default function ItemModal({ item, onSave, onDelete, onClose }: Props) {
         </div>
         {/* 헤더 */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <h2 className="font-bold text-[#1e2a3a] text-lg">{isEdit ? '항목 수정' : '항목 추가'}</h2>
-          <button onClick={onClose}><X size={20} className="text-gray-400" /></button>
+          <div>
+            <h2 className="font-bold text-[#1e2a3a] text-lg">{isEdit ? '항목 수정' : '항목 추가'}</h2>
+            {!isEdit && addedCount > 0 && (
+              <p className="text-xs text-[#2980b9] mt-0.5">{addedCount}개 추가됨</p>
+            )}
+          </div>
+          <button onClick={() => onClose(addedCount > 0 ? addedCount : undefined)}>
+            <X size={20} className="text-gray-400" />
+          </button>
         </div>
 
         {/* 폼 */}
@@ -185,13 +227,28 @@ export default function ItemModal({ item, onSave, onDelete, onClose }: Props) {
                 <button onClick={() => { onDelete?.(); onClose() }} className="flex-1 py-2 rounded-lg bg-red-500 text-white text-sm font-medium">삭제</button>
               </div>
             </div>
-          ) : (
+          ) : isEdit ? (
+            /* 수정 모드: 기존 UI 유지 */
             <div className="flex gap-2">
-              {isEdit && (
-                <button onClick={() => setShowDeleteConfirm(true)} className="py-3 px-4 rounded-xl bg-red-50 text-red-500 font-medium text-sm">삭제</button>
-              )}
+              <button onClick={() => setShowDeleteConfirm(true)} className="py-3 px-4 rounded-xl bg-red-50 text-red-500 font-medium text-sm">삭제</button>
               <button onClick={handleSave} className="flex-1 py-3 rounded-xl bg-[#2980b9] text-white font-semibold text-sm">
-                {isEdit ? '수정 완료' : '추가'}
+                수정 완료
+              </button>
+            </div>
+          ) : (
+            /* 신규 추가 모드: [항목 추가] [완료] */
+            <div className="flex gap-2">
+              <button
+                onClick={handleAddMore}
+                className="flex-1 py-3 rounded-xl border-2 border-[#2980b9] text-[#2980b9] font-semibold text-sm"
+              >
+                + 항목 추가
+              </button>
+              <button
+                onClick={handleFinish}
+                className="flex-1 py-3 rounded-xl bg-[#2980b9] text-white font-semibold text-sm"
+              >
+                완료
               </button>
             </div>
           )}

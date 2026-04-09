@@ -69,47 +69,68 @@ function parseResponse(raw: string, count: number): string[] {
     const stripped = line.trim()
     if (!stripped) continue
 
-    let matched = false
-    for (const sep of ['. ', ') ']) {
-      if (stripped[0]?.match(/\d/) && stripped.includes(sep)) {
-        const sepIdx = stripped.indexOf(sep)
-        const numPart = stripped.slice(0, sepIdx)
-        if (/^\d+$/.test(numPart)) {
-          flush()
-          currentLines = []
-          currentIdx = parseInt(numPart) - 1
-          currentLines.push(stripped.slice(sepIdx + sep.length).trim())
-          matched = true
-          break
-        }
+    // "1." / "1. " / "1)" / "1) " 등 번호 줄 감지 (공백 없는 "1."도 처리)
+    const numMatch = stripped.match(/^(\d+)[\.)](.*)$/)
+    if (numMatch) {
+      const num = parseInt(numMatch[1]) - 1
+      if (num >= 0 && num < count) {
+        flush()
+        currentLines = []
+        currentIdx = num
+        const rest = numMatch[2].replace(/^[\s•\-\*]+/, '')  // "1.•내용" 형태 처리
+        if (rest) currentLines.push(rest.trim())
+        continue
       }
     }
-    if (!matched && currentIdx !== null) {
+    if (currentIdx !== null) {
       currentLines.push(stripped)
     }
   }
   flush()
 
-  // 폴백: 번호 파싱 결과가 비어있는 항목 처리
-  for (let i = 0; i < count; i++) {
-    if (notes[i]) continue
-
-    // 해당 항목 범위 추정: count가 1이면 raw 전체 사용
-    const targetRaw = count === 1 ? raw : ''
-
-    if (targetRaw) {
-      // 1단계: • 로 시작하는 줄만 추출
-      const bulletLines = targetRaw.split('\n')
+  // 번호 파싱이 하나도 안 됐으면 → 단락 분할 폴백
+  const allEmpty = notes.every(n => !n)
+  if (allEmpty) {
+    // 빈 줄로 단락 분리
+    const paragraphs = raw.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean)
+    if (paragraphs.length >= count) {
+      // 단락이 충분하면 1:1 매핑
+      for (let i = 0; i < count; i++) {
+        notes[i] = paragraphs[i]
+      }
+    } else if (paragraphs.length > 0) {
+      // 단락이 부족하면 bullet 줄 기준으로 count등분 시도
+      const bulletLines = raw.split('\n')
+        .map(l => l.trim())
+        .filter(l => l.startsWith('•') || l.startsWith('-') || l.startsWith('*'))
+      if (bulletLines.length >= count) {
+        const perItem = Math.ceil(bulletLines.length / count)
+        for (let i = 0; i < count; i++) {
+          notes[i] = bulletLines.slice(i * perItem, (i + 1) * perItem).join('\n')
+        }
+      } else {
+        // 최후 폴백: raw 전체를 첫 항목에, 나머지도 동일하게
+        for (let i = 0; i < count; i++) {
+          notes[i] = paragraphs[0] ?? raw.trim()
+        }
+      }
+    }
+  } else {
+    // 일부만 비어있는 경우: 개별 항목 폴백
+    for (let i = 0; i < count; i++) {
+      if (notes[i]) continue
+      // 빈 항목은 인접한 채워진 항목의 내용을 사용하지 않고 raw에서 재시도
+      const bulletLines = raw.split('\n')
         .map(l => l.trim())
         .filter(l => l.startsWith('•') || l.startsWith('-') || l.startsWith('*'))
       if (bulletLines.length > 0) {
         notes[i] = bulletLines.join('\n')
       } else {
-        // 2단계: raw 전체를 그대로 사용
-        notes[i] = targetRaw.trim()
+        notes[i] = raw.trim()
       }
     }
   }
 
-  return notes
+  // 후처리: 각 노트 첫 줄에 남아있는 "1." "2." 등 번호 제거
+  return notes.map(n => n.replace(/^\d+[\.\)]\s*\n?/, '').trim())
 }

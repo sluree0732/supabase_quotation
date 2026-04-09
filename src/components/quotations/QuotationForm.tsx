@@ -86,7 +86,7 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
       })
       const json = await res.json()
       if (json.notes) {
-        set({ items: state.items.map((it, i) => ({ ...it, note: json.notes[i] ?? it.note })) })
+        set({ items: state.items.map((it, i) => ({ ...it, note: json.notes[i] || it.note })) })
       }
     } catch { alert('AI 생성 실패') }
     finally { setAiAllLoading(false) }
@@ -338,7 +338,13 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
         />
       )}
       {showAdd && (
-        <ItemModal onSave={addItem} onClose={() => setShowAdd(false)} />
+        <ItemModal
+          onSave={addItem}
+          onClose={(count) => {
+            setShowAdd(false)
+            if (count && count > 0) showToast(`${count}개 항목이 추가되었습니다`)
+          }}
+        />
       )}
       {editIdx !== null && (
         <ItemModal
