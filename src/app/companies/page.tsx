@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
-import { Plus, Search, Building2, Phone, MapPin, ChevronRight } from 'lucide-react'
+import { Plus, Search, Building2, Phone, MapPin, ChevronRight, Trash2 } from 'lucide-react'
 import type { Company } from '@/types'
-import { getCompanies } from '@/lib/companies'
+import { getCompanies, deleteCompany } from '@/lib/companies'
 import CompanyModal from '@/components/companies/CompanyModal'
 
 export default function CompaniesPage() {
@@ -12,8 +12,15 @@ export default function CompaniesPage() {
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<Company | null | undefined>(undefined)
   // undefined = 모달 닫힘, null = 신규, Company = 수정
+  const [deleteTarget, setDeleteTarget] = useState<Company | null>(null)
 
   useEffect(() => { load() }, [])
+
+  async function handleDelete(company: Company) {
+    await deleteCompany(company.id)
+    setDeleteTarget(null)
+    load()
+  }
 
   async function load() {
     setLoading(true)
@@ -117,6 +124,7 @@ export default function CompaniesPage() {
                       <th className="text-left px-5 py-3 font-semibold text-[#4a5568]">전화번호</th>
                       <th className="text-left px-5 py-3 font-semibold text-[#4a5568]">주소</th>
                       <th className="text-left px-5 py-3 font-semibold text-[#4a5568]">업태</th>
+                      <th className="w-12" />
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
@@ -124,12 +132,20 @@ export default function CompaniesPage() {
                       <tr
                         key={company.id}
                         onClick={() => setSelected(company)}
-                        className="hover:bg-[#f0f7fd] cursor-pointer transition-colors"
+                        className="group hover:bg-[#f0f7fd] cursor-pointer transition-colors"
                       >
                         <td className="px-5 py-3.5 font-medium text-[#1e2a3a]">{company.name}</td>
                         <td className="px-5 py-3.5 text-[#718096]">{company.phone || '—'}</td>
                         <td className="px-5 py-3.5 text-[#718096] max-w-xs truncate">{company.address || '—'}</td>
                         <td className="px-5 py-3.5 text-[#718096]">{company.business_type || '—'}</td>
+                        <td className="px-3 py-3.5">
+                          <button
+                            onClick={e => { e.stopPropagation(); setDeleteTarget(company) }}
+                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -140,7 +156,35 @@ export default function CompaniesPage() {
         )}
       </div>
 
-      {/* 모달 */}
+      {/* 삭제 확인 다이얼로그 */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setDeleteTarget(null)} />
+          <div className="relative z-10 bg-white rounded-2xl shadow-xl p-6 w-80">
+            <h3 className="font-bold text-[#1e2a3a] mb-1">업체 삭제</h3>
+            <p className="text-sm text-[#718096] mb-5">
+              <span className="font-semibold text-[#1e2a3a]">{deleteTarget.name}</span>을(를) 삭제하시겠습니까?<br />
+              이 작업은 되돌릴 수 없습니다.
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="flex-1 py-2.5 rounded-xl bg-gray-100 text-[#4a5568] font-medium text-sm"
+              >
+                취소
+              </button>
+              <button
+                onClick={() => handleDelete(deleteTarget)}
+                className="flex-1 py-2.5 rounded-xl bg-red-500 text-white font-semibold text-sm"
+              >
+                삭제
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 수정 모달 */}
       {selected !== undefined && (
         <CompanyModal
           company={selected}
