@@ -111,7 +111,6 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
               onChange={e => set({ recipient: e.target.value })}
               placeholder="예: 홍길동 대표"
               className="input-base"
-              autoFocus
             />
           </Field>
 

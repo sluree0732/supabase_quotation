@@ -72,9 +72,9 @@ const S = StyleSheet.create({
   tableLastRow: { flexDirection: 'row' },
   colCat:   { width: '10%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 3 },
   colName:  { width: '18%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 3 },
-  colPer:   { width: '7%',  borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingVertical: 3 },
-  colUnit:  { width: '11%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'flex-end', paddingHorizontal: 3, paddingVertical: 3 },
-  colTotal: { width: '11%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'flex-end', paddingHorizontal: 3, paddingVertical: 3 },
+  colPer:   { width: '9%',  borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingVertical: 3 },
+  colUnit:  { width: '13%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'flex-end', paddingHorizontal: 3, paddingVertical: 3 },
+  colTotal: { width: '13%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'flex-end', paddingHorizontal: 3, paddingVertical: 3 },
   colNote:  { flex: 1, justifyContent: 'flex-start', paddingHorizontal: 4, paddingVertical: 4 },
   noteText: { fontSize: 7, lineHeight: 1.6 },
   headerText: { fontSize: 8, fontWeight: 'bold', textAlign: 'center' },
@@ -166,10 +166,10 @@ function ItemsTable({ items }: { items: QuotationItem[] }) {
     <View style={S.table}>
       {/* 헤더 */}
       <View style={S.tableHeader}>
-        <View style={[S.colCat, S.colName, { width: '32%' }]}><Text style={S.headerText}>상  품</Text></View>
-        <View style={S.colPer}><Text style={S.headerText}>기간{'\n'}(월)</Text></View>
-        <View style={S.colUnit}><Text style={S.headerText}>금  액</Text></View>
-        <View style={S.colTotal}><Text style={S.headerText}>총  액</Text></View>
+        <View style={[S.colCat, S.colName, { width: '28%' }]}><Text style={S.headerText}>상  품</Text></View>
+        <View style={S.colPer}><Text style={S.headerText}>기간(월)</Text></View>
+        <View style={[S.colUnit, { alignItems: 'center' }]}><Text style={S.headerText}>금  액</Text></View>
+        <View style={[S.colTotal, { alignItems: 'center' }]}><Text style={S.headerText}>총  액</Text></View>
         <View style={S.colNote}><Text style={S.headerText}>비  고</Text></View>
       </View>
       {/* 서브헤더 (대분류 / 상품명 구분) */}

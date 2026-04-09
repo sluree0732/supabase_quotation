@@ -31,6 +31,7 @@ export default function ItemModal({ item, onSave, onDelete, onClose }: Props) {
   }, [])
 
   function handleSave() {
+    if (!category) { alert('대분류를 선택해주세요.'); return }
     if (!itemName.trim()) { alert('상품명을 입력해주세요.'); return }
     onSave({ category, item_name: itemName.trim(), period, unit_price: unitPrice, total_price: totalPrice, note })
     onClose()
@@ -83,7 +84,7 @@ export default function ItemModal({ item, onSave, onDelete, onClose }: Props) {
         <div className="px-5 py-4 space-y-4 flex-1 overflow-y-auto">
           {/* 대분류 */}
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-[#4a5568]">대분류</label>
+            <label className="text-sm font-medium text-[#4a5568]">대분류 *</label>
             <div className="flex flex-wrap gap-2">
               {CATEGORIES.filter(c => c).map(cat => (
                 <button

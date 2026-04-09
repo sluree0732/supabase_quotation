@@ -106,7 +106,7 @@ function QuotationPage() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `견적서_${state.quoteDate.replace(/-/g, '')}.pdf`
+      a.download = `${state.company?.name ?? '견적서'}_${state.quoteDate.replace(/-/g, '')}.pdf`
       a.click()
       URL.revokeObjectURL(url)
     } catch (e: any) {
