@@ -10,6 +10,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     fetchDraftCount()
+
+    const channel = supabase
+      .channel('quotations-draft-count')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'quotations' }, fetchDraftCount)
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
   }, [])
 
   async function fetchDraftCount() {

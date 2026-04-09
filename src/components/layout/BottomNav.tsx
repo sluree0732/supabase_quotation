@@ -12,7 +12,7 @@ const NAV_ITEMS = [
 ]
 
 interface BottomNavProps {
-  draftCount: number
+  draftCount?: number
 }
 
 export default function BottomNav({ draftCount }: BottomNavProps) {
@@ -32,11 +32,6 @@ export default function BottomNav({ draftCount }: BottomNavProps) {
           >
             <div className="relative">
               <Icon size={22} />
-              {href === '/quotations' && draftCount > 0 && (
-                <span className="absolute -top-1.5 -right-2 bg-red-500 text-white text-[10px] rounded-full px-1 min-w-[16px] text-center">
-                  {draftCount}
-                </span>
-              )}
             </div>
             <span>{label}</span>
           </Link>

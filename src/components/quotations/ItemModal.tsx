@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X, Sparkles, Loader2 } from 'lucide-react'
 import type { QuotationItem } from '@/types'
 
@@ -24,6 +24,11 @@ export default function ItemModal({ item, onSave, onDelete, onClose }: Props) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const totalPrice = period * unitPrice
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
+  }, [])
 
   function handleSave() {
     if (!itemName.trim()) { alert('상품명을 입력해주세요.'); return }
@@ -58,9 +63,12 @@ export default function ItemModal({ item, onSave, onDelete, onClose }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
+    <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative z-10 w-full md:w-[500px] bg-white rounded-t-2xl md:rounded-2xl shadow-xl">
+      <div
+        className="relative z-10 w-full md:w-[500px] bg-white rounded-t-2xl md:rounded-2xl shadow-xl flex flex-col max-h-[calc(100dvh-3.5rem)] md:max-h-[85vh]"
+        onTouchMove={e => e.stopPropagation()}
+      >
         {/* 핸들 */}
         <div className="md:hidden flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 bg-gray-300 rounded-full" />
@@ -72,7 +80,7 @@ export default function ItemModal({ item, onSave, onDelete, onClose }: Props) {
         </div>
 
         {/* 폼 */}
-        <div className="px-5 py-4 space-y-4 max-h-[65vh] overflow-y-auto">
+        <div className="px-5 py-4 space-y-4 flex-1 overflow-y-auto">
           {/* 대분류 */}
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-[#4a5568]">대분류</label>
@@ -150,7 +158,7 @@ export default function ItemModal({ item, onSave, onDelete, onClose }: Props) {
               <button
                 onClick={handleAiNote}
                 disabled={aiLoading}
-                className="flex items-center gap-1 text-xs text-[#8e44ad] font-medium disabled:opacity-50"
+                className="flex items-center gap-1.5 text-xs text-[#8e44ad] font-medium border border-[#8e44ad]/30 rounded-lg px-2.5 py-1.5 bg-[#f9f0ff] hover:bg-[#f3e5ff] disabled:opacity-50 transition-colors"
               >
                 {aiLoading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
                 AI 생성
@@ -167,7 +175,7 @@ export default function ItemModal({ item, onSave, onDelete, onClose }: Props) {
         </div>
 
         {/* 버튼 */}
-        <div className="px-5 py-4 border-t border-gray-100 space-y-2">
+        <div className="px-5 py-4 border-t border-gray-100 space-y-2 shrink-0">
           {showDeleteConfirm ? (
             <div className="bg-red-50 rounded-xl p-3 space-y-2">
               <p className="text-sm text-red-700 font-medium">이 항목을 삭제하시겠습니까?</p>

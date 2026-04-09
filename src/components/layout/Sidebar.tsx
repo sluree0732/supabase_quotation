@@ -12,7 +12,7 @@ const NAV_ITEMS = [
 ]
 
 interface SidebarProps {
-  draftCount: number
+  draftCount?: number
 }
 
 export default function Sidebar({ draftCount }: SidebarProps) {
@@ -41,11 +41,6 @@ export default function Sidebar({ draftCount }: SidebarProps) {
             >
               <Icon size={18} />
               <span>{label}</span>
-              {href === '/quotations' && draftCount > 0 && (
-                <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[20px] text-center">
-                  {draftCount}
-                </span>
-              )}
             </Link>
           )
         })}

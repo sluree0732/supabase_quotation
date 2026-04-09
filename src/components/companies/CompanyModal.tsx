@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X, MapPin, Loader2 } from 'lucide-react'
 import type { Company } from '@/types'
 import { createCompany, updateCompany, deleteCompany } from '@/lib/companies'
@@ -23,6 +23,11 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
   const [error, setError] = useState('')
   const [showAddress, setShowAddress] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
+  }, [])
 
   async function handleSave() {
     if (!name.trim()) { setError('업체명을 입력해주세요.'); return }
@@ -59,12 +64,15 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
 
   return (
     <>
-      <div className="fixed inset-0 z-40 flex items-end md:items-center justify-center">
+      <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center">
         {/* 배경 */}
         <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
         {/* 모달 — 모바일: 하단 시트, PC: 중앙 */}
-        <div className="relative z-10 w-full md:w-[480px] bg-white rounded-t-2xl md:rounded-2xl shadow-xl">
+        <div
+          className="relative z-10 w-full md:w-[480px] bg-white rounded-t-2xl md:rounded-2xl shadow-xl flex flex-col max-h-[calc(100dvh-3.5rem)] md:max-h-[80vh]"
+          onTouchMove={e => e.stopPropagation()}
+        >
           {/* 핸들 (모바일) */}
           <div className="md:hidden flex justify-center pt-3 pb-1">
             <div className="w-10 h-1 bg-gray-300 rounded-full" />
@@ -81,7 +89,7 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
           </div>
 
           {/* 폼 */}
-          <div className="px-5 py-4 space-y-4 max-h-[60vh] overflow-y-auto">
+          <div className="px-5 py-4 space-y-4 flex-1 overflow-y-auto">
             {error && (
               <p className="text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2">{error}</p>
             )}
@@ -139,7 +147,7 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
           </div>
 
           {/* 버튼 */}
-          <div className="px-5 py-4 border-t border-gray-100 space-y-2">
+          <div className="px-5 py-4 border-t border-gray-100 space-y-2 shrink-0">
             {showDeleteConfirm ? (
               <div className="bg-red-50 rounded-xl p-3 space-y-2">
                 <p className="text-sm text-red-700 font-medium">

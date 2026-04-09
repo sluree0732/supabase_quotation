@@ -19,15 +19,23 @@ export default function CompanyPickerModal({ selected, onSelect, onClose }: Prop
     getCompanies().then(setCompanies).catch(() => {})
   }, [])
 
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
+  }, [])
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     return q ? companies.filter(c => c.name.toLowerCase().includes(q)) : companies
   }, [companies, query])
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
+    <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative z-10 w-full md:w-[480px] bg-white rounded-t-2xl md:rounded-2xl shadow-xl flex flex-col max-h-[75vh]">
+      <div
+        className="relative z-10 w-full md:w-[480px] bg-white rounded-t-2xl md:rounded-2xl shadow-xl flex flex-col max-h-[calc(100dvh-3.5rem)] md:max-h-[75vh]"
+        onTouchMove={e => e.stopPropagation()}
+      >
         <div className="md:hidden flex justify-center pt-3 pb-1 shrink-0">
           <div className="w-10 h-1 bg-gray-300 rounded-full" />
         </div>
@@ -48,7 +56,7 @@ export default function CompanyPickerModal({ selected, onSelect, onClose }: Prop
             />
           </div>
         </div>
-        <ul className="flex-1 overflow-y-auto divide-y divide-gray-50 px-2 pb-4">
+        <ul className="flex-1 overflow-y-auto divide-y divide-gray-50 px-2 pb-4 min-h-[200px]">
           {filtered.length === 0 ? (
             <li className="py-8 text-center text-sm text-gray-400">업체가 없습니다.</li>
           ) : filtered.map(c => (

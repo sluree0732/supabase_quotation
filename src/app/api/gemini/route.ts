@@ -89,5 +89,27 @@ function parseResponse(raw: string, count: number): string[] {
     }
   }
   flush()
+
+  // 폴백: 번호 파싱 결과가 비어있는 항목 처리
+  for (let i = 0; i < count; i++) {
+    if (notes[i]) continue
+
+    // 해당 항목 범위 추정: count가 1이면 raw 전체 사용
+    const targetRaw = count === 1 ? raw : ''
+
+    if (targetRaw) {
+      // 1단계: • 로 시작하는 줄만 추출
+      const bulletLines = targetRaw.split('\n')
+        .map(l => l.trim())
+        .filter(l => l.startsWith('•') || l.startsWith('-') || l.startsWith('*'))
+      if (bulletLines.length > 0) {
+        notes[i] = bulletLines.join('\n')
+      } else {
+        // 2단계: raw 전체를 그대로 사용
+        notes[i] = targetRaw.trim()
+      }
+    }
+  }
+
   return notes
 }

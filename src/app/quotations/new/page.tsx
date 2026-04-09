@@ -16,6 +16,7 @@ const INITIAL: QuotationFormState = {
   company: null,
   vatType: 'excluded',
   items: [],
+  status: null,
 }
 
 function QuotationPage() {
@@ -39,6 +40,7 @@ function QuotationPage() {
         company: data.companies ?? null,
         vatType: data.vat_type,
         items: data.items,
+        status: data.status,
       })
     }).finally(() => setLoading(false))
   }, [editId])
@@ -71,12 +73,16 @@ function QuotationPage() {
           saveItems(q.id, state.items),
         ])
       }
-      router.push('/quotations')
     } catch (e: any) {
       alert(e.message ?? '저장 실패')
+      throw e
     } finally {
       setSaving(false)
     }
+  }
+
+  function handleSaveSuccess(_status: 'draft' | 'saved') {
+    // 페이지 이동 없이 폼에서 토스트로 처리
   }
 
   async function handlePdf(state: QuotationFormState) {
@@ -135,6 +141,8 @@ function QuotationPage() {
         pdfLoading={pdfLoading}
         onSave={handleSave}
         onPdf={handlePdf}
+        onSaveSuccess={handleSaveSuccess}
+        quotationId={editId ?? undefined}
       />
     </div>
   )

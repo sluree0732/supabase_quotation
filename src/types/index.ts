@@ -40,3 +40,38 @@ export interface QuotationWithItems extends Quotation {
   items: QuotationItem[]
   companies: Company | null
 }
+
+export type ContractStatus = 'draft' | 'signed'
+
+export interface ContractItem {
+  id?: string
+  contract_id?: string
+  sort_order: number
+  category: string
+  item_name: string
+  period: number
+  unit_price: number
+  total_price: number
+  note: string
+}
+
+export interface Contract {
+  id: string
+  quotation_id: string | null
+  company_id: string | null
+  contract_date: string
+  start_date: string | null
+  end_date: string | null
+  recipient: string
+  total_amount: number
+  vat_type: VatType
+  status: ContractStatus
+  special_terms: string | null
+  created_at: string
+  companies?: { name: string } | null
+}
+
+export interface ContractWithItems extends Contract {
+  items: ContractItem[]
+  companies: Company | null
+}

@@ -70,12 +70,13 @@ const S = StyleSheet.create({
   tableHeader: { flexDirection: 'row', backgroundColor: '#d9d9d9', borderBottomWidth: 1, borderColor: '#333', minHeight: 20 },
   tableRow: { flexDirection: 'row', borderBottomWidth: 0.5, borderColor: '#d0d0d0' },
   tableLastRow: { flexDirection: 'row' },
-  colCat:   { width: '12%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 3 },
-  colName:  { width: '20%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 3 },
-  colPer:   { width: '8%',  borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingVertical: 3 },
-  colUnit:  { width: '12%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'flex-end', paddingHorizontal: 3, paddingVertical: 3 },
-  colTotal: { width: '12%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'flex-end', paddingHorizontal: 3, paddingVertical: 3 },
-  colNote:  { flex: 1, justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 3 },
+  colCat:   { width: '10%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 3 },
+  colName:  { width: '18%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 3 },
+  colPer:   { width: '7%',  borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingVertical: 3 },
+  colUnit:  { width: '11%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'flex-end', paddingHorizontal: 3, paddingVertical: 3 },
+  colTotal: { width: '11%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'flex-end', paddingHorizontal: 3, paddingVertical: 3 },
+  colNote:  { flex: 1, justifyContent: 'flex-start', paddingHorizontal: 4, paddingVertical: 4 },
+  noteText: { fontSize: 7, lineHeight: 1.6 },
   headerText: { fontSize: 8, fontWeight: 'bold', textAlign: 'center' },
   cellText: { fontSize: 7.5 },
   // 합계 행
@@ -88,13 +89,9 @@ const S = StyleSheet.create({
 // ── 유틸 ──────────────────────────────────────────────────
 function fmtNum(n: number) { return n.toLocaleString('ko-KR') }
 
-function formatNote(note: string): string {
-  if (!note) return ''
-  return note
-    .split('\n')
-    .map(l => l.trim())
-    .filter(Boolean)
-    .join('  ')
+function noteLines(note: string): string[] {
+  if (!note) return []
+  return note.split('\n').map(l => l.trim()).filter(Boolean)
 }
 
 function formatBank(bank: string) {
@@ -189,13 +186,17 @@ function ItemsTable({ items }: { items: QuotationItem[] }) {
         const isLast = i === items.length - 1
         const RowStyle = isLast ? S.tableLastRow : S.tableRow
         return (
-          <View key={i} style={RowStyle}>
+          <View key={i} style={RowStyle} wrap={false}>
             <View style={S.colCat}><Text style={S.cellText}>{item.category}</Text></View>
             <View style={S.colName}><Text style={S.cellText}>{item.item_name}</Text></View>
             <View style={S.colPer}><Text style={S.cellText}>{item.period}</Text></View>
             <View style={S.colUnit}><Text style={S.cellText}>{fmtNum(item.unit_price)}</Text></View>
             <View style={S.colTotal}><Text style={S.cellText}>{fmtNum(item.total_price)}</Text></View>
-            <View style={S.colNote}><Text style={S.cellText}>{formatNote(item.note)}</Text></View>
+            <View style={S.colNote}>
+              {noteLines(item.note).map((line, li) => (
+                <Text key={li} style={S.noteText}>{line}</Text>
+              ))}
+            </View>
           </View>
         )
       })}
