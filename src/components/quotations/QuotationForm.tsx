@@ -52,10 +52,15 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
   const [showAdd, setShowAdd] = useState(false)
   const [aiAllLoading, setAiAllLoading] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [isDirty, setIsDirty] = useState(false)
 
-  const set = (patch: Partial<QuotationFormState>) => setState(s => ({ ...s, ...patch }))
-  const total = state.items.reduce((s, i) => s + i.total_price, 0)
   const isSaved = state.status === 'saved'
+
+  const set = (patch: Partial<QuotationFormState>) => {
+    setState(s => ({ ...s, ...patch }))
+    if (!('status' in patch) && isSaved) setIsDirty(true)
+  }
+  const total = state.items.reduce((s, i) => s + i.total_price, 0)
 
   // ── 항목 조작 ─────────────────────────────────────────
   function addItem(data: Omit<QuotationItem, 'id' | 'quotation_id' | 'sort_order'>) {
@@ -96,7 +101,8 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
     if (!state.recipient.trim()) { alert('수신인을 입력해주세요.'); return }
     if (status === 'saved' && !state.items.length) { alert('항목을 1개 이상 추가해주세요.'); return }
     await onSave(state, status)
-    set({ status })
+    setState(s => ({ ...s, status }))
+    setIsDirty(false)
     onSaveSuccess(status)
     showToast(status === 'saved' ? '저장 완료' : '임시저장 완료')
   }
@@ -249,57 +255,60 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
 
           {/* 액션 버튼 */}
           <div className="space-y-2 pb-8">
-            {/* 다운로드 + 계약서: saved 상태일 때만 표시 */}
+            {/* 다운로드: saved 상태일 때만 표시 */}
             {isSaved && (
-              <>
-                <div className="bg-white border border-gray-200 rounded-xl px-4 py-3">
-                  <p className="text-xs text-gray-400 font-medium mb-3">다운로드</p>
-                  <div className="flex gap-6 justify-center">
-                    <button
-                      onClick={() => onExcel(state)}
-                      disabled={excelLoading}
-                      className="flex flex-col items-center gap-1.5 disabled:opacity-40"
-                    >
-                      <div className="w-14 h-14 rounded-2xl bg-[#217346] flex items-center justify-center shadow-sm hover:opacity-90 transition-opacity">
-                        {excelLoading
-                          ? <Loader2 size={28} className="animate-spin text-white" />
-                          : <BsFiletypeXlsx size={28} color="white" />}
-                      </div>
-                      <span className="text-xs text-gray-500">{excelLoading ? '생성 중...' : '엑셀'}</span>
-                    </button>
-                    <button
-                      onClick={() => onPdf(state)}
-                      disabled={pdfLoading}
-                      className="flex flex-col items-center gap-1.5 disabled:opacity-40"
-                    >
-                      <div className="w-14 h-14 rounded-2xl bg-[#e74c3c] flex items-center justify-center shadow-sm hover:opacity-90 transition-opacity">
-                        {pdfLoading
-                          ? <Loader2 size={28} className="animate-spin text-white" />
-                          : <BsFiletypePdf size={28} color="white" />}
-                      </div>
-                      <span className="text-xs text-gray-500">{pdfLoading ? '생성 중...' : 'PDF'}</span>
-                    </button>
-                  </div>
-                </div>
-                {quotationId && (
-                  <a
-                    href={`/contracts/new?quotationId=${quotationId}`}
-                    className="w-full py-3.5 rounded-xl bg-[#8e44ad] text-white font-semibold flex items-center justify-center gap-2"
+              <div className="bg-white border border-gray-200 rounded-xl px-4 py-3">
+                <p className="text-xs text-gray-400 font-medium mb-3">다운로드</p>
+                <div className="flex gap-6 justify-center">
+                  <button
+                    onClick={() => onExcel(state)}
+                    disabled={excelLoading}
+                    className="flex flex-col items-center gap-1.5 disabled:opacity-40"
                   >
-                    <FileSignature size={16} />
-                    계약서 작성
-                  </a>
-                )}
-              </>
+                    <div className="w-14 h-14 rounded-2xl bg-[#217346] flex items-center justify-center shadow-sm hover:opacity-90 transition-opacity">
+                      {excelLoading
+                        ? <Loader2 size={28} className="animate-spin text-white" />
+                        : <BsFiletypeXlsx size={28} color="white" />}
+                    </div>
+                    <span className="text-xs text-gray-500">{excelLoading ? '생성 중...' : '엑셀'}</span>
+                  </button>
+                  <button
+                    onClick={() => onPdf(state)}
+                    disabled={pdfLoading}
+                    className="flex flex-col items-center gap-1.5 disabled:opacity-40"
+                  >
+                    <div className="w-14 h-14 rounded-2xl bg-[#e74c3c] flex items-center justify-center shadow-sm hover:opacity-90 transition-opacity">
+                      {pdfLoading
+                        ? <Loader2 size={28} className="animate-spin text-white" />
+                        : <BsFiletypePdf size={28} color="white" />}
+                    </div>
+                    <span className="text-xs text-gray-500">{pdfLoading ? '생성 중...' : 'PDF'}</span>
+                  </button>
+                </div>
+              </div>
             )}
-            <button
-              onClick={() => handleSave('saved')}
-              disabled={saving}
-              className="w-full py-3.5 rounded-xl bg-[#27ae60] text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-              {isSaved ? '저장 완료' : '저장'}
-            </button>
+
+            {/* 저장 / 계약서 작성 버튼 (상태에 따라 전환) */}
+            {isSaved && !isDirty && quotationId ? (
+              <a
+                href={`/contracts/new?quotationId=${quotationId}`}
+                className="w-full py-3.5 rounded-xl bg-[#8e44ad] text-white font-semibold flex items-center justify-center gap-2"
+              >
+                <FileSignature size={16} />
+                계약서 작성
+              </a>
+            ) : (
+              <button
+                onClick={() => handleSave('saved')}
+                disabled={saving}
+                className="w-full py-3.5 rounded-xl bg-[#27ae60] text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                저장
+              </button>
+            )}
+
+            {/* 임시저장 */}
             <button
               onClick={() => handleSave('draft')}
               disabled={saving}
