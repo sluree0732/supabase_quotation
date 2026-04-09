@@ -1,7 +1,18 @@
 'use client'
 
 import { useState } from 'react'
-import { Building2, ChevronRight, X, Plus, Sparkles, Loader2, FileDown, Save, FileSignature, Sheet } from 'lucide-react'
+import { Building2, ChevronRight, X, Plus, Sparkles, Loader2, Save, FileSignature } from 'lucide-react'
+import { BsFiletypePdf } from 'react-icons/bs'
+
+function ExcelIcon({ size = 28 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z" fill="white" fillOpacity="0.9"/>
+      <path d="M14 2V8H20L14 2Z" fill="white" fillOpacity="0.5"/>
+      <path d="M8 13L10.5 17L8 21H10L12 18L14 21H16L13.5 17L16 13H14L12 16L10 13H8Z" fill="#217346"/>
+    </svg>
+  )
+}
 import type { Company, QuotationItem, VatType } from '@/types'
 import CompanyPickerModal from './CompanyPickerModal'
 import ItemModal from './ItemModal'
@@ -247,26 +258,37 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
 
           {/* 액션 버튼 */}
           <div className="space-y-2 pb-8">
-            {/* 엑셀 + PDF + 계약서: saved 상태일 때만 표시 */}
+            {/* 다운로드 + 계약서: saved 상태일 때만 표시 */}
             {isSaved && (
               <>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => onExcel(state)}
-                    disabled={excelLoading}
-                    className="flex-1 py-3.5 rounded-xl bg-[#27ae60] text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-40"
-                  >
-                    {excelLoading ? <Loader2 size={16} className="animate-spin" /> : <Sheet size={16} />}
-                    {excelLoading ? '생성 중...' : '엑셀'}
-                  </button>
-                  <button
-                    onClick={() => onPdf(state)}
-                    disabled={pdfLoading}
-                    className="flex-1 py-3.5 rounded-xl bg-[#2980b9] text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-40"
-                  >
-                    {pdfLoading ? <Loader2 size={16} className="animate-spin" /> : <FileDown size={16} />}
-                    {pdfLoading ? '생성 중...' : 'PDF'}
-                  </button>
+                <div className="bg-white border border-gray-200 rounded-xl px-4 py-3">
+                  <p className="text-xs text-gray-400 font-medium mb-3">다운로드</p>
+                  <div className="flex gap-6 justify-center">
+                    <button
+                      onClick={() => onExcel(state)}
+                      disabled={excelLoading}
+                      className="flex flex-col items-center gap-1.5 disabled:opacity-40"
+                    >
+                      <div className="w-14 h-14 rounded-2xl bg-[#217346] flex items-center justify-center shadow-sm hover:opacity-90 transition-opacity">
+                        {excelLoading
+                          ? <Loader2 size={28} className="animate-spin text-white" />
+                          : <ExcelIcon size={28} />}
+                      </div>
+                      <span className="text-xs text-gray-500">{excelLoading ? '생성 중...' : '엑셀'}</span>
+                    </button>
+                    <button
+                      onClick={() => onPdf(state)}
+                      disabled={pdfLoading}
+                      className="flex flex-col items-center gap-1.5 disabled:opacity-40"
+                    >
+                      <div className="w-14 h-14 rounded-2xl bg-[#e74c3c] flex items-center justify-center shadow-sm hover:opacity-90 transition-opacity">
+                        {pdfLoading
+                          ? <Loader2 size={28} className="animate-spin text-white" />
+                          : <BsFiletypePdf size={28} color="white" />}
+                      </div>
+                      <span className="text-xs text-gray-500">{pdfLoading ? '생성 중...' : 'PDF'}</span>
+                    </button>
+                  </div>
                 </div>
                 {quotationId && (
                   <a
