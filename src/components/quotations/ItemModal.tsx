@@ -11,9 +11,13 @@ interface Props {
   onSave: (item: Omit<QuotationItem, 'id' | 'quotation_id' | 'sort_order'>) => void
   onDelete?: () => void
   onClose: (addedCount?: number) => void
+  // 신규 추가 모드 전용
+  items?: QuotationItem[]
+  sessionStartIdx?: number
+  onAiAllResult?: (notes: string[], startIdx: number) => void
 }
 
-export default function ItemModal({ item, onSave, onDelete, onClose }: Props) {
+export default function ItemModal({ item, onSave, onDelete, onClose, items, sessionStartIdx = 0, onAiAllResult }: Props) {
   const isEdit = !!item
   const [category, setCategory] = useState(item?.category ?? '')
   const [itemName, setItemName] = useState(item?.item_name ?? '')
@@ -21,8 +25,13 @@ export default function ItemModal({ item, onSave, onDelete, onClose }: Props) {
   const [unitPrice, setUnitPrice] = useState(item?.unit_price ?? 0)
   const [note, setNote] = useState(item?.note ?? '')
   const [aiLoading, setAiLoading] = useState(false)
+  const [aiAllLoading, setAiAllLoading] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [addedCount, setAddedCount] = useState(0)
+  const [showList, setShowList] = useState(false)
+
+  // 이번 세션에서 추가된 항목 목록
+  const sessionItems = items ? items.slice(sessionStartIdx) : []
 
   const totalPrice = period * unitPrice
 
@@ -72,6 +81,38 @@ export default function ItemModal({ item, onSave, onDelete, onClose }: Props) {
     onClose()
   }
 
+  async function handleAiAll() {
+    const currentHasContent = !!(category && itemName.trim())
+    const allItems = [
+      ...sessionItems.map(it => ({ category: it.category, item_name: it.item_name })),
+      ...(currentHasContent ? [{ category, item_name: itemName.trim() }] : []),
+    ]
+    if (!allItems.length) return
+
+    setAiAllLoading(true)
+    try {
+      const res = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: allItems }),
+      })
+      const json = await res.json()
+      if (json.notes) {
+        // 이미 저장된 세션 항목 → 부모 콜백으로 업데이트
+        const savedNotes = json.notes.slice(0, sessionItems.length)
+        if (savedNotes.length > 0) onAiAllResult?.(savedNotes, sessionStartIdx)
+        // 현재 폼 항목 → 로컬 state 업데이트
+        if (currentHasContent && json.notes[sessionItems.length]) {
+          setNote(json.notes[sessionItems.length])
+        }
+      }
+    } catch {
+      alert('AI 생성 실패')
+    } finally {
+      setAiAllLoading(false)
+    }
+  }
+
   async function handleAiNote() {
     if (!itemName.trim()) { alert('상품명을 먼저 입력해주세요.'); return }
     setAiLoading(true)
@@ -114,13 +155,38 @@ export default function ItemModal({ item, onSave, onDelete, onClose }: Props) {
           <div>
             <h2 className="font-bold text-[#1e2a3a] text-lg">{isEdit ? '항목 수정' : '항목 추가'}</h2>
             {!isEdit && addedCount > 0 && (
-              <p className="text-xs text-[#2980b9] mt-0.5">{addedCount}개 추가됨</p>
+              <button
+                onClick={() => setShowList(v => !v)}
+                className="text-xs text-[#2980b9] mt-0.5 flex items-center gap-0.5 hover:underline"
+              >
+                {addedCount}개 추가됨
+                <span className="text-[10px]">{showList ? '▲' : '▼'}</span>
+              </button>
             )}
           </div>
           <button onClick={() => onClose(addedCount > 0 ? addedCount : undefined)}>
             <X size={20} className="text-gray-400" />
           </button>
         </div>
+
+        {/* 추가된 항목 목록 패널 */}
+        {!isEdit && showList && sessionItems.length > 0 && (
+          <div className="border-b border-gray-100 bg-[#f8fafc] px-5 py-3 space-y-2 max-h-40 overflow-y-auto">
+            {sessionItems.map((it, i) => (
+              <div key={i} className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  {it.category && (
+                    <span className="shrink-0 bg-[#ebf5fb] text-[#2980b9] px-1.5 py-0.5 rounded text-[10px] font-medium">
+                      {it.category}
+                    </span>
+                  )}
+                  <span className="text-[#1e2a3a] font-medium truncate">{it.item_name}</span>
+                </div>
+                <span className="shrink-0 text-[#718096] ml-2">{it.total_price.toLocaleString()}원</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* 폼 */}
         <div className="px-5 py-4 space-y-4 flex-1 overflow-y-auto">
@@ -198,14 +264,27 @@ export default function ItemModal({ item, onSave, onDelete, onClose }: Props) {
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium text-[#4a5568]">비고</label>
-              <button
-                onClick={handleAiNote}
-                disabled={aiLoading}
-                className="flex items-center gap-1.5 text-xs text-[#8e44ad] font-medium border border-[#8e44ad]/30 rounded-lg px-2.5 py-1.5 bg-[#f9f0ff] hover:bg-[#f3e5ff] disabled:opacity-50 transition-colors"
-              >
-                {aiLoading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                AI 생성
-              </button>
+              <div className="flex items-center gap-1.5">
+                {/* 전체 AI 비고: 세션에 1개 이상 추가됐을 때만 표시 */}
+                {!isEdit && addedCount >= 1 && (
+                  <button
+                    onClick={handleAiAll}
+                    disabled={aiAllLoading}
+                    className="flex items-center gap-1 text-xs text-[#2980b9] font-medium border border-[#2980b9]/30 rounded-lg px-2.5 py-1.5 bg-[#f0f7fd] hover:bg-[#dbeef8] disabled:opacity-50 transition-colors"
+                  >
+                    {aiAllLoading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                    전체 AI 비고
+                  </button>
+                )}
+                <button
+                  onClick={handleAiNote}
+                  disabled={aiLoading}
+                  className="flex items-center gap-1.5 text-xs text-[#8e44ad] font-medium border border-[#8e44ad]/30 rounded-lg px-2.5 py-1.5 bg-[#f9f0ff] hover:bg-[#f3e5ff] disabled:opacity-50 transition-colors"
+                >
+                  {aiLoading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                  AI 생성
+                </button>
+              </div>
             </div>
             <textarea
               value={note}
