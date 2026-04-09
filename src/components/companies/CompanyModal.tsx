@@ -12,6 +12,17 @@ interface CompanyModalProps {
   onSaved: () => void
 }
 
+function formatPhone(value: string): string {
+  const nums = value.replace(/\D/g, '').slice(0, 11)
+  if (nums.startsWith('02')) {
+    if (nums.length <= 6) return nums.replace(/(\d{2})(\d+)/, '$1-$2')
+    return nums.replace(/(\d{2})(\d{4})(\d+)/, '$1-$2-$3')
+  }
+  if (nums.length <= 7) return nums.replace(/(\d{3})(\d+)/, '$1-$2')
+  if (nums.length <= 10) return nums.replace(/(\d{3})(\d{3})(\d+)/, '$1-$2-$3')
+  return nums.replace(/(\d{3})(\d{4})(\d+)/, '$1-$2-$3')
+}
+
 export default function CompanyModal({ company, onClose, onSaved }: CompanyModalProps) {
   const isEdit = !!company
 
@@ -128,8 +139,9 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
             <Field label="전화번호">
               <input
                 type="tel"
+                inputMode="numeric"
                 value={phone}
-                onChange={e => setPhone(e.target.value)}
+                onChange={e => setPhone(formatPhone(e.target.value))}
                 placeholder="051-000-0000"
                 className="input-base"
               />
