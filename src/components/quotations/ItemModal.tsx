@@ -10,14 +10,13 @@ interface Props {
   item?: QuotationItem | null
   onSave: (item: Omit<QuotationItem, 'id' | 'quotation_id' | 'sort_order'>) => void
   onDelete?: () => void
-  onClose: (addedCount?: number) => void
+  onClose: (addedCount?: number, totalCount?: number) => void
   // 신규 추가 모드 전용
   items?: QuotationItem[]
-  sessionStartIdx?: number
-  onAiAllResult?: (notes: string[], startIdx: number) => void
+  onAiAllResult?: (notes: string[]) => void
 }
 
-export default function ItemModal({ item, onSave, onDelete, onClose, items, sessionStartIdx = 0, onAiAllResult }: Props) {
+export default function ItemModal({ item, onSave, onDelete, onClose, items, onAiAllResult }: Props) {
   const isEdit = !!item
   const [category, setCategory] = useState(item?.category ?? '')
   const [itemName, setItemName] = useState(item?.item_name ?? '')
@@ -27,11 +26,12 @@ export default function ItemModal({ item, onSave, onDelete, onClose, items, sess
   const [aiLoading, setAiLoading] = useState(false)
   const [aiAllLoading, setAiAllLoading] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [addedCount, setAddedCount] = useState(0)
+  const [addedCount, setAddedCount] = useState(0)   // 이번 모달 오픈에서 새로 추가한 수
   const [showList, setShowList] = useState(false)
 
-  // 이번 세션에서 추가된 항목 목록
-  const sessionItems = items ? items.slice(sessionStartIdx) : []
+  const existingCount = items?.length ?? 0           // 모달 열 때 이미 있던 항목 수
+  const displayCount = existingCount + addedCount    // 헤더 표시용 전체 수
+  const sessionItems = items ?? []                   // 목록 패널 + AI용 전체 항목
 
   const totalPrice = period * unitPrice
 
@@ -68,9 +68,13 @@ export default function ItemModal({ item, onSave, onDelete, onClose, items, sess
     if (hasContent) {
       if (!validate()) return
       onSave({ category, item_name: itemName.trim(), period, unit_price: unitPrice, total_price: totalPrice, note })
-      onClose(addedCount + 1)
+      const newCount = addedCount + 1
+      onClose(newCount, existingCount + newCount)
     } else {
-      onClose(addedCount > 0 ? addedCount : undefined)
+      onClose(
+        addedCount > 0 ? addedCount : undefined,
+        addedCount > 0 ? displayCount : undefined,
+      )
     }
   }
 
@@ -98,9 +102,9 @@ export default function ItemModal({ item, onSave, onDelete, onClose, items, sess
       })
       const json = await res.json()
       if (json.notes) {
-        // 이미 저장된 세션 항목 → 부모 콜백으로 업데이트
+        // 저장된 항목들 → 부모 콜백으로 업데이트 (index 0부터 매핑)
         const savedNotes = json.notes.slice(0, sessionItems.length)
-        if (savedNotes.length > 0) onAiAllResult?.(savedNotes, sessionStartIdx)
+        if (savedNotes.length > 0) onAiAllResult?.(savedNotes)
         // 현재 폼 항목 → 로컬 state 업데이트
         if (currentHasContent && json.notes[sessionItems.length]) {
           setNote(json.notes[sessionItems.length])
@@ -154,17 +158,17 @@ export default function ItemModal({ item, onSave, onDelete, onClose, items, sess
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <div>
             <h2 className="font-bold text-[#1e2a3a] text-lg">{isEdit ? '항목 수정' : '항목 추가'}</h2>
-            {!isEdit && addedCount > 0 && (
+            {!isEdit && displayCount > 0 && (
               <button
                 onClick={() => setShowList(v => !v)}
                 className="text-xs text-[#2980b9] mt-0.5 flex items-center gap-0.5 hover:underline"
               >
-                {addedCount}개 추가됨
+                {displayCount}개 추가됨
                 <span className="text-[10px]">{showList ? '▲' : '▼'}</span>
               </button>
             )}
           </div>
-          <button onClick={() => onClose(addedCount > 0 ? addedCount : undefined)}>
+          <button onClick={() => onClose(addedCount > 0 ? addedCount : undefined, addedCount > 0 ? displayCount : undefined)}>
             <X size={20} className="text-gray-400" />
           </button>
         </div>
@@ -266,7 +270,7 @@ export default function ItemModal({ item, onSave, onDelete, onClose, items, sess
               <label className="text-sm font-medium text-[#4a5568]">비고</label>
               <div className="flex items-center gap-1.5">
                 {/* 전체 AI 비고: 세션에 1개 이상 추가됐을 때만 표시 */}
-                {!isEdit && addedCount >= 1 && (
+                {!isEdit && displayCount >= 1 && (
                   <button
                     onClick={handleAiAll}
                     disabled={aiAllLoading}

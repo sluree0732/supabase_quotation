@@ -50,7 +50,6 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
   const [showCompany, setShowCompany] = useState(false)
   const [editIdx, setEditIdx] = useState<number | null>(null)
   const [showAdd, setShowAdd] = useState(false)
-  const [sessionStartIdx, setSessionStartIdx] = useState(0)
   const [aiAllLoading, setAiAllLoading] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [isDirty, setIsDirty] = useState(false)
@@ -193,7 +192,7 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
                   전체 AI 비고
                 </button>
                 <button
-                  onClick={() => { setSessionStartIdx(state.items.length); setShowAdd(true) }}
+                  onClick={() => setShowAdd(true)}
                   className="flex items-center gap-1.5 bg-[#2980b9] text-white px-3 py-1.5 rounded-lg text-xs font-semibold"
                 >
                   <Plus size={14} />
@@ -204,7 +203,7 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
           >
             {state.items.length === 0 ? (
               <button
-                onClick={() => { setSessionStartIdx(state.items.length); setShowAdd(true) }}
+                onClick={() => setShowAdd(true)}
                 className="w-full flex flex-col items-center justify-center gap-2 py-10 border-2 border-dashed border-gray-200 rounded-2xl text-gray-400 hover:border-[#2980b9] hover:text-[#2980b9] transition-colors"
               >
                 <Plus size={24} />
@@ -342,21 +341,23 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
         <ItemModal
           onSave={addItem}
           items={state.items}
-          sessionStartIdx={sessionStartIdx}
-          onAiAllResult={(notes, startIdx) => {
+          onAiAllResult={(notes) => {
             setState(s => ({
               ...s,
-              items: s.items.map((it, i) => {
-                const noteIdx = i - startIdx
-                return noteIdx >= 0 && noteIdx < notes.length
-                  ? { ...it, note: notes[noteIdx] || it.note }
-                  : it
-              }),
+              items: s.items.map((it, i) => ({
+                ...it,
+                note: notes[i] || it.note,
+              })),
             }))
           }}
-          onClose={(count) => {
+          onClose={(newCount, totalCount) => {
             setShowAdd(false)
-            if (count && count > 0) showToast(`${count}개 항목이 추가되었습니다`)
+            if (newCount && newCount > 0) {
+              const msg = totalCount && totalCount > newCount
+                ? `${newCount}개 항목 추가하여 총 ${totalCount}개 추가되었습니다`
+                : `${newCount}개 항목이 추가되었습니다`
+              showToast(msg)
+            }
           }}
         />
       )}
