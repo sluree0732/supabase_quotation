@@ -255,55 +255,58 @@ export default function ContractDocument({
           </View>
         ) : null}
 
-        {/* 계약일 */}
-        <Text style={S.signDate}>{fmtDate(contractDate)}</Text>
+        {/* 서명 전체 wrap={false} — 페이지 중간에서 잘리지 않게 */}
+        <View wrap={false}>
+          {/* 계약일 */}
+          <Text style={S.signDate}>{fmtDate(contractDate)}</Text>
 
-        {/* 갑 서명란 */}
-        <View style={S.signParty}>
-          <Text style={S.signPartyTitle}>갑 (광고주)</Text>
-          {companyName ? (
+          {/* 갑 서명란 */}
+          <View style={S.signParty}>
+            <Text style={S.signPartyTitle}>갑 (광고주)</Text>
+            {companyName ? (
+              <View style={S.signRow}>
+                <Text style={S.signLabel}>- 업 체 명 :</Text>
+                <Text style={S.signValue}>{companyName}</Text>
+              </View>
+            ) : null}
             <View style={S.signRow}>
-              <Text style={S.signLabel}>- 업 체 명 :</Text>
-              <Text style={S.signValue}>{companyName}</Text>
+              <Text style={S.signLabel}>- 성    명 :</Text>
+              <Text style={S.signValue}>{recipient}</Text>
             </View>
-          ) : null}
-          <View style={S.signRow}>
-            <Text style={S.signLabel}>- 성    명 :</Text>
-            <Text style={S.signValue}>{recipient}</Text>
+            <View style={S.signRow}>
+              <Text style={S.signLabel}>- 주    소 :</Text>
+              <Text style={S.signValue}>{companyAddress || ''}</Text>
+            </View>
+            <View style={[S.signRow, { marginTop: 6 }]}>
+              <Text style={S.signLabel}>- 서    명 :</Text>
+              <Text style={S.signValue}> </Text>
+            </View>
           </View>
-          <View style={S.signRow}>
-            <Text style={S.signLabel}>- 주    소 :</Text>
-            <Text style={S.signValue}>{companyAddress || ''}</Text>
-          </View>
-          <View style={[S.signRow, { marginTop: 6 }]}>
-            <Text style={S.signLabel}>- 서    명 :</Text>
-            <Text style={S.signValue}> </Text>
-          </View>
-        </View>
 
-        {/* 을 서명란 */}
-        <View style={S.signParty}>
-          <Text style={S.signPartyTitle}>을 (대행사)</Text>
-          <View style={S.signRow}>
-            <Text style={S.signLabel}>- 상    호 :</Text>
-            <Text style={S.signValue}>{SUPPLIER.name}</Text>
-          </View>
-          <View style={S.signRow}>
-            <Text style={S.signLabel}>- 대 표 자 :</Text>
-            <Text style={S.signValue}>{SUPPLIER.ceo}</Text>
-          </View>
-          <View style={S.signRow}>
-            <Text style={S.signLabel}>- 주    소 :</Text>
-            <Text style={[S.signValue, { fontSize: 8 }]}>{SUPPLIER.address}</Text>
-          </View>
-          <View style={S.signRow}>
-            <Text style={S.signLabel}>- 사업자번호 :</Text>
-            <Text style={S.signValue}>{SUPPLIER.business_no}</Text>
-          </View>
-          <View style={[S.signRow, { marginTop: 6, alignItems: 'center' }]}>
-            <Text style={S.signLabel}>- 서    명 :</Text>
-            <View style={{ flex: 1 }}>
-              <Image src={stampPath} style={{ width: 48, height: 48 }} />
+          {/* 을 서명란 */}
+          <View style={S.signParty}>
+            <Text style={S.signPartyTitle}>을 (대행사)</Text>
+            <View style={S.signRow}>
+              <Text style={S.signLabel}>- 상    호 :</Text>
+              <Text style={S.signValue}>{SUPPLIER.name}</Text>
+            </View>
+            <View style={S.signRow}>
+              <Text style={S.signLabel}>- 대 표 자 :</Text>
+              <Text style={S.signValue}>{SUPPLIER.ceo}</Text>
+            </View>
+            <View style={S.signRow}>
+              <Text style={S.signLabel}>- 주    소 :</Text>
+              <Text style={[S.signValue, { fontSize: 8 }]}>{SUPPLIER.address}</Text>
+            </View>
+            <View style={S.signRow}>
+              <Text style={S.signLabel}>- 사업자번호 :</Text>
+              <Text style={S.signValue}>{SUPPLIER.business_no}</Text>
+            </View>
+            <View style={[S.signRow, { marginTop: 6, alignItems: 'center' }]}>
+              <Text style={S.signLabel}>- 서    명 :</Text>
+              <View style={{ flex: 1 }}>
+                <Image src={stampPath} style={{ width: 48, height: 48 }} />
+              </View>
             </View>
           </View>
         </View>
