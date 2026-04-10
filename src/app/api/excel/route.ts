@@ -62,8 +62,8 @@ export async function POST(req: NextRequest) {
     // ── 날짜 / 수신 + 공급자 정보 ─────────────────────────
     const s = SUPPLIER
 
-    ws.getRow(2).height = 18
-    ws.getRow(3).height = 18
+    ws.getRow(2).height = 28  // 도장 이미지 수용을 위해 높임
+    ws.getRow(3).height = 28  // 도장 이미지 수용을 위해 높임
     ws.getRow(4).height = 18
     ws.getRow(5).height = 18
     ws.getRow(6).height = 18
@@ -110,17 +110,19 @@ export async function POST(req: NextRequest) {
         val1Cell.alignment = { horizontal: 'left', vertical: 'middle' }
         applyBorder(val1Cell)
 
-        // col E: 도장이 덮는 영역 — 라벨 텍스트 제거, 회색 배경 유지
-        const stampAreaCell = ws.getCell(rowNum, 5)
-        stampAreaCell.value = ''
-        stampAreaCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9D9D9' } }
-        applyBorder(stampAreaCell)
+        // col E: label2
+        const labelCell2 = ws.getCell(rowNum, 5)
+        labelCell2.value = l2
+        labelCell2.font = { bold: true, size: 8 }
+        labelCell2.alignment = { horizontal: 'center', vertical: 'middle' }
+        labelCell2.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9D9D9' } }
+        applyBorder(labelCell2)
 
-        // col F: "라벨   값" 형태로 합쳐서 가운데 정렬
+        // col F: 상호/대표자 행(ri≤1)은 가운데 정렬, 나머지는 왼쪽
         const val2Cell = ws.getCell(rowNum, 6)
-        val2Cell.value = `${l2}   ${v2}`
+        val2Cell.value = v2
         val2Cell.font = { size: 8 }
-        val2Cell.alignment = { horizontal: 'center', vertical: 'middle' }
+        val2Cell.alignment = { horizontal: ri <= 1 ? 'center' : 'left', vertical: 'middle' }
         applyBorder(val2Cell)
       } else {
         // 사업장/계좌정보: D~F 병합
