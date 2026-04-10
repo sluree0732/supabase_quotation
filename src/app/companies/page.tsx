@@ -99,7 +99,7 @@ export default function CompaniesPage() {
             <button
               key={tab.value}
               onClick={() => setActiveTab(tab.value)}
-              className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`flex-1 py-1 rounded-lg text-sm font-medium transition-all ${
                 activeTab === tab.value
                   ? 'bg-white text-[#1e2a3a] shadow-sm'
                   : 'text-[#718096] hover:text-[#4a5568]'
