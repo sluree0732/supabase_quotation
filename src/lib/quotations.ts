@@ -46,7 +46,7 @@ export async function updateQuotation(
 export async function getDraftQuotations(): Promise<Quotation[]> {
   const { data, error } = await supabase
     .from('quotations')
-    .select('*, companies(name)')
+    .select('*, companies!company_id(name)')
     .eq('status', 'draft')
     .order('created_at', { ascending: false })
   if (error) throw error
@@ -56,7 +56,7 @@ export async function getDraftQuotations(): Promise<Quotation[]> {
 export async function getAllQuotations(): Promise<Quotation[]> {
   const { data, error } = await supabase
     .from('quotations')
-    .select('*, companies(name)')
+    .select('*, companies!company_id(name)')
     .order('created_at', { ascending: false })
   if (error) throw error
   return data
@@ -64,7 +64,7 @@ export async function getAllQuotations(): Promise<Quotation[]> {
 
 export async function getQuotationWithItems(id: string): Promise<QuotationWithItems | null> {
   const [{ data: q, error: qErr }, { data: items, error: iErr }] = await Promise.all([
-    supabase.from('quotations').select('*, companies(*)').eq('id', id).single(),
+    supabase.from('quotations').select('*, companies!company_id(*)').eq('id', id).single(),
     supabase.from('quotation_items').select('*').eq('quotation_id', id).order('sort_order'),
   ])
   if (qErr || !q) return null
