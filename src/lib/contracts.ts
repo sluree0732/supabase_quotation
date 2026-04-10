@@ -75,3 +75,13 @@ export async function deleteContract(id: string) {
   const { error } = await supabase.from('contracts').delete().eq('id', id)
   if (error) throw new Error(error.message)
 }
+
+export async function deleteDraftsByQuotationId(quotationId: string, exceptId: string) {
+  const { error } = await supabase
+    .from('contracts')
+    .delete()
+    .eq('quotation_id', quotationId)
+    .eq('status', 'draft')
+    .neq('id', exceptId)
+  if (error) throw new Error(error.message)
+}

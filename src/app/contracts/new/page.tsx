@@ -6,6 +6,7 @@ import { Building2, ChevronRight, X, Plus, Loader2, Save, ChevronLeft, FileDown 
 import type { Company, ContractItem, VatType, ContractStatus } from '@/types'
 import {
   createContract, updateContract, saveContractItems, getContractWithItems,
+  deleteDraftsByQuotationId,
 } from '@/lib/contracts'
 import { getQuotationWithItems } from '@/lib/quotations'
 import CompanyPickerModal from '@/components/quotations/CompanyPickerModal'
@@ -25,6 +26,8 @@ interface ContractFormState {
   items: ContractItem[]
   specialTerms: string
   status: ContractStatus | null
+  savedQuotationId: string | null
+  savedId: string | null
 }
 
 const INITIAL: ContractFormState = {
@@ -37,6 +40,8 @@ const INITIAL: ContractFormState = {
   items: [],
   specialTerms: '',
   status: null,
+  savedQuotationId: null,
+  savedId: null,
 }
 
 const VAT_OPTIONS: { value: VatType; label: string }[] = [
@@ -64,6 +69,12 @@ function ContractPage() {
   const [showCompany, setShowCompany] = useState(false)
   const [showAdd, setShowAdd] = useState(false)
   const [editIdx, setEditIdx] = useState<number | null>(null)
+  const [toast, setToast] = useState(false)
+
+  function showToast() {
+    setToast(true)
+    setTimeout(() => setToast(false), 2000)
+  }
 
   const set = (patch: Partial<ContractFormState>) => setForm(s => ({ ...s, ...patch }))
   const total = form.items.reduce((s, i) => s + i.total_price, 0)
@@ -87,6 +98,8 @@ function ContractPage() {
           items: data.items,
           specialTerms: data.special_terms ?? '',
           status: data.status,
+          savedQuotationId: data.quotation_id ?? null,
+          savedId: editId,
         })
       }).finally(() => setLoading(false))
       return
@@ -180,11 +193,14 @@ function ContractPage() {
         special_terms: form.specialTerms || null,
         quotation_id: quotationId ?? null,
       }
+
+      let savedId = form.savedId
       if (editId) {
         await Promise.all([
           updateContract(editId, payload),
           saveContractItems(editId, form.items),
         ])
+        savedId = editId
       } else {
         const c = await createContract({
           quotation_id: quotationId ?? null,
@@ -196,8 +212,19 @@ function ContractPage() {
           updateContract(c.id, { ...payload }),
           saveContractItems(c.id, form.items),
         ])
+        savedId = c.id
       }
-      router.push('/contracts')
+
+      if (status === 'signed') {
+        const qid = quotationId ?? form.savedQuotationId
+        if (qid && savedId) {
+          await deleteDraftsByQuotationId(qid, savedId)
+        }
+        set({ status: 'signed', savedId })
+        showToast()
+      } else {
+        router.push('/contracts')
+      }
     } catch (e: any) {
       alert(e.message ?? '저장 실패')
     } finally {
@@ -215,6 +242,13 @@ function ContractPage() {
 
   return (
     <div className="flex flex-col min-h-full">
+      {/* 토스트 */}
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#1e2a3a] text-white text-sm font-medium px-5 py-3 rounded-xl shadow-lg animate-fade-in-up">
+          계약이 완료되었습니다.
+        </div>
+      )}
+
       {/* 헤더 */}
       <div className="bg-white border-b border-gray-100 px-4 py-4 md:px-8 sticky top-0 z-10 flex items-center gap-3">
         <button onClick={() => router.back()} className="p-1 text-gray-400 hover:text-gray-600">
@@ -363,7 +397,9 @@ function ContractPage() {
             {/* 버튼 */}
             <div className="space-y-2 pb-8">
               <button onClick={() => handleSave('signed')} disabled={saving}
-                className="w-full py-3.5 rounded-xl bg-[#27ae60] text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-50">
+                className={`w-full py-3.5 rounded-xl text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors ${
+                  form.status === 'signed' ? 'bg-[#2980b9]' : 'bg-[#27ae60]'
+                }`}>
                 {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                 {form.status === 'signed' ? '계약 완료' : '계약 확정'}
               </button>
@@ -371,11 +407,13 @@ function ContractPage() {
                 className="w-full py-3.5 rounded-xl bg-gray-100 text-[#4a5568] font-medium text-sm disabled:opacity-50">
                 임시저장
               </button>
-              <button onClick={handlePdf} disabled={pdfLoading}
-                className="w-full py-3.5 rounded-xl border border-[#e74c3c] text-[#e74c3c] font-medium text-sm flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-red-50 transition-colors">
-                {pdfLoading ? <Loader2 size={16} className="animate-spin" /> : <FileDown size={16} />}
-                계약서 PDF 다운로드
-              </button>
+              {form.status === 'signed' && (
+                <button onClick={handlePdf} disabled={pdfLoading}
+                  className="w-full py-3.5 rounded-xl border border-[#e74c3c] text-[#e74c3c] font-medium text-sm flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-red-50 transition-colors">
+                  {pdfLoading ? <Loader2 size={16} className="animate-spin" /> : <FileDown size={16} />}
+                  계약서 PDF 다운로드
+                </button>
+              )}
             </div>
           </div>
         </div>
