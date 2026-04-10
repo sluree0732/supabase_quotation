@@ -186,9 +186,19 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
                     <td className="border border-gray-200 p-1">
                       <textarea
                         value={item.note}
-                        onChange={e => updateItem(idx, { note: e.target.value })}
-                        rows={2}
-                        className="w-full px-2 py-1.5 text-xs focus:outline-none focus:bg-blue-50 rounded resize-none transition-colors"
+                        onChange={e => {
+                          updateItem(idx, { note: e.target.value })
+                          e.target.style.height = 'auto'
+                          e.target.style.height = e.target.scrollHeight + 'px'
+                        }}
+                        ref={el => {
+                          if (el) {
+                            el.style.height = 'auto'
+                            el.style.height = el.scrollHeight + 'px'
+                          }
+                        }}
+                        rows={1}
+                        className="w-full px-2 py-1.5 text-xs focus:outline-none focus:bg-blue-50 rounded resize-none transition-colors overflow-hidden"
                       />
                     </td>
                     <td className="border border-gray-200 px-1 text-center">
