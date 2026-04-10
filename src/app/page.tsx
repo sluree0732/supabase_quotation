@@ -2,16 +2,17 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Building2, FileText, ChevronRight } from 'lucide-react'
+import { Building2, FileText, FileSignature, ChevronRight } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 export default function HomePage() {
   const [draftCount, setDraftCount] = useState(0)
   const [companyCount, setCompanyCount] = useState(0)
+  const [contractDraftCount, setContractDraftCount] = useState(0)
 
   useEffect(() => {
     async function fetchCounts() {
-      const [draftRes, companyRes] = await Promise.all([
+      const [draftRes, companyRes, contractDraftRes] = await Promise.all([
         supabase
           .from('quotations')
           .select('id', { count: 'exact', head: true })
@@ -19,9 +20,14 @@ export default function HomePage() {
         supabase
           .from('companies')
           .select('id', { count: 'exact', head: true }),
+        supabase
+          .from('contracts')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'draft'),
       ])
       setDraftCount(draftRes.count ?? 0)
       setCompanyCount(companyRes.count ?? 0)
+      setContractDraftCount(contractDraftRes.count ?? 0)
     }
     fetchCounts()
   }, [])
@@ -44,6 +50,15 @@ export default function HomePage() {
       badge: draftCount > 0 ? `임시저장 ${draftCount}건` : null,
       badgeColor: 'bg-red-500',
     },
+    {
+      href: '/contracts',
+      icon: FileSignature,
+      color: '#8e44ad',
+      label: '계약서 작성',
+      desc: '계약서 작성 및 PDF 출력',
+      badge: contractDraftCount > 0 ? `임시저장 ${contractDraftCount}건` : null,
+      badgeColor: 'bg-red-500',
+    },
   ]
 
   return (
@@ -57,7 +72,7 @@ export default function HomePage() {
       </div>
 
       {/* 카드 */}
-      <div className="flex flex-col sm:flex-row gap-5 w-full max-w-lg">
+      <div className="flex flex-col sm:flex-row gap-5 w-full max-w-2xl">
         {cards.map(({ href, icon: Icon, color, label, desc, badge, badgeColor }) => (
           <Link
             key={href}
