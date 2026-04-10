@@ -297,7 +297,7 @@ function ContractPage() {
               <Field label="수신인 *">
                 <input type="text" value={form.recipient}
                   onChange={e => set({ recipient: e.target.value })}
-                  placeholder="예: 홍길동 대표" className="input-base" autoFocus />
+                  placeholder="예: 홍길동 대표" className="input-base" autoFocus={!editId && !quotationId} />
               </Field>
 
               <div className="grid grid-cols-2 gap-3">
