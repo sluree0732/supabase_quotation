@@ -108,6 +108,36 @@ const S = StyleSheet.create({
 // ── 유틸 ──────────────────────────────────────────────────
 function fmtNum(n: number) { return n.toLocaleString('ko-KR') }
 
+function toKoreanAmount(n: number): string {
+  const units = ['', '일', '이', '삼', '사', '오', '육', '칠', '팔', '구']
+  const places = ['', '십', '백', '천']
+  const bigUnits = ['', '만', '억', '조']
+
+  if (n === 0) return '영'
+
+  let result = ''
+  let bigIdx = 0
+
+  while (n > 0) {
+    const chunk = n % 10000
+    if (chunk > 0) {
+      let chunkStr = ''
+      let tmp = chunk
+      for (let i = 3; i >= 0; i--) {
+        const digit = Math.floor(tmp / Math.pow(10, i)) % 10
+        if (digit > 0) {
+          chunkStr += (digit === 1 && i > 0 ? '' : units[digit]) + places[i]
+        }
+      }
+      result = chunkStr + bigUnits[bigIdx] + result
+    }
+    bigIdx++
+    n = Math.floor(n / 10000)
+  }
+
+  return '일금 ' + result + '원정'
+}
+
 function fmtDate(d: string) {
   if (!d) return '미정'
   const [y, m, dd] = d.split('-')
@@ -199,15 +229,25 @@ export default function ContractDocument({
         </Article>
 
         {/* 제4조 */}
-        <Article no={4} title="비용 및 지급">
+        <Article no={4} title="광고 비용 및 대금 지급">
           <Text style={S.articleBody}>
-            갑은 을에게 본 계약에 따른 대행 비용으로 금 {fmtNum(totalAmount)}원{VAT_MAP[vatType]}을 지급한다.
+            1. 총 광고 예산: {toKoreanAmount(totalAmount)} (₩{fmtNum(totalAmount)} / {vatType === 'excluded' ? '부가세 별도' : vatType === 'included' ? '부가세 포함' : '부가세 없음'})
           </Text>
-          {specialTerms ? (
-            <Text style={[S.articleBody, { marginTop: 3 }]}>
-              지급 조건: {specialTerms}
-            </Text>
-          ) : null}
+          <Text style={[S.articleBody, { paddingLeft: 24, marginTop: 2 }]}>
+            • 예산 세부 내역(매체비, 제작비, 대행 수수료 등)은 별첨된 견적서에 따른다.
+          </Text>
+          <Text style={[S.articleBody, { marginTop: 4 }]}>
+            2. 지급 방법:
+          </Text>
+          <Text style={[S.articleBody, { paddingLeft: 24, marginTop: 2 }]}>
+            - 선금 (50%): 계약 체결 후 3일 이내 지급
+          </Text>
+          <Text style={[S.articleBody, { paddingLeft: 24 }]}>
+            - 잔금 (50%): 광고 집행 완료 및 최종 보고서 제출 후 7일 이내 지급
+          </Text>
+          <Text style={[S.articleBody, { marginTop: 4 }]}>
+            2. 결제 계좌: {SUPPLIER.bank.trim().split(' ').filter(p => !(/\d/.test(p) && p.includes('-'))).join(' ')} {SUPPLIER.bank.trim().split(' ').find(p => /\d/.test(p) && p.includes('-')) ?? ''} (예금주: {SUPPLIER.ceo})
+          </Text>
         </Article>
 
         {/* 제5조 */}

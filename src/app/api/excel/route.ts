@@ -128,8 +128,22 @@ export async function POST(req: NextRequest) {
         // 사업장/계좌정보: D~F 병합
         ws.mergeCells(rowNum, 4, rowNum, 6)
         const wideCell = ws.getCell(rowNum, 4)
-        wideCell.value = v1
-        wideCell.font = { size: 8, color: l1 === '계좌정보' ? { argb: 'FFCC0000' } : undefined }
+        if (l1 === '계좌정보') {
+          // 계좌번호 부분만 빨간색 Rich Text
+          const parts = v1.trim().split(' ')
+          wideCell.value = {
+            richText: parts.map((part, i) => {
+              const isAccount = /\d/.test(part) && part.includes('-')
+              return {
+                text: (i > 0 ? ' ' : '') + part,
+                font: { size: 8, color: isAccount ? { argb: 'FFCC0000' } : undefined },
+              }
+            }),
+          }
+        } else {
+          wideCell.value = v1
+          wideCell.font = { size: 8 }
+        }
         wideCell.alignment = { horizontal: 'left', vertical: 'middle' }
         applyBorder(wideCell)
       }
