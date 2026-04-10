@@ -1,20 +1,23 @@
 'use client'
 
 import { useState } from 'react'
-import { Building2, ChevronRight, X, Plus, Sparkles, Loader2, Save, FileSignature } from 'lucide-react'
+import { Building2, ChevronRight, X, Plus, Sparkles, Loader2, Save, FileSignature, ChevronDown, ChevronUp } from 'lucide-react'
 import { BsFiletypePdf, BsFiletypeXlsx } from 'react-icons/bs'
 
-import type { Company, QuotationItem, VatType } from '@/types'
+import type { Company, CompanyInfo, QuotationItem, VatType } from '@/types'
 import CompanyPickerModal from './CompanyPickerModal'
 import ItemModal from './ItemModal'
 
 // ── 타입 ──────────────────────────────────────────────────
 export interface QuotationFormState {
+  projectName: string
   recipient: string
   quoteDate: string
+  senderCompany: Company | null
+  senderInfo: CompanyInfo | null
   company: Company | null
+  clientInfo: CompanyInfo | null
   vatType: VatType
-  period: number
   items: QuotationItem[]
   status: 'draft' | 'saved' | null
 }
@@ -44,11 +47,70 @@ const VAT_LABEL: Record<VatType, string> = {
   none: '',
 }
 
-const CATEGORIES = ['기획', '디자인', '개발', '마케팅', '광고', '영상', '운영', '유지보수', '기타']
+function companyToInfo(c: Company): CompanyInfo {
+  return {
+    name: c.name ?? '',
+    address: c.address ?? '',
+    phone: c.phone ?? '',
+    business_no: c.business_no ?? '',
+    business_type: c.business_type ?? '',
+    business_item: c.business_item ?? '',
+    email: c.email ?? '',
+    fax: c.fax ?? '',
+  }
+}
+
+// ── 업체 정보 인라인 편집 컴포넌트 ──────────────────────────
+function CompanyInfoEditor({
+  info,
+  onChange,
+}: {
+  info: CompanyInfo
+  onChange: (info: CompanyInfo) => void
+}) {
+  const [open, setOpen] = useState(true)
+
+  const field = (label: string, key: keyof CompanyInfo) => (
+    <div className="space-y-1">
+      <label className="text-xs text-[#718096]">{label}</label>
+      <input
+        type="text"
+        value={info[key]}
+        onChange={e => onChange({ ...info, [key]: e.target.value })}
+        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-[#2980b9] transition-colors"
+      />
+    </div>
+  )
+
+  return (
+    <div className="mt-1.5 border border-gray-100 rounded-xl overflow-hidden">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 text-xs text-[#4a5568] font-medium"
+      >
+        <span>상세 정보 편집</span>
+        {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+      </button>
+      {open && (
+        <div className="px-3 py-3 space-y-2.5 bg-white">
+          {field('업체명', 'name')}
+          {field('주소', 'address')}
+          {field('연락처', 'phone')}
+          {field('사업자번호', 'business_no')}
+          {field('업태', 'business_type')}
+          {field('업종', 'business_item')}
+          {field('이메일', 'email')}
+          {field('팩스', 'fax')}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, pdfLoading, onExcel, excelLoading, onSaveSuccess, quotationId }: Props) {
   const [state, setState] = useState<QuotationFormState>(initial)
-  const [showCompany, setShowCompany] = useState(false)
+  const [showSenderPicker, setShowSenderPicker] = useState(false)
+  const [showClientPicker, setShowClientPicker] = useState(false)
   const [editIdx, setEditIdx] = useState<number | null>(null)
   const [showAdd, setShowAdd] = useState(false)
   const [aiAllLoading, setAiAllLoading] = useState(false)
@@ -64,25 +126,12 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
   const total = state.items.reduce((s, i) => s + i.total_price, 0)
 
   // ── 항목 조작 ─────────────────────────────────────────
-  function handlePeriodChange(newPeriod: number) {
-    setState(s => ({
-      ...s,
-      period: newPeriod,
-      items: s.items.map(it => ({
-        ...it,
-        period: newPeriod,
-        total_price: it.unit_price * newPeriod,
-      })),
-    }))
-    if (isSaved) setIsDirty(true)
-  }
-
   function addItem(data: Omit<QuotationItem, 'id' | 'quotation_id' | 'sort_order'>) {
-    set({ items: [...state.items, { ...data, period: state.period, total_price: data.unit_price * state.period, sort_order: state.items.length }] })
+    set({ items: [...state.items, { ...data, sort_order: state.items.length }] })
   }
 
   function updateItem(idx: number, data: Omit<QuotationItem, 'id' | 'quotation_id' | 'sort_order'>) {
-    set({ items: state.items.map((it, i) => i === idx ? { ...it, ...data, period: state.period, total_price: data.unit_price * state.period } : it) })
+    set({ items: state.items.map((it, i) => i === idx ? { ...it, ...data } : it) })
   }
 
   function deleteItem(idx: number) {
@@ -123,11 +172,22 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
 
   return (
     <div className="px-4 py-6 md:px-8">
-      {/* ── PC: 2단 레이아웃 / 모바일: 단일 컬럼 ── */}
       <div className="md:grid md:grid-cols-[1fr_1.4fr] md:gap-6 md:items-start space-y-6 md:space-y-0">
 
         {/* ── 왼쪽: 기본 정보 ───────────────────── */}
         <Section title="기본 정보">
+          {/* 프로젝트명 */}
+          <Field label="프로젝트명">
+            <input
+              type="text"
+              value={state.projectName}
+              onChange={e => set({ projectName: e.target.value })}
+              placeholder="예: 2026년 상반기 마케팅 캠페인"
+              className="input-base"
+            />
+          </Field>
+
+          {/* 견적일 */}
           <Field label="견적일">
             <input
               type="date"
@@ -137,18 +197,19 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
             />
           </Field>
 
-          <Field label="수신 업체">
+          {/* 발신 업체 */}
+          <Field label="발신 업체">
             <button
-              onClick={() => setShowCompany(true)}
+              onClick={() => setShowSenderPicker(true)}
               className="w-full flex items-center gap-3 px-4 py-3 border border-gray-200 rounded-xl bg-white hover:border-[#2980b9] transition-colors text-left"
             >
-              <Building2 size={18} className="text-[#2980b9] shrink-0" />
-              <span className={`flex-1 text-sm ${state.company ? 'text-[#1e2a3a] font-medium' : 'text-gray-400'}`}>
-                {state.company?.name ?? '업체 선택 (선택사항)'}
+              <Building2 size={18} className="text-[#27ae60] shrink-0" />
+              <span className={`flex-1 text-sm ${state.senderCompany ? 'text-[#1e2a3a] font-medium' : 'text-gray-400'}`}>
+                {state.senderCompany?.name ?? '자사 업체 선택 (선택사항)'}
               </span>
-              {state.company ? (
+              {state.senderCompany ? (
                 <button
-                  onClick={e => { e.stopPropagation(); set({ company: null }) }}
+                  onClick={e => { e.stopPropagation(); set({ senderCompany: null, senderInfo: null }) }}
                   className="p-0.5 text-gray-400 hover:text-gray-600"
                 >
                   <X size={14} />
@@ -157,11 +218,44 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
                 <ChevronRight size={16} className="text-gray-400" />
               )}
             </button>
-            {state.company?.address && (
-              <p className="text-xs text-gray-400 px-1 mt-1">{state.company.address}</p>
+            {state.senderInfo && (
+              <CompanyInfoEditor
+                info={state.senderInfo}
+                onChange={info => set({ senderInfo: info })}
+              />
             )}
           </Field>
 
+          {/* 수신 업체 */}
+          <Field label="수신 업체">
+            <button
+              onClick={() => setShowClientPicker(true)}
+              className="w-full flex items-center gap-3 px-4 py-3 border border-gray-200 rounded-xl bg-white hover:border-[#2980b9] transition-colors text-left"
+            >
+              <Building2 size={18} className="text-[#2980b9] shrink-0" />
+              <span className={`flex-1 text-sm ${state.company ? 'text-[#1e2a3a] font-medium' : 'text-gray-400'}`}>
+                {state.company?.name ?? '광고주 업체 선택 (선택사항)'}
+              </span>
+              {state.company ? (
+                <button
+                  onClick={e => { e.stopPropagation(); set({ company: null, clientInfo: null }) }}
+                  className="p-0.5 text-gray-400 hover:text-gray-600"
+                >
+                  <X size={14} />
+                </button>
+              ) : (
+                <ChevronRight size={16} className="text-gray-400" />
+              )}
+            </button>
+            {state.clientInfo && (
+              <CompanyInfoEditor
+                info={state.clientInfo}
+                onChange={info => set({ clientInfo: info })}
+              />
+            )}
+          </Field>
+
+          {/* 수신인 */}
           <Field label="수신인 *">
             <input
               type="text"
@@ -172,6 +266,7 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
             />
           </Field>
 
+          {/* 부가세 */}
           <Field label="부가세">
             <div className="flex gap-2">
               {VAT_OPTIONS.map(opt => (
@@ -187,20 +282,6 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
                   {opt.label}
                 </button>
               ))}
-            </div>
-          </Field>
-
-          <Field label="계약 기간 (개월)">
-            <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden">
-              <button
-                onClick={() => handlePeriodChange(Math.max(1, state.period - 1))}
-                className="px-4 py-3 text-gray-500 hover:bg-gray-50 text-lg font-bold"
-              >−</button>
-              <span className="flex-1 text-center font-semibold text-[#1e2a3a]">{state.period}개월</span>
-              <button
-                onClick={() => handlePeriodChange(Math.min(24, state.period + 1))}
-                className="px-4 py-3 text-gray-500 hover:bg-gray-50 text-lg font-bold"
-              >+</button>
             </div>
           </Field>
         </Section>
@@ -255,8 +336,7 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
                           <span className="font-semibold text-sm text-[#1e2a3a]">{item.item_name}</span>
                         </div>
                         <div className="flex items-center gap-3 mt-1 text-xs text-[#718096]">
-                          <span>{state.period}개월 × {item.unit_price.toLocaleString()}원</span>
-                          <span className="font-semibold text-[#1e2a3a]">= {item.total_price.toLocaleString()}원</span>
+                          <span className="font-semibold text-[#1e2a3a]">{item.total_price.toLocaleString()}원</span>
                         </div>
                         {item.note && (
                           <p className="text-xs text-[#a0aec0] mt-1 line-clamp-1">{item.note.replace(/•/g, '·')}</p>
@@ -283,7 +363,6 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
 
           {/* 액션 버튼 */}
           <div className="space-y-2 pb-8">
-            {/* 다운로드: saved 상태일 때만 표시 */}
             {isSaved && (
               <div className="bg-white border border-gray-200 rounded-xl px-4 py-3">
                 <p className="text-xs text-gray-400 font-medium mb-3">다운로드</p>
@@ -316,7 +395,6 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
               </div>
             )}
 
-            {/* 저장 / 계약서 작성 버튼 (상태에 따라 전환) */}
             {isSaved && !isDirty && quotationId ? (
               <a
                 href={`/contracts/new?quotationId=${quotationId}`}
@@ -336,7 +414,6 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
               </button>
             )}
 
-            {/* 임시저장 */}
             <button
               onClick={() => handleSave('draft')}
               disabled={saving}
@@ -358,18 +435,26 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
       )}
 
       {/* ── 모달 ──────────────────────────────────────── */}
-      {showCompany && (
+      {showSenderPicker && (
+        <CompanyPickerModal
+          selected={state.senderCompany}
+          typeFilter="sender"
+          onSelect={company => set({ senderCompany: company, senderInfo: companyToInfo(company) })}
+          onClose={() => setShowSenderPicker(false)}
+        />
+      )}
+      {showClientPicker && (
         <CompanyPickerModal
           selected={state.company}
-          onSelect={company => set({ company })}
-          onClose={() => setShowCompany(false)}
+          typeFilter="client"
+          onSelect={company => set({ company, clientInfo: companyToInfo(company) })}
+          onClose={() => setShowClientPicker(false)}
         />
       )}
       {showAdd && (
         <ItemModal
           onSave={addItem}
           items={state.items}
-          globalPeriod={state.period}
           onAiAllResult={(notes) => {
             setState(s => ({
               ...s,
@@ -393,7 +478,6 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
       {editIdx !== null && (
         <ItemModal
           item={state.items[editIdx]}
-          globalPeriod={state.period}
           onSave={data => updateItem(editIdx, data)}
           onDelete={() => deleteItem(editIdx)}
           onClose={() => setEditIdx(null)}

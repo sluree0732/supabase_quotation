@@ -14,10 +14,9 @@ interface Props {
   // 신규 추가 모드 전용
   items?: QuotationItem[]
   onAiAllResult?: (notes: string[]) => void
-  globalPeriod?: number
 }
 
-export default function ItemModal({ item, onSave, onDelete, onClose, items, onAiAllResult, globalPeriod = 1 }: Props) {
+export default function ItemModal({ item, onSave, onDelete, onClose, items, onAiAllResult }: Props) {
   const isEdit = !!item
   const [category, setCategory] = useState(item?.category ?? '')
   const [itemName, setItemName] = useState(item?.item_name ?? '')
@@ -33,7 +32,7 @@ export default function ItemModal({ item, onSave, onDelete, onClose, items, onAi
   const displayCount = existingCount + addedCount    // 헤더 표시용 전체 수
   const sessionItems = items ?? []                   // 목록 패널 + AI용 전체 항목
 
-  const totalPrice = globalPeriod * unitPrice
+  const totalPrice = unitPrice
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
@@ -56,7 +55,7 @@ export default function ItemModal({ item, onSave, onDelete, onClose, items, onAi
   // [항목 추가] — 저장 후 폼 초기화, 모달 유지
   function handleAddMore() {
     if (!validate()) return
-    onSave({ category, item_name: itemName.trim(), period: globalPeriod, unit_price: unitPrice, total_price: totalPrice, note })
+    onSave({ category, item_name: itemName.trim(), period: 1, unit_price: unitPrice, total_price: totalPrice, note })
     resetForm()
     setAddedCount(c => c + 1)
   }
@@ -66,7 +65,7 @@ export default function ItemModal({ item, onSave, onDelete, onClose, items, onAi
     const hasContent = category || itemName.trim()
     if (hasContent) {
       if (!validate()) return
-      onSave({ category, item_name: itemName.trim(), period: globalPeriod, unit_price: unitPrice, total_price: totalPrice, note })
+      onSave({ category, item_name: itemName.trim(), period: 1, unit_price: unitPrice, total_price: totalPrice, note })
       const newCount = addedCount + 1
       onClose(newCount, existingCount + newCount)
     } else {
@@ -80,7 +79,7 @@ export default function ItemModal({ item, onSave, onDelete, onClose, items, onAi
   // 수정 모드용 (기존 동작 유지)
   function handleSave() {
     if (!validate()) return
-    onSave({ category, item_name: itemName.trim(), period: globalPeriod, unit_price: unitPrice, total_price: totalPrice, note })
+    onSave({ category, item_name: itemName.trim(), period: 1, unit_price: unitPrice, total_price: totalPrice, note })
     onClose()
   }
 
@@ -228,7 +227,7 @@ export default function ItemModal({ item, onSave, onDelete, onClose, items, onAi
 
           {/* 단가 */}
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-[#4a5568]">단가 (원/월)</label>
+            <label className="text-sm font-medium text-[#4a5568]">단가 (원)</label>
             <input
               type="text"
               inputMode="numeric"
@@ -239,11 +238,9 @@ export default function ItemModal({ item, onSave, onDelete, onClose, items, onAi
             />
           </div>
 
-          {/* 총액 자동계산 */}
+          {/* 총액 */}
           <div className="bg-[#f0f7fd] rounded-xl px-4 py-3 flex items-center justify-between">
-            <span className="text-sm text-[#4a5568]">
-              총액 <span className="text-xs text-[#2980b9] font-medium">({globalPeriod}개월 × 단가)</span>
-            </span>
+            <span className="text-sm text-[#4a5568]">총액</span>
             <span className="font-bold text-[#1e2a3a] text-lg">
               {totalPrice.toLocaleString()}원
             </span>

@@ -1,5 +1,16 @@
 export type CompanyType = 'sender' | 'client'
 
+export interface CompanyInfo {
+  name: string
+  address: string
+  phone: string
+  business_no: string
+  business_type: string
+  business_item: string
+  email: string
+  fax: string
+}
+
 export interface CompanyContact {
   id: string
   company_id: string
@@ -47,6 +58,10 @@ export interface Quotation {
   vat_type: VatType
   status: QuotationStatus
   period: number
+  project_name: string | null
+  sender_company_id: string | null
+  sender_info: CompanyInfo | null
+  client_info: CompanyInfo | null
   created_at: string
   companies?: { name: string } | null
 }

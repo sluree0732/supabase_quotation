@@ -11,11 +11,14 @@ function today() {
 }
 
 const INITIAL: QuotationFormState = {
+  projectName: '',
   recipient: '',
   quoteDate: today(),
+  senderCompany: null,
+  senderInfo: null,
   company: null,
+  clientInfo: null,
   vatType: 'excluded',
-  period: 1,
   items: [],
   status: null,
 }
@@ -32,17 +35,19 @@ function QuotationPage() {
   const [loading, setLoading] = useState(!!editId)
   const [savedQuotationId, setSavedQuotationId] = useState<string | null>(null)
 
-  // 편집 모드: 기존 데이터 로드
   useEffect(() => {
     if (!editId) return
     getQuotationWithItems(editId).then(data => {
       if (!data) return
       setFormState({
+        projectName: data.project_name ?? '',
         recipient: data.recipient,
         quoteDate: data.quote_date,
+        senderCompany: null,
+        senderInfo: data.sender_info ?? null,
         company: data.companies ?? null,
+        clientInfo: data.client_info ?? null,
         vatType: data.vat_type,
-        period: data.period ?? 1,
         items: data.items,
         status: data.status,
       })
@@ -53,6 +58,15 @@ function QuotationPage() {
     setSaving(true)
     try {
       const total = state.items.reduce((s, i) => s + i.total_price, 0)
+      const extraFields = {
+        total_amount: total,
+        vat_type: state.vatType,
+        status,
+        project_name: state.projectName || null,
+        sender_company_id: state.senderCompany?.id ?? null,
+        sender_info: state.senderInfo ?? null,
+        client_info: state.clientInfo ?? null,
+      }
 
       if (editId) {
         await Promise.all([
@@ -60,10 +74,7 @@ function QuotationPage() {
             company_id: state.company?.id ?? null,
             quote_date: state.quoteDate,
             recipient: state.recipient,
-            total_amount: total,
-            vat_type: state.vatType,
-            period: state.period,
-            status,
+            ...extraFields,
           }),
           saveItems(editId, state.items),
         ])
@@ -75,7 +86,7 @@ function QuotationPage() {
         )
         setSavedQuotationId(q.id)
         await Promise.all([
-          updateQuotation(q.id, { total_amount: total, vat_type: state.vatType, period: state.period, status }),
+          updateQuotation(q.id, extraFields),
           saveItems(q.id, state.items),
         ])
       }
@@ -87,9 +98,7 @@ function QuotationPage() {
     }
   }
 
-  function handleSaveSuccess(_status: 'draft' | 'saved') {
-    // 페이지 이동 없이 폼에서 토스트로 처리
-  }
+  function handleSaveSuccess(_status: 'draft' | 'saved') {}
 
   async function handleExcel(state: QuotationFormState) {
     if (!state.items.length) { alert('항목을 먼저 추가해주세요.'); return }
@@ -100,12 +109,14 @@ function QuotationPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          projectName: state.projectName,
           quoteDate: state.quoteDate,
           recipient: state.recipient,
+          senderInfo: state.senderInfo,
+          clientInfo: state.clientInfo,
           items: state.items,
           totalAmount: total,
           vatType: state.vatType,
-          period: state.period,
         }),
       })
       if (!res.ok) throw new Error('엑셀 생성 실패')
@@ -114,7 +125,7 @@ function QuotationPage() {
       const a = document.createElement('a')
       a.href = url
       const dateStr = state.quoteDate.replace(/-/g, '')
-      const prefix = state.company?.name ?? ''
+      const prefix = state.company?.name ?? state.clientInfo?.name ?? ''
       a.download = prefix ? `${prefix}_견적서(${dateStr}).xlsx` : `견적서(${dateStr}).xlsx`
       a.click()
       URL.revokeObjectURL(url)
@@ -134,12 +145,14 @@ function QuotationPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          projectName: state.projectName,
           quoteDate: state.quoteDate,
           recipient: state.recipient,
+          senderInfo: state.senderInfo,
+          clientInfo: state.clientInfo,
           items: state.items,
           totalAmount: total,
           vatType: state.vatType,
-          period: state.period,
         }),
       })
       if (!res.ok) throw new Error('PDF 생성 실패')
@@ -147,9 +160,9 @@ function QuotationPage() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      const dateStr2 = state.quoteDate.replace(/-/g, '')
-      const prefix2 = state.company?.name ?? ''
-      a.download = prefix2 ? `${prefix2}_견적서(${dateStr2}).pdf` : `견적서(${dateStr2}).pdf`
+      const dateStr = state.quoteDate.replace(/-/g, '')
+      const prefix = state.company?.name ?? state.clientInfo?.name ?? ''
+      a.download = prefix ? `${prefix}_견적서(${dateStr}).pdf` : `견적서(${dateStr}).pdf`
       a.click()
       URL.revokeObjectURL(url)
     } catch (e: any) {
@@ -169,14 +182,12 @@ function QuotationPage() {
 
   return (
     <div className="flex flex-col min-h-full">
-      {/* 헤더 */}
       <div className="bg-white border-b border-gray-100 px-4 py-4 md:px-8 sticky top-0 z-10">
         <h1 className="text-xl font-bold text-[#1e2a3a]">
           {editId ? '견적서 수정' : '새 견적서'}
         </h1>
       </div>
 
-      {/* 단일 스크롤 폼 */}
       <QuotationForm
         initial={formState}
         isEdit={!!editId}

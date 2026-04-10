@@ -9,15 +9,18 @@ interface Props {
   selected: Company | null
   onSelect: (company: Company) => void
   onClose: () => void
+  typeFilter?: 'sender' | 'client'
 }
 
-export default function CompanyPickerModal({ selected, onSelect, onClose }: Props) {
+export default function CompanyPickerModal({ selected, onSelect, onClose, typeFilter }: Props) {
   const [companies, setCompanies] = useState<Company[]>([])
   const [query, setQuery] = useState('')
 
   useEffect(() => {
-    getCompanies().then(setCompanies).catch(() => {})
-  }, [])
+    getCompanies().then(all => {
+      setCompanies(typeFilter ? all.filter(c => c.company_type === typeFilter) : all)
+    }).catch(() => {})
+  }, [typeFilter])
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
@@ -40,7 +43,9 @@ export default function CompanyPickerModal({ selected, onSelect, onClose }: Prop
           <div className="w-10 h-1 bg-gray-300 rounded-full" />
         </div>
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
-          <h2 className="font-bold text-[#1e2a3a]">업체 선택</h2>
+          <h2 className="font-bold text-[#1e2a3a]">
+          {typeFilter === 'sender' ? '발신 업체 선택' : typeFilter === 'client' ? '수신 업체 선택' : '업체 선택'}
+        </h2>
           <button onClick={onClose}><X size={20} className="text-gray-400" /></button>
         </div>
         <div className="px-4 py-3 shrink-0">
