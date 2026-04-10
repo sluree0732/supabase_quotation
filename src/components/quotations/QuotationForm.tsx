@@ -7,6 +7,8 @@ import { BsFiletypePdf, BsFiletypeXlsx } from 'react-icons/bs'
 import type { Company, CompanyInfo, QuotationItem, VatType } from '@/types'
 import CompanyPickerModal from './CompanyPickerModal'
 import ItemModal from './ItemModal'
+import PdfViewerModal from './PdfViewerModal'
+import ExcelViewerModal from './ExcelViewerModal'
 
 // ── 타입 ──────────────────────────────────────────────────
 export interface QuotationFormState {
@@ -27,10 +29,6 @@ interface Props {
   isEdit: boolean
   saving: boolean
   onSave: (state: QuotationFormState, status: 'draft' | 'saved') => Promise<void>
-  onPdf: (state: QuotationFormState) => Promise<void>
-  pdfLoading: boolean
-  onExcel: (state: QuotationFormState) => Promise<void>
-  excelLoading: boolean
   onSaveSuccess: (status: 'draft' | 'saved') => void
   quotationId?: string
 }
@@ -107,7 +105,7 @@ function CompanyInfoEditor({
   )
 }
 
-export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, pdfLoading, onExcel, excelLoading, onSaveSuccess, quotationId }: Props) {
+export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveSuccess, quotationId }: Props) {
   const [state, setState] = useState<QuotationFormState>(initial)
   const [showSenderPicker, setShowSenderPicker] = useState(false)
   const [showClientPicker, setShowClientPicker] = useState(false)
@@ -116,6 +114,8 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
   const [aiAllLoading, setAiAllLoading] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [isDirty, setIsDirty] = useState(false)
+  const [showPdfViewer, setShowPdfViewer] = useState(false)
+  const [showExcelViewer, setShowExcelViewer] = useState(false)
 
   const isSaved = state.status === 'saved'
 
@@ -365,31 +365,25 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
           <div className="space-y-2 pb-8">
             {isSaved && (
               <div className="bg-white border border-gray-200 rounded-xl px-4 py-3">
-                <p className="text-xs text-gray-400 font-medium mb-3">다운로드</p>
+                <p className="text-xs text-gray-400 font-medium mb-3">미리보기 / 다운로드</p>
                 <div className="flex gap-6 justify-center">
                   <button
-                    onClick={() => onExcel(state)}
-                    disabled={excelLoading}
-                    className="flex flex-col items-center gap-1.5 disabled:opacity-40"
+                    onClick={() => setShowExcelViewer(true)}
+                    className="flex flex-col items-center gap-1.5"
                   >
                     <div className="w-14 h-14 rounded-2xl bg-[#217346] flex items-center justify-center shadow-sm hover:opacity-90 transition-opacity">
-                      {excelLoading
-                        ? <Loader2 size={28} className="animate-spin text-white" />
-                        : <BsFiletypeXlsx size={28} color="white" />}
+                      <BsFiletypeXlsx size={28} color="white" />
                     </div>
-                    <span className="text-xs text-gray-500">{excelLoading ? '생성 중...' : '엑셀'}</span>
+                    <span className="text-xs text-gray-500">엑셀</span>
                   </button>
                   <button
-                    onClick={() => onPdf(state)}
-                    disabled={pdfLoading}
-                    className="flex flex-col items-center gap-1.5 disabled:opacity-40"
+                    onClick={() => setShowPdfViewer(true)}
+                    className="flex flex-col items-center gap-1.5"
                   >
                     <div className="w-14 h-14 rounded-2xl bg-[#e74c3c] flex items-center justify-center shadow-sm hover:opacity-90 transition-opacity">
-                      {pdfLoading
-                        ? <Loader2 size={28} className="animate-spin text-white" />
-                        : <BsFiletypePdf size={28} color="white" />}
+                      <BsFiletypePdf size={28} color="white" />
                     </div>
-                    <span className="text-xs text-gray-500">{pdfLoading ? '생성 중...' : 'PDF'}</span>
+                    <span className="text-xs text-gray-500">PDF</span>
                   </button>
                 </div>
               </div>
@@ -432,6 +426,14 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="8" fill="#27ae60"/><path d="M4.5 8l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           {toast}
         </div>
+      )}
+
+      {/* ── 뷰어 모달 ─────────────────────────────────── */}
+      {showPdfViewer && (
+        <PdfViewerModal state={state} onClose={() => setShowPdfViewer(false)} />
+      )}
+      {showExcelViewer && (
+        <ExcelViewerModal state={state} onClose={() => setShowExcelViewer(false)} />
       )}
 
       {/* ── 모달 ──────────────────────────────────────── */}
