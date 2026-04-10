@@ -154,11 +154,22 @@ export async function POST(req: NextRequest) {
     headerCell(ws.getCell(`E${subRow}`), '')
     headerCell(ws.getCell(`F${subRow}`), '')
 
+    // ── 비고 줄 수 기반 행 높이 계산 ─────────────────────
+    function calcRowHeight(note: string): number {
+      if (!note) return 40
+      const lines = note.split('\n').filter(Boolean)
+      // F열 너비(48) 기준 약 28자당 1줄로 추정
+      const totalLines = lines.reduce((acc, line) => {
+        return acc + Math.max(1, Math.ceil(line.length / 28))
+      }, 0)
+      return Math.max(40, totalLines * 14 + 10)
+    }
+
     // ── 데이터 행 ─────────────────────────────────────────
     let dataStartRow = subRow + 1
     items.forEach((item: any, i: number) => {
       const r = dataStartRow + i
-      ws.getRow(r).height = 40
+      ws.getRow(r).height = calcRowHeight(item.note ?? '')
       dataCell(ws.getCell(`A${r}`), item.category ?? '', 'center')
       dataCell(ws.getCell(`B${r}`), item.item_name ?? '', 'center')
       dataCell(ws.getCell(`C${r}`), item.period ?? 0, 'center')
