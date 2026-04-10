@@ -190,13 +190,12 @@ function SupplierTable() {
 }
 
 // ── 항목 테이블 ───────────────────────────────────────────
-function ItemsTable({ items, period }: { items: QuotationItem[]; period: number }) {
+function ItemsTable({ items }: { items: QuotationItem[] }) {
   return (
     <View style={S.table}>
       {/* 헤더 */}
       <View style={S.tableHeader}>
         <View style={[S.colCat, S.colName, { width: '28%' }]}><Text style={S.headerText}>상  품</Text></View>
-        <View style={S.colPer}><Text style={S.headerText}>기간(월)</Text></View>
         <View style={[S.colUnit, { alignItems: 'center' }]}><Text style={S.headerText}>금  액</Text></View>
         <View style={[S.colTotal, { alignItems: 'center' }]}><Text style={S.headerText}>총  액</Text></View>
         <View style={S.colNote}><Text style={S.headerText}>비  고</Text></View>
@@ -205,7 +204,6 @@ function ItemsTable({ items, period }: { items: QuotationItem[]; period: number 
       <View style={[S.tableRow, { backgroundColor: '#f5f5f5' }]}>
         <View style={S.colCat}><Text style={[S.headerText, { fontSize: 7 }]}>대분류</Text></View>
         <View style={S.colName}><Text style={[S.headerText, { fontSize: 7 }]}>상품명</Text></View>
-        <View style={S.colPer}></View>
         <View style={S.colUnit}></View>
         <View style={S.colTotal}></View>
         <View style={S.colNote}></View>
@@ -218,7 +216,6 @@ function ItemsTable({ items, period }: { items: QuotationItem[]; period: number 
           <View key={i} style={RowStyle} wrap={false}>
             <View style={S.colCat}><Text style={S.cellText}>{item.category}</Text></View>
             <View style={S.colName}><Text style={S.cellText}>{item.item_name}</Text></View>
-            <View style={S.colPer}><Text style={S.cellText}>{period}</Text></View>
             <View style={S.colUnit}><Text style={S.cellText}>{fmtNum(item.unit_price)}</Text></View>
             <View style={S.colTotal}><Text style={S.cellText}>{fmtNum(item.total_price)}</Text></View>
             <View style={S.colNote}>
@@ -257,11 +254,10 @@ export interface QuotationDocProps {
   items: QuotationItem[]
   totalAmount: number
   vatType: VatType
-  period?: number
 }
 
 export default function QuotationDocument({
-  quoteDate, recipient, items, totalAmount, vatType, period = 1,
+  quoteDate, recipient, items, totalAmount, vatType,
 }: QuotationDocProps) {
   return (
     <Document>
@@ -282,7 +278,7 @@ export default function QuotationDocument({
         </View>
 
         {/* 항목 테이블 */}
-        <ItemsTable items={items} period={period} />
+        <ItemsTable items={items} />
 
         {/* 합계 */}
         <TotalRow total={totalAmount} vatType={vatType} />
