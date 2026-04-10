@@ -103,24 +103,24 @@ export async function POST(req: NextRequest) {
       applyBorder(labelCell1)
 
       if (l2) {
-        // v1: col D, label2: col E, v2: col F
+        // v1: col D
         const val1Cell = ws.getCell(rowNum, 4)
         val1Cell.value = v1
         val1Cell.font = { size: 8 }
         val1Cell.alignment = { horizontal: 'left', vertical: 'middle' }
         applyBorder(val1Cell)
 
-        const labelCell2 = ws.getCell(rowNum, 5)
-        labelCell2.value = l2
-        labelCell2.font = { bold: true, size: 8 }
-        labelCell2.alignment = { horizontal: 'center', vertical: 'middle' }
-        labelCell2.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9D9D9' } }
-        applyBorder(labelCell2)
+        // col E: 도장이 덮는 영역 — 라벨 텍스트 제거, 회색 배경 유지
+        const stampAreaCell = ws.getCell(rowNum, 5)
+        stampAreaCell.value = ''
+        stampAreaCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9D9D9' } }
+        applyBorder(stampAreaCell)
 
+        // col F: "라벨   값" 형태로 합쳐서 가운데 정렬
         const val2Cell = ws.getCell(rowNum, 6)
-        val2Cell.value = v2
+        val2Cell.value = `${l2}   ${v2}`
         val2Cell.font = { size: 8 }
-        val2Cell.alignment = { horizontal: 'left', vertical: 'middle' }
+        val2Cell.alignment = { horizontal: 'center', vertical: 'middle' }
         applyBorder(val2Cell)
       } else {
         // 사업장/계좌정보: D~F 병합
