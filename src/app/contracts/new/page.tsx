@@ -11,6 +11,7 @@ import {
 import { getQuotationWithItems } from '@/lib/quotations'
 import CompanyPickerModal from '@/components/quotations/CompanyPickerModal'
 import ItemModal from '@/components/quotations/ItemModal'
+import ContractPdfViewerModal from '@/components/contracts/ContractPdfViewerModal'
 
 function today() {
   return new Date().toISOString().slice(0, 10)
@@ -65,7 +66,7 @@ function ContractPage() {
   const [form, setForm] = useState<ContractFormState>(INITIAL)
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(!!(editId || quotationId))
-  const [pdfLoading, setPdfLoading] = useState(false)
+  const [showPdfViewer, setShowPdfViewer] = useState(false)
   const [showCompany, setShowCompany] = useState(false)
   const [showAdd, setShowAdd] = useState(false)
   const [editIdx, setEditIdx] = useState<number | null>(null)
@@ -141,39 +142,21 @@ function ContractPage() {
     set({ items: form.items.filter((_, i) => i !== idx).map((it, i) => ({ ...it, sort_order: i })) })
   }
 
-  async function handlePdf() {
-    setPdfLoading(true)
-    try {
-      const res = await fetch('/api/contract-pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contractDate: form.contractDate,
-          startDate: form.startDate,
-          endDate: form.endDate,
-          recipient: form.recipient,
-          companyName: form.company?.name ?? '',
-          companyAddress: form.company?.address ?? '',
-          items: form.items,
-          totalAmount: total,
-          vatType: form.vatType,
-          specialTerms: form.specialTerms,
-        }),
-      })
-      if (!res.ok) throw new Error('PDF 생성 실패')
-      const blob = await res.blob()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      const dateStr = form.contractDate.replace(/-/g, '')
-      const name = form.company?.name || ''
-      a.href = url
-      a.download = name ? `${name}_계약서(${dateStr}).pdf` : `계약서(${dateStr}).pdf`
-      a.click()
-      URL.revokeObjectURL(url)
-    } catch (e: any) {
-      alert(e.message ?? 'PDF 생성 실패')
-    } finally {
-      setPdfLoading(false)
+  function getPdfPayload() {
+    const dateStr = form.contractDate.replace(/-/g, '')
+    const name = form.company?.name ?? ''
+    return {
+      contractDate: form.contractDate,
+      startDate: form.startDate,
+      endDate: form.endDate,
+      recipient: form.recipient,
+      companyName: name,
+      companyAddress: form.company?.address ?? '',
+      items: form.items,
+      totalAmount: total,
+      vatType: form.vatType,
+      specialTerms: form.specialTerms,
+      filename: name ? `${name}_계약서(${dateStr}).pdf` : `계약서(${dateStr}).pdf`,
     }
   }
 
@@ -410,10 +393,10 @@ function ContractPage() {
                 임시저장
               </button>
               {form.status === 'signed' && (
-                <button onClick={handlePdf} disabled={pdfLoading}
-                  className="w-full py-3.5 rounded-xl border border-[#e74c3c] text-[#e74c3c] font-medium text-sm flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-red-50 transition-colors">
-                  {pdfLoading ? <Loader2 size={16} className="animate-spin" /> : <FileDown size={16} />}
-                  계약서 PDF 다운로드
+                <button onClick={() => setShowPdfViewer(true)}
+                  className="w-full py-3.5 rounded-xl border border-[#e74c3c] text-[#e74c3c] font-medium text-sm flex items-center justify-center gap-2 hover:bg-red-50 transition-colors">
+                  <FileDown size={16} />
+                  계약서 PDF 미리보기
                 </button>
               )}
             </div>
@@ -421,6 +404,12 @@ function ContractPage() {
         </div>
       </div>
 
+      {showPdfViewer && (
+        <ContractPdfViewerModal
+          payload={getPdfPayload()}
+          onClose={() => setShowPdfViewer(false)}
+        />
+      )}
       {showCompany && (
         <CompanyPickerModal selected={form.company}
           onSelect={company => set({ company })}
