@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
     // 파일명: 견적서_YYYYMMDD.pdf
     const dateStr = quoteDate.replace(/-/g, '')
-    const filename = encodeURIComponent(`견적서_${dateStr}.pdf`)
+    const filename = encodeURIComponent(`견적서(${dateStr}).pdf`)
 
     return new NextResponse(buffer as unknown as BodyInit, {
       status: 200,

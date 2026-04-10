@@ -111,7 +111,9 @@ function QuotationPage() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `${state.company?.name ?? '견적서'}_${state.quoteDate.replace(/-/g, '')}.xlsx`
+      const dateStr = state.quoteDate.replace(/-/g, '')
+      const prefix = state.company?.name ?? ''
+      a.download = prefix ? `${prefix}_견적서(${dateStr}).xlsx` : `견적서(${dateStr}).xlsx`
       a.click()
       URL.revokeObjectURL(url)
     } catch (e: any) {
@@ -143,7 +145,9 @@ function QuotationPage() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `${state.company?.name ?? '견적서'}_${state.quoteDate.replace(/-/g, '')}.pdf`
+      const dateStr2 = state.quoteDate.replace(/-/g, '')
+      const prefix2 = state.company?.name ?? ''
+      a.download = prefix2 ? `${prefix2}_견적서(${dateStr2}).pdf` : `견적서(${dateStr2}).pdf`
       a.click()
       URL.revokeObjectURL(url)
     } catch (e: any) {

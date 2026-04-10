@@ -39,8 +39,8 @@ export async function POST(req: NextRequest) {
     const buffer = await renderToBuffer(element as any)
 
     const dateStr = contractDate.replace(/-/g, '')
-    const name = companyName || recipient
-    const filename = encodeURIComponent(`계약서_${name}_${dateStr}.pdf`)
+    const name = companyName || ''
+    const filename = encodeURIComponent(name ? `${name}_계약서(${dateStr}).pdf` : `계약서(${dateStr}).pdf`)
 
     return new NextResponse(buffer as unknown as BodyInit, {
       status: 200,

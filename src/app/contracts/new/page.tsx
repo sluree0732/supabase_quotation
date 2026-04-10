@@ -152,9 +152,9 @@ function ContractPage() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       const dateStr = form.contractDate.replace(/-/g, '')
-      const name = form.company?.name || form.recipient
+      const name = form.company?.name || ''
       a.href = url
-      a.download = `계약서_${name}_${dateStr}.pdf`
+      a.download = name ? `${name}_계약서(${dateStr}).pdf` : `계약서(${dateStr}).pdf`
       a.click()
       URL.revokeObjectURL(url)
     } catch (e: any) {
