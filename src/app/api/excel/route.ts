@@ -11,7 +11,7 @@ const VAT_MAP: Record<string, string> = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { quoteDate, recipient, items, totalAmount, vatType } = await req.json()
+    const { quoteDate, recipient, items, totalAmount, vatType, period = 1 } = await req.json()
 
     const wb = new ExcelJS.Workbook()
     const ws = wb.addWorksheet('견적서')
@@ -173,7 +173,7 @@ export async function POST(req: NextRequest) {
       ws.getRow(r).height = calcRowHeight(item.note ?? '')
       dataCell(ws.getCell(`A${r}`), item.category ?? '', 'center')
       dataCell(ws.getCell(`B${r}`), item.item_name ?? '', 'center')
-      dataCell(ws.getCell(`C${r}`), item.period ?? 0, 'center')
+      dataCell(ws.getCell(`C${r}`), period, 'center')
       dataCell(ws.getCell(`D${r}`), item.unit_price ?? 0, 'right')
       dataCell(ws.getCell(`E${r}`), item.total_price ?? 0, 'right')
       dataCell(ws.getCell(`F${r}`), item.note ?? '', 'left')
@@ -211,7 +211,7 @@ export async function POST(req: NextRequest) {
     const stampId = wb.addImage({ filename: stampFile, extension: 'png' })
     ws.addImage(stampId, {
       tl: { col: 4, row: 1 },  // E2 (사업자번호 label)
-      br: { col: 5, row: 3 },  // E3 끝 (연락처 label 포함)
+      ext: { width: 65, height: 65 },
       editAs: 'oneCell',
     } as any)
 

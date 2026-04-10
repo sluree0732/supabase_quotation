@@ -95,11 +95,21 @@ function ContractPage() {
       setLoading(true)
       getQuotationWithItems(quotationId).then(data => {
         if (!data) return
+        const period = data.period ?? 1
+        const start = today()
+        const endDate = (() => {
+          const d = new Date(start)
+          d.setMonth(d.getMonth() + period)
+          d.setDate(d.getDate() - 1)
+          return d.toISOString().slice(0, 10)
+        })()
         setForm(prev => ({
           ...prev,
           company: data.companies ?? null,
           recipient: data.recipient,
           vatType: data.vat_type,
+          startDate: start,
+          endDate,
           items: data.items.map(it => ({ ...it, contract_id: undefined })),
         }))
       }).finally(() => setLoading(false))

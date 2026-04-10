@@ -14,13 +14,13 @@ interface Props {
   // 신규 추가 모드 전용
   items?: QuotationItem[]
   onAiAllResult?: (notes: string[]) => void
+  globalPeriod?: number
 }
 
-export default function ItemModal({ item, onSave, onDelete, onClose, items, onAiAllResult }: Props) {
+export default function ItemModal({ item, onSave, onDelete, onClose, items, onAiAllResult, globalPeriod = 1 }: Props) {
   const isEdit = !!item
   const [category, setCategory] = useState(item?.category ?? '')
   const [itemName, setItemName] = useState(item?.item_name ?? '')
-  const [period, setPeriod] = useState(item?.period ?? 1)
   const [unitPrice, setUnitPrice] = useState(item?.unit_price ?? 0)
   const [note, setNote] = useState(item?.note ?? '')
   const [aiLoading, setAiLoading] = useState(false)
@@ -33,7 +33,7 @@ export default function ItemModal({ item, onSave, onDelete, onClose, items, onAi
   const displayCount = existingCount + addedCount    // 헤더 표시용 전체 수
   const sessionItems = items ?? []                   // 목록 패널 + AI용 전체 항목
 
-  const totalPrice = period * unitPrice
+  const totalPrice = globalPeriod * unitPrice
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
@@ -49,7 +49,6 @@ export default function ItemModal({ item, onSave, onDelete, onClose, items, onAi
   function resetForm() {
     setCategory('')
     setItemName('')
-    setPeriod(1)
     setUnitPrice(0)
     setNote('')
   }
@@ -57,7 +56,7 @@ export default function ItemModal({ item, onSave, onDelete, onClose, items, onAi
   // [항목 추가] — 저장 후 폼 초기화, 모달 유지
   function handleAddMore() {
     if (!validate()) return
-    onSave({ category, item_name: itemName.trim(), period, unit_price: unitPrice, total_price: totalPrice, note })
+    onSave({ category, item_name: itemName.trim(), period: globalPeriod, unit_price: unitPrice, total_price: totalPrice, note })
     resetForm()
     setAddedCount(c => c + 1)
   }
@@ -67,7 +66,7 @@ export default function ItemModal({ item, onSave, onDelete, onClose, items, onAi
     const hasContent = category || itemName.trim()
     if (hasContent) {
       if (!validate()) return
-      onSave({ category, item_name: itemName.trim(), period, unit_price: unitPrice, total_price: totalPrice, note })
+      onSave({ category, item_name: itemName.trim(), period: globalPeriod, unit_price: unitPrice, total_price: totalPrice, note })
       const newCount = addedCount + 1
       onClose(newCount, existingCount + newCount)
     } else {
@@ -81,7 +80,7 @@ export default function ItemModal({ item, onSave, onDelete, onClose, items, onAi
   // 수정 모드용 (기존 동작 유지)
   function handleSave() {
     if (!validate()) return
-    onSave({ category, item_name: itemName.trim(), period, unit_price: unitPrice, total_price: totalPrice, note })
+    onSave({ category, item_name: itemName.trim(), period: globalPeriod, unit_price: unitPrice, total_price: totalPrice, note })
     onClose()
   }
 
@@ -227,38 +226,24 @@ export default function ItemModal({ item, onSave, onDelete, onClose, items, onAi
             />
           </div>
 
-          {/* 기간 + 단가 */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-[#4a5568]">기간 (개월)</label>
-              <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden">
-                <button
-                  onClick={() => setPeriod(Math.max(1, period - 1))}
-                  className="px-3 py-3 text-gray-500 hover:bg-gray-50 text-lg font-bold"
-                >−</button>
-                <span className="flex-1 text-center font-semibold text-[#1e2a3a]">{period}</span>
-                <button
-                  onClick={() => setPeriod(period + 1)}
-                  className="px-3 py-3 text-gray-500 hover:bg-gray-50 text-lg font-bold"
-                >+</button>
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-[#4a5568]">단가 (원)</label>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={formatPrice(unitPrice)}
-                onChange={e => setUnitPrice(parsePriceInput(e.target.value))}
-                placeholder="0"
-                className="input-base text-right"
-              />
-            </div>
+          {/* 단가 */}
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-[#4a5568]">단가 (원/월)</label>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={formatPrice(unitPrice)}
+              onChange={e => setUnitPrice(parsePriceInput(e.target.value))}
+              placeholder="0"
+              className="input-base text-right"
+            />
           </div>
 
           {/* 총액 자동계산 */}
           <div className="bg-[#f0f7fd] rounded-xl px-4 py-3 flex items-center justify-between">
-            <span className="text-sm text-[#4a5568]">총액</span>
+            <span className="text-sm text-[#4a5568]">
+              총액 <span className="text-xs text-[#2980b9] font-medium">({globalPeriod}개월 × 단가)</span>
+            </span>
             <span className="font-bold text-[#1e2a3a] text-lg">
               {totalPrice.toLocaleString()}원
             </span>

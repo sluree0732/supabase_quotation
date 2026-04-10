@@ -15,6 +15,7 @@ const INITIAL: QuotationFormState = {
   quoteDate: today(),
   company: null,
   vatType: 'excluded',
+  period: 1,
   items: [],
   status: null,
 }
@@ -40,6 +41,7 @@ function QuotationPage() {
         quoteDate: data.quote_date,
         company: data.companies ?? null,
         vatType: data.vat_type,
+        period: data.period ?? 1,
         items: data.items,
         status: data.status,
       })
@@ -59,6 +61,7 @@ function QuotationPage() {
             recipient: state.recipient,
             total_amount: total,
             vat_type: state.vatType,
+            period: state.period,
             status,
           }),
           saveItems(editId, state.items),
@@ -70,7 +73,7 @@ function QuotationPage() {
           state.recipient,
         )
         await Promise.all([
-          updateQuotation(q.id, { total_amount: total, vat_type: state.vatType, status }),
+          updateQuotation(q.id, { total_amount: total, vat_type: state.vatType, period: state.period, status }),
           saveItems(q.id, state.items),
         ])
       }
@@ -100,6 +103,7 @@ function QuotationPage() {
           items: state.items,
           totalAmount: total,
           vatType: state.vatType,
+          period: state.period,
         }),
       })
       if (!res.ok) throw new Error('엑셀 생성 실패')
@@ -131,6 +135,7 @@ function QuotationPage() {
           items: state.items,
           totalAmount: total,
           vatType: state.vatType,
+          period: state.period,
         }),
       })
       if (!res.ok) throw new Error('PDF 생성 실패')

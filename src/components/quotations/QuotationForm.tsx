@@ -14,6 +14,7 @@ export interface QuotationFormState {
   quoteDate: string
   company: Company | null
   vatType: VatType
+  period: number
   items: QuotationItem[]
   status: 'draft' | 'saved' | null
 }
@@ -63,12 +64,25 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
   const total = state.items.reduce((s, i) => s + i.total_price, 0)
 
   // ── 항목 조작 ─────────────────────────────────────────
+  function handlePeriodChange(newPeriod: number) {
+    setState(s => ({
+      ...s,
+      period: newPeriod,
+      items: s.items.map(it => ({
+        ...it,
+        period: newPeriod,
+        total_price: it.unit_price * newPeriod,
+      })),
+    }))
+    if (isSaved) setIsDirty(true)
+  }
+
   function addItem(data: Omit<QuotationItem, 'id' | 'quotation_id' | 'sort_order'>) {
-    set({ items: [...state.items, { ...data, sort_order: state.items.length }] })
+    set({ items: [...state.items, { ...data, period: state.period, total_price: data.unit_price * state.period, sort_order: state.items.length }] })
   }
 
   function updateItem(idx: number, data: Omit<QuotationItem, 'id' | 'quotation_id' | 'sort_order'>) {
-    set({ items: state.items.map((it, i) => i === idx ? { ...it, ...data } : it) })
+    set({ items: state.items.map((it, i) => i === idx ? { ...it, ...data, period: state.period, total_price: data.unit_price * state.period } : it) })
   }
 
   function deleteItem(idx: number) {
@@ -158,6 +172,20 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
             )}
           </Field>
 
+          <Field label="계약 기간 (개월)">
+            <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden">
+              <button
+                onClick={() => handlePeriodChange(Math.max(1, state.period - 1))}
+                className="px-4 py-3 text-gray-500 hover:bg-gray-50 text-lg font-bold"
+              >−</button>
+              <span className="flex-1 text-center font-semibold text-[#1e2a3a]">{state.period}개월</span>
+              <button
+                onClick={() => handlePeriodChange(Math.min(24, state.period + 1))}
+                className="px-4 py-3 text-gray-500 hover:bg-gray-50 text-lg font-bold"
+              >+</button>
+            </div>
+          </Field>
+
           <Field label="부가세">
             <div className="flex gap-2">
               {VAT_OPTIONS.map(opt => (
@@ -227,7 +255,7 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
                           <span className="font-semibold text-sm text-[#1e2a3a]">{item.item_name}</span>
                         </div>
                         <div className="flex items-center gap-3 mt-1 text-xs text-[#718096]">
-                          <span>{item.period}개월 × {item.unit_price.toLocaleString()}원</span>
+                          <span>{state.period}개월 × {item.unit_price.toLocaleString()}원</span>
                           <span className="font-semibold text-[#1e2a3a]">= {item.total_price.toLocaleString()}원</span>
                         </div>
                         {item.note && (
@@ -341,6 +369,7 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
         <ItemModal
           onSave={addItem}
           items={state.items}
+          globalPeriod={state.period}
           onAiAllResult={(notes) => {
             setState(s => ({
               ...s,
@@ -364,6 +393,7 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
       {editIdx !== null && (
         <ItemModal
           item={state.items[editIdx]}
+          globalPeriod={state.period}
           onSave={data => updateItem(editIdx, data)}
           onDelete={() => deleteItem(editIdx)}
           onClose={() => setEditIdx(null)}

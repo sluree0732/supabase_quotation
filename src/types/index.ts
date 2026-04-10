@@ -32,6 +32,7 @@ export interface Quotation {
   total_amount: number
   vat_type: VatType
   status: QuotationStatus
+  period: number
   created_at: string
   companies?: { name: string } | null
 }

@@ -143,17 +143,17 @@ function SupplierTable() {
             </View>
           </View>
         </View>
-        {/* Column B (도장): 2행 높이 전체 */}
-        <View style={{ width: '12%', borderLeftWidth: 0.5, borderColor: '#333', justifyContent: 'center', alignItems: 'center' }}>
-          <Image src={stampPath} style={{ width: 36, height: 36 }} />
-        </View>
-        {/* Column C (flex:1): 사업자번호값 / 연락처값 스택 */}
+        {/* Column B+C: 도장 + 값 (세로줄 없이 자연스럽게 배치) */}
         <View style={{ flex: 1, borderLeftWidth: 0.5, borderColor: '#333' }}>
-          <View style={{ flex: 1, borderBottomWidth: 0.5, borderColor: '#333', justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 2 }}>
-            <Text style={S.valText}>{s.business_no}</Text>
+          <View style={{ flex: 1, borderBottomWidth: 0.5, borderColor: '#333', flexDirection: 'row', alignItems: 'center' }}>
+            <View style={{ width: 42, justifyContent: 'center', alignItems: 'center', paddingVertical: 1 }}>
+              <Image src={stampPath} style={{ width: 40, height: 40 }} />
+            </View>
+            <Text style={[S.valText, { flex: 1, paddingHorizontal: 3 }]}>{s.business_no}</Text>
           </View>
-          <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 2 }}>
-            <Text style={S.valText}>{s.phone}</Text>
+          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+            <View style={{ width: 42 }} />
+            <Text style={[S.valText, { flex: 1, paddingHorizontal: 3 }]}>{s.phone}</Text>
           </View>
         </View>
       </View>
@@ -190,7 +190,7 @@ function SupplierTable() {
 }
 
 // ── 항목 테이블 ───────────────────────────────────────────
-function ItemsTable({ items }: { items: QuotationItem[] }) {
+function ItemsTable({ items, period }: { items: QuotationItem[]; period: number }) {
   return (
     <View style={S.table}>
       {/* 헤더 */}
@@ -218,7 +218,7 @@ function ItemsTable({ items }: { items: QuotationItem[] }) {
           <View key={i} style={RowStyle} wrap={false}>
             <View style={S.colCat}><Text style={S.cellText}>{item.category}</Text></View>
             <View style={S.colName}><Text style={S.cellText}>{item.item_name}</Text></View>
-            <View style={S.colPer}><Text style={S.cellText}>{item.period}</Text></View>
+            <View style={S.colPer}><Text style={S.cellText}>{period}</Text></View>
             <View style={S.colUnit}><Text style={S.cellText}>{fmtNum(item.unit_price)}</Text></View>
             <View style={S.colTotal}><Text style={S.cellText}>{fmtNum(item.total_price)}</Text></View>
             <View style={S.colNote}>
@@ -257,10 +257,11 @@ export interface QuotationDocProps {
   items: QuotationItem[]
   totalAmount: number
   vatType: VatType
+  period?: number
 }
 
 export default function QuotationDocument({
-  quoteDate, recipient, items, totalAmount, vatType,
+  quoteDate, recipient, items, totalAmount, vatType, period = 1,
 }: QuotationDocProps) {
   return (
     <Document>
@@ -281,7 +282,7 @@ export default function QuotationDocument({
         </View>
 
         {/* 항목 테이블 */}
-        <ItemsTable items={items} />
+        <ItemsTable items={items} period={period} />
 
         {/* 합계 */}
         <TotalRow total={totalAmount} vatType={vatType} />

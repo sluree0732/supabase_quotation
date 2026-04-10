@@ -19,7 +19,7 @@ export async function createQuotation(
 
 export async function updateQuotation(
   id: string,
-  fields: { total_amount?: number; vat_type?: VatType; status?: string; recipient?: string; quote_date?: string; company_id?: string | null },
+  fields: { total_amount?: number; vat_type?: VatType; status?: string; recipient?: string; quote_date?: string; company_id?: string | null; period?: number },
 ): Promise<Quotation> {
   const { data, error } = await supabase
     .from('quotations')
