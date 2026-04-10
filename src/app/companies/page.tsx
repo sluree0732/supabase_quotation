@@ -6,12 +6,30 @@ import type { Company } from '@/types'
 import { getCompanies, deleteCompany } from '@/lib/companies'
 import CompanyModal from '@/components/companies/CompanyModal'
 
+type Tab = 'all' | 'sender' | 'client'
+
+const TABS: { value: Tab; label: string }[] = [
+  { value: 'all', label: '전체' },
+  { value: 'sender', label: '자사' },
+  { value: 'client', label: '광고주' },
+]
+
+function TypeBadge({ type }: { type: string }) {
+  return (
+    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0 ${
+      type === 'sender' ? 'bg-[#ebf5fb] text-[#2980b9]' : 'bg-[#f5eefa] text-[#8e44ad]'
+    }`}>
+      {type === 'sender' ? '자사' : '광고주'}
+    </span>
+  )
+}
+
 export default function CompaniesPage() {
   const [companies, setCompanies] = useState<Company[]>([])
   const [query, setQuery] = useState('')
+  const [activeTab, setActiveTab] = useState<Tab>('all')
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<Company | null | undefined>(undefined)
-  // undefined = 모달 닫힘, null = 신규, Company = 수정
   const [deleteTarget, setDeleteTarget] = useState<Company | null>(null)
 
   useEffect(() => { load() }, [])
@@ -33,8 +51,29 @@ export default function CompaniesPage() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    return q ? companies.filter(c => c.name.toLowerCase().includes(q)) : companies
-  }, [companies, query])
+    let list = q ? companies.filter(c => c.name.toLowerCase().includes(q)) : [...companies]
+
+    if (activeTab !== 'all') {
+      list = list.filter(c => c.company_type === activeTab)
+    } else {
+      // 전체 탭: 자사 먼저, 광고주 다음
+      list.sort((a, b) => {
+        if (a.company_type === b.company_type) return 0
+        return a.company_type === 'sender' ? -1 : 1
+      })
+    }
+    return list
+  }, [companies, query, activeTab])
+
+  // 전체 탭에서 자사/광고주 구분 인덱스
+  const senderCount = activeTab === 'all'
+    ? filtered.filter(c => c.company_type === 'sender').length
+    : null
+
+  const tabCount = (tab: Tab) => {
+    if (tab === 'all') return companies.length
+    return companies.filter(c => c.company_type === tab).length
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -52,6 +91,28 @@ export default function CompaniesPage() {
             <Plus size={16} />
             업체 추가
           </button>
+        </div>
+
+        {/* 탭 */}
+        <div className="flex gap-1 mb-3 bg-gray-100 rounded-xl p-1">
+          {TABS.map(tab => (
+            <button
+              key={tab.value}
+              onClick={() => setActiveTab(tab.value)}
+              className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
+                activeTab === tab.value
+                  ? 'bg-white text-[#1e2a3a] shadow-sm'
+                  : 'text-[#718096] hover:text-[#4a5568]'
+              }`}
+            >
+              {tab.label}
+              <span className={`ml-1.5 text-xs ${
+                activeTab === tab.value ? 'text-[#2980b9]' : 'text-[#a0aec0]'
+              }`}>
+                {tabCount(tab.value)}
+              </span>
+            </button>
+          ))}
         </div>
 
         {/* 검색 */}
@@ -84,42 +145,51 @@ export default function CompaniesPage() {
           <>
             {/* 모바일: 카드 목록 */}
             <ul className="md:hidden divide-y divide-gray-100">
-              {filtered.map(company => (
-                <li key={company.id}>
-                  <button
-                    onClick={() => setSelected(company)}
-                    className="w-full text-left px-4 py-4 flex items-center gap-3 active:bg-gray-50"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-[#ebf5fb] flex items-center justify-center shrink-0">
-                      <Building2 size={18} className="text-[#2980b9]" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-semibold text-[#1e2a3a] text-sm truncate">{company.name}</p>
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0 ${
-                          company.company_type === 'sender'
-                            ? 'bg-[#ebf5fb] text-[#2980b9]'
-                            : 'bg-[#f5eefa] text-[#8e44ad]'
-                        }`}>
-                          {company.company_type === 'sender' ? '자사' : '광고주'}
-                        </span>
+              {filtered.map((company, idx) => (
+                <>
+                  {/* 전체 탭에서 자사/광고주 구분선 */}
+                  {activeTab === 'all' && senderCount !== null && idx === senderCount && senderCount > 0 && (
+                    <li key={`divider-${idx}`} className="px-4 py-2 bg-gray-50">
+                      <span className="text-[11px] font-semibold text-[#8e44ad] uppercase tracking-wide">광고주 업체</span>
+                    </li>
+                  )}
+                  {activeTab === 'all' && idx === 0 && senderCount !== null && senderCount > 0 && (
+                    <li key="sender-label" className="px-4 py-2 bg-gray-50">
+                      <span className="text-[11px] font-semibold text-[#2980b9] uppercase tracking-wide">자사 업체</span>
+                    </li>
+                  )}
+                  <li key={company.id}>
+                    <button
+                      onClick={() => setSelected(company)}
+                      className="w-full text-left px-4 py-4 flex items-center gap-3 active:bg-gray-50"
+                    >
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                        company.company_type === 'sender' ? 'bg-[#ebf5fb]' : 'bg-[#f5eefa]'
+                      }`}>
+                        <Building2 size={18} className={company.company_type === 'sender' ? 'text-[#2980b9]' : 'text-[#8e44ad]'} />
                       </div>
-                      {company.phone && (
-                        <p className="text-xs text-[#718096] flex items-center gap-1 mt-0.5">
-                          <Phone size={10} />
-                          {company.phone}
-                        </p>
-                      )}
-                      {company.address && (
-                        <p className="text-xs text-[#a0aec0] flex items-center gap-1 mt-0.5 truncate">
-                          <MapPin size={10} className="shrink-0" />
-                          {company.address}
-                        </p>
-                      )}
-                    </div>
-                    <ChevronRight size={16} className="text-gray-300 shrink-0" />
-                  </button>
-                </li>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-semibold text-[#1e2a3a] text-sm truncate">{company.name}</p>
+                          {activeTab === 'all' && <TypeBadge type={company.company_type} />}
+                        </div>
+                        {company.phone && (
+                          <p className="text-xs text-[#718096] flex items-center gap-1 mt-0.5">
+                            <Phone size={10} />
+                            {company.phone}
+                          </p>
+                        )}
+                        {company.address && (
+                          <p className="text-xs text-[#a0aec0] flex items-center gap-1 mt-0.5 truncate">
+                            <MapPin size={10} className="shrink-0" />
+                            {company.address}
+                          </p>
+                        )}
+                      </div>
+                      <ChevronRight size={16} className="text-gray-300 shrink-0" />
+                    </button>
+                  </li>
+                </>
               ))}
             </ul>
 
@@ -129,7 +199,9 @@ export default function CompaniesPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-gray-50 border-b border-gray-100">
-                      <th className="text-left px-5 py-3 font-semibold text-[#4a5568]">구분</th>
+                      {activeTab === 'all' && (
+                        <th className="text-left px-5 py-3 font-semibold text-[#4a5568]">구분</th>
+                      )}
                       <th className="text-left px-5 py-3 font-semibold text-[#4a5568]">업체명</th>
                       <th className="text-left px-5 py-3 font-semibold text-[#4a5568]">연락처</th>
                       <th className="text-left px-5 py-3 font-semibold text-[#4a5568]">주소</th>
@@ -138,34 +210,47 @@ export default function CompaniesPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
-                    {filtered.map(company => (
-                      <tr
-                        key={company.id}
-                        onClick={() => setSelected(company)}
-                        className="group hover:bg-[#f0f7fd] cursor-pointer transition-colors"
-                      >
-                        <td className="px-5 py-3.5">
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                            company.company_type === 'sender'
-                              ? 'bg-[#ebf5fb] text-[#2980b9]'
-                              : 'bg-[#f5eefa] text-[#8e44ad]'
-                          }`}>
-                            {company.company_type === 'sender' ? '자사' : '광고주'}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3.5 font-medium text-[#1e2a3a]">{company.name}</td>
-                        <td className="px-5 py-3.5 text-[#718096]">{company.phone || '—'}</td>
-                        <td className="px-5 py-3.5 text-[#718096] max-w-xs truncate">{company.address || '—'}</td>
-                        <td className="px-5 py-3.5 text-[#718096]">{company.business_type || '—'}</td>
-                        <td className="px-3 py-3.5">
-                          <button
-                            onClick={e => { e.stopPropagation(); setDeleteTarget(company) }}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50"
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        </td>
-                      </tr>
+                    {filtered.map((company, idx) => (
+                      <>
+                        {/* 전체 탭 구분선 (PC) */}
+                        {activeTab === 'all' && senderCount !== null && idx === 0 && senderCount > 0 && (
+                          <tr key="sender-label-pc">
+                            <td colSpan={6} className="px-5 py-2 bg-[#f0f7fd]">
+                              <span className="text-[11px] font-semibold text-[#2980b9] uppercase tracking-wide">자사 업체</span>
+                            </td>
+                          </tr>
+                        )}
+                        {activeTab === 'all' && senderCount !== null && idx === senderCount && senderCount > 0 && (
+                          <tr key="client-label-pc">
+                            <td colSpan={6} className="px-5 py-2 bg-[#f9f4fd]">
+                              <span className="text-[11px] font-semibold text-[#8e44ad] uppercase tracking-wide">광고주 업체</span>
+                            </td>
+                          </tr>
+                        )}
+                        <tr
+                          key={company.id}
+                          onClick={() => setSelected(company)}
+                          className="group hover:bg-[#f0f7fd] cursor-pointer transition-colors"
+                        >
+                          {activeTab === 'all' && (
+                            <td className="px-5 py-3.5">
+                              <TypeBadge type={company.company_type} />
+                            </td>
+                          )}
+                          <td className="px-5 py-3.5 font-medium text-[#1e2a3a]">{company.name}</td>
+                          <td className="px-5 py-3.5 text-[#718096]">{company.phone || '—'}</td>
+                          <td className="px-5 py-3.5 text-[#718096] max-w-xs truncate">{company.address || '—'}</td>
+                          <td className="px-5 py-3.5 text-[#718096]">{company.business_type || '—'}</td>
+                          <td className="px-3 py-3.5">
+                            <button
+                              onClick={e => { e.stopPropagation(); setDeleteTarget(company) }}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </td>
+                        </tr>
+                      </>
                     ))}
                   </tbody>
                 </table>
