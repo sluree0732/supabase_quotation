@@ -1,0 +1,54 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { renderToBuffer } from '@react-pdf/renderer'
+import { createElement } from 'react'
+import ContractDocument from '@/lib/pdf/ContractDocument'
+import type { VatType } from '@/types'
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json()
+    const {
+      contractDate, startDate, endDate, recipient, companyName,
+      items, totalAmount, vatType, specialTerms,
+    } = body as {
+      contractDate: string
+      startDate: string
+      endDate: string
+      recipient: string
+      companyName: string
+      items: any[]
+      totalAmount: number
+      vatType: VatType
+      specialTerms: string
+    }
+
+    const element = createElement(ContractDocument, {
+      contractDate,
+      startDate,
+      endDate,
+      recipient,
+      companyName,
+      items,
+      totalAmount,
+      vatType,
+      specialTerms,
+    })
+
+    const buffer = await renderToBuffer(element as any)
+
+    const dateStr = contractDate.replace(/-/g, '')
+    const name = companyName || recipient
+    const filename = encodeURIComponent(`계약서_${name}_${dateStr}.pdf`)
+
+    return new NextResponse(buffer as unknown as BodyInit, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename*=UTF-8''${filename}`,
+      },
+    })
+  } catch (e: any) {
+    console.error('계약서 PDF 생성 오류:', e)
+    return NextResponse.json({ error: e.message ?? '계약서 PDF 생성 실패' }, { status: 500 })
+  }
+}

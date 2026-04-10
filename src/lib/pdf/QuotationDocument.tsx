@@ -1,5 +1,5 @@
 import {
-  Document, Page, View, Text, StyleSheet, Font,
+  Document, Page, View, Text, StyleSheet, Font, Image,
 } from '@react-pdf/renderer'
 import path from 'path'
 import type { QuotationItem, VatType } from '@/types'
@@ -107,6 +107,8 @@ const VAT_MAP: Record<VatType, string> = {
   none: '',
 }
 
+const stampPath = path.join(process.cwd(), 'public', 'images', 'stamp.png')
+
 // ── 공급자 테이블 ─────────────────────────────────────────
 function SupplierTable() {
   const s = SUPPLIER
@@ -114,19 +116,34 @@ function SupplierTable() {
 
   return (
     <View style={S.supplierTable}>
-      {/* row 0: 상호 / 사업자번호 */}
-      <View style={S.supplierRow}>
-        <View style={S.supplierLabel}><Text style={S.labelText}>상  호</Text></View>
-        <View style={S.supplierVal}><Text style={S.valText}>{s.name}</Text></View>
-        <View style={S.supplierLabel2}><Text style={S.labelText}>사업자번호</Text></View>
-        <View style={S.supplierValWide}><Text style={S.valText}>{s.business_no}</Text></View>
-      </View>
-      {/* row 1: 대표자 / 연락처 */}
-      <View style={S.supplierRow}>
-        <View style={S.supplierLabel}><Text style={S.labelText}>대표자</Text></View>
-        <View style={S.supplierVal}><Text style={S.valText}>{s.ceo}</Text></View>
-        <View style={S.supplierLabel2}><Text style={S.labelText}>연  락  처</Text></View>
-        <View style={S.supplierValWide}><Text style={S.valText}>{s.phone}</Text></View>
+      {/* row 0+1: 상호/대표자 묶음 (도장 rowSpan 효과) */}
+      <View style={{ flexDirection: 'row', borderBottomWidth: 0.5, borderColor: '#333' }}>
+        {/* 좌측: 상호/대표자 행 2개 */}
+        <View style={{ flex: 1 }}>
+          <View style={{ flexDirection: 'row', borderBottomWidth: 0.5, borderColor: '#333', minHeight: 16 }}>
+            <View style={S.supplierLabel}><Text style={S.labelText}>상  호</Text></View>
+            <View style={S.supplierVal}><Text style={S.valText}>{s.name}</Text></View>
+            <View style={S.supplierLabel2}><Text style={S.labelText}>사업자번호</Text></View>
+          </View>
+          <View style={{ flexDirection: 'row', minHeight: 16 }}>
+            <View style={S.supplierLabel}><Text style={S.labelText}>대표자</Text></View>
+            <View style={S.supplierVal}><Text style={S.valText}>{s.ceo}</Text></View>
+            <View style={S.supplierLabel2}><Text style={S.labelText}>연  락  처</Text></View>
+          </View>
+        </View>
+        {/* 도장 컬럼: 2행 높이 */}
+        <View style={{ width: 36, borderLeftWidth: 0.5, borderColor: '#333', justifyContent: 'center', alignItems: 'center' }}>
+          <Image src={stampPath} style={{ width: 34, height: 34 }} />
+        </View>
+        {/* 우측 값: 사업자번호/연락처 */}
+        <View style={{ flex: 1, borderLeftWidth: 0.5, borderColor: '#333' }}>
+          <View style={{ borderBottomWidth: 0.5, borderColor: '#333', minHeight: 16, justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 2 }}>
+            <Text style={S.valText}>{s.business_no}</Text>
+          </View>
+          <View style={{ minHeight: 16, justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 2 }}>
+            <Text style={S.valText}>{s.phone}</Text>
+          </View>
+        </View>
       </View>
       {/* row 2: 사업장 (full width) */}
       <View style={S.supplierRow}>

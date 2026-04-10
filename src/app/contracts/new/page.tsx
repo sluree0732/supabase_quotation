@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Building2, ChevronRight, X, Plus, Loader2, Save, ChevronLeft } from 'lucide-react'
+import { Building2, ChevronRight, X, Plus, Loader2, Save, ChevronLeft, FileDown } from 'lucide-react'
 import type { Company, ContractItem, VatType, ContractStatus } from '@/types'
 import {
   createContract, updateContract, saveContractItems, getContractWithItems,
@@ -60,6 +60,7 @@ function ContractPage() {
   const [form, setForm] = useState<ContractFormState>(INITIAL)
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(!!(editId || quotationId))
+  const [pdfLoading, setPdfLoading] = useState(false)
   const [showCompany, setShowCompany] = useState(false)
   const [showAdd, setShowAdd] = useState(false)
   const [editIdx, setEditIdx] = useState<number | null>(null)
@@ -115,6 +116,41 @@ function ContractPage() {
 
   function deleteItem(idx: number) {
     set({ items: form.items.filter((_, i) => i !== idx).map((it, i) => ({ ...it, sort_order: i })) })
+  }
+
+  async function handlePdf() {
+    setPdfLoading(true)
+    try {
+      const res = await fetch('/api/contract-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contractDate: form.contractDate,
+          startDate: form.startDate,
+          endDate: form.endDate,
+          recipient: form.recipient,
+          companyName: form.company?.name ?? '',
+          items: form.items,
+          totalAmount: total,
+          vatType: form.vatType,
+          specialTerms: form.specialTerms,
+        }),
+      })
+      if (!res.ok) throw new Error('PDF 생성 실패')
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      const dateStr = form.contractDate.replace(/-/g, '')
+      const name = form.company?.name || form.recipient
+      a.href = url
+      a.download = `계약서_${name}_${dateStr}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (e: any) {
+      alert(e.message ?? 'PDF 생성 실패')
+    } finally {
+      setPdfLoading(false)
+    }
   }
 
   async function handleSave(status: ContractStatus) {
@@ -323,6 +359,11 @@ function ContractPage() {
               <button onClick={() => handleSave('draft')} disabled={saving}
                 className="w-full py-3.5 rounded-xl bg-gray-100 text-[#4a5568] font-medium text-sm disabled:opacity-50">
                 임시저장
+              </button>
+              <button onClick={handlePdf} disabled={pdfLoading}
+                className="w-full py-3.5 rounded-xl border border-[#e74c3c] text-[#e74c3c] font-medium text-sm flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-red-50 transition-colors">
+                {pdfLoading ? <Loader2 size={16} className="animate-spin" /> : <FileDown size={16} />}
+                계약서 PDF 다운로드
               </button>
             </div>
           </div>
