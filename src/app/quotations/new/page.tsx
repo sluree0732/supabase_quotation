@@ -30,6 +30,7 @@ function QuotationPage() {
   const [pdfLoading, setPdfLoading] = useState(false)
   const [excelLoading, setExcelLoading] = useState(false)
   const [loading, setLoading] = useState(!!editId)
+  const [savedQuotationId, setSavedQuotationId] = useState<string | null>(null)
 
   // 편집 모드: 기존 데이터 로드
   useEffect(() => {
@@ -72,6 +73,7 @@ function QuotationPage() {
           state.quoteDate,
           state.recipient,
         )
+        setSavedQuotationId(q.id)
         await Promise.all([
           updateQuotation(q.id, { total_amount: total, vat_type: state.vatType, period: state.period, status }),
           saveItems(q.id, state.items),
@@ -185,7 +187,7 @@ function QuotationPage() {
         onExcel={handleExcel}
         excelLoading={excelLoading}
         onSaveSuccess={handleSaveSuccess}
-        quotationId={editId ?? undefined}
+        quotationId={editId ?? savedQuotationId ?? undefined}
       />
     </div>
   )
