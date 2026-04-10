@@ -140,6 +140,7 @@ function ContractPage() {
           endDate: form.endDate,
           recipient: form.recipient,
           companyName: form.company?.name ?? '',
+          companyAddress: form.company?.address ?? '',
           items: form.items,
           totalAmount: total,
           vatType: form.vatType,

@@ -75,45 +75,33 @@ const S = StyleSheet.create({
     borderRadius: 2,
   },
   // 서명란
-  signSection: {
-    marginTop: 16,
-    flexDirection: 'row',
-    gap: 20,
+  signDate: {
+    fontSize: 10,
+    textAlign: 'center',
+    marginTop: 14,
+    marginBottom: 20,
+    letterSpacing: 1,
   },
-  signBox: {
-    flex: 1,
-    borderWidth: 0.5,
-    borderColor: '#aaa',
-    padding: 10,
+  signParty: {
+    marginBottom: 16,
   },
-  signTitle: {
+  signPartyTitle: {
     fontSize: 9,
     fontWeight: 'bold',
-    marginBottom: 8,
-    textAlign: 'center',
-    borderBottomWidth: 0.5,
-    borderColor: '#ccc',
-    paddingBottom: 4,
+    marginBottom: 6,
   },
   signRow: {
     flexDirection: 'row',
     marginBottom: 5,
     fontSize: 8.5,
-    minHeight: 14,
+    paddingLeft: 12,
   },
   signLabel: {
-    width: 40,
-    color: '#555',
+    width: 56,
+    color: '#333',
   },
   signValue: {
     flex: 1,
-  },
-  signDate: {
-    fontSize: 9,
-    textAlign: 'center',
-    marginTop: 14,
-    marginBottom: 10,
-    letterSpacing: 1,
   },
 })
 
@@ -149,6 +137,7 @@ export interface ContractDocProps {
   endDate: string
   recipient: string
   companyName: string
+  companyAddress?: string
   items: ContractItem[]
   totalAmount: number
   vatType: VatType
@@ -156,7 +145,7 @@ export interface ContractDocProps {
 }
 
 export default function ContractDocument({
-  contractDate, startDate, endDate, recipient, companyName,
+  contractDate, startDate, endDate, recipient, companyName, companyAddress,
   items, totalAmount, vatType, specialTerms,
 }: ContractDocProps) {
   const gab = companyName ? `${companyName} (${recipient})` : recipient
@@ -269,49 +258,52 @@ export default function ContractDocument({
         {/* 계약일 */}
         <Text style={S.signDate}>{fmtDate(contractDate)}</Text>
 
-        {/* 서명란 */}
-        <View style={S.signSection}>
-          {/* 갑 */}
-          <View style={S.signBox}>
-            <Text style={S.signTitle}>갑 (광고주)</Text>
+        {/* 갑 서명란 */}
+        <View style={S.signParty}>
+          <Text style={S.signPartyTitle}>갑 (광고주)</Text>
+          {companyName ? (
             <View style={S.signRow}>
-              <Text style={S.signLabel}>업체명</Text>
-              <Text style={S.signValue}>{companyName || ''}</Text>
+              <Text style={S.signLabel}>- 업 체 명 :</Text>
+              <Text style={S.signValue}>{companyName}</Text>
             </View>
-            <View style={S.signRow}>
-              <Text style={S.signLabel}>성  명</Text>
-              <Text style={S.signValue}>{recipient}</Text>
-            </View>
-            <View style={S.signRow}>
-              <Text style={S.signLabel}>주  소</Text>
-              <Text style={S.signValue}> </Text>
-            </View>
-            <View style={[S.signRow, { marginTop: 8 }]}>
-              <Text style={S.signLabel}>서  명</Text>
-              <Text style={S.signValue}> </Text>
-            </View>
+          ) : null}
+          <View style={S.signRow}>
+            <Text style={S.signLabel}>- 성    명 :</Text>
+            <Text style={S.signValue}>{recipient}</Text>
           </View>
+          <View style={S.signRow}>
+            <Text style={S.signLabel}>- 주    소 :</Text>
+            <Text style={S.signValue}>{companyAddress || ''}</Text>
+          </View>
+          <View style={[S.signRow, { marginTop: 6 }]}>
+            <Text style={S.signLabel}>- 서    명 :</Text>
+            <Text style={S.signValue}> </Text>
+          </View>
+        </View>
 
-          {/* 을 */}
-          <View style={S.signBox}>
-            <Text style={S.signTitle}>을 (대행사)</Text>
-            <View style={S.signRow}>
-              <Text style={S.signLabel}>상  호</Text>
-              <Text style={S.signValue}>{SUPPLIER.name}</Text>
-            </View>
-            <View style={S.signRow}>
-              <Text style={S.signLabel}>대표자</Text>
-              <Text style={S.signValue}>{SUPPLIER.ceo}</Text>
-            </View>
-            <View style={S.signRow}>
-              <Text style={S.signLabel}>주  소</Text>
-              <Text style={[S.signValue, { fontSize: 7.5 }]}>{SUPPLIER.address}</Text>
-            </View>
-            <View style={[S.signRow, { marginTop: 8, alignItems: 'center' }]}>
-              <Text style={S.signLabel}>서  명</Text>
-              <View style={{ flex: 1, alignItems: 'flex-start' }}>
-                <Image src={stampPath} style={{ width: 48, height: 48 }} />
-              </View>
+        {/* 을 서명란 */}
+        <View style={S.signParty}>
+          <Text style={S.signPartyTitle}>을 (대행사)</Text>
+          <View style={S.signRow}>
+            <Text style={S.signLabel}>- 상    호 :</Text>
+            <Text style={S.signValue}>{SUPPLIER.name}</Text>
+          </View>
+          <View style={S.signRow}>
+            <Text style={S.signLabel}>- 대 표 자 :</Text>
+            <Text style={S.signValue}>{SUPPLIER.ceo}</Text>
+          </View>
+          <View style={S.signRow}>
+            <Text style={S.signLabel}>- 주    소 :</Text>
+            <Text style={[S.signValue, { fontSize: 8 }]}>{SUPPLIER.address}</Text>
+          </View>
+          <View style={S.signRow}>
+            <Text style={S.signLabel}>- 사업자번호 :</Text>
+            <Text style={S.signValue}>{SUPPLIER.business_no}</Text>
+          </View>
+          <View style={[S.signRow, { marginTop: 6, alignItems: 'center' }]}>
+            <Text style={S.signLabel}>- 서    명 :</Text>
+            <View style={{ flex: 1 }}>
+              <Image src={stampPath} style={{ width: 48, height: 48 }} />
             </View>
           </View>
         </View>

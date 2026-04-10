@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const {
-      contractDate, startDate, endDate, recipient, companyName,
+      contractDate, startDate, endDate, recipient, companyName, companyAddress,
       items, totalAmount, vatType, specialTerms,
     } = body as {
       contractDate: string
@@ -16,6 +16,7 @@ export async function POST(req: NextRequest) {
       endDate: string
       recipient: string
       companyName: string
+      companyAddress?: string
       items: any[]
       totalAmount: number
       vatType: VatType
@@ -28,6 +29,7 @@ export async function POST(req: NextRequest) {
       endDate,
       recipient,
       companyName,
+      companyAddress,
       items,
       totalAmount,
       vatType,
