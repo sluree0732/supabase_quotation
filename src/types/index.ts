@@ -1,12 +1,26 @@
+export type CompanyType = 'sender' | 'client'
+
+export interface CompanyContact {
+  id: string
+  company_id: string
+  name: string
+  phone: string | null
+  created_at: string
+}
+
 export interface Company {
   id: string
+  company_type: CompanyType
   name: string
   address: string | null
   phone: string | null
   business_no: string | null
   business_type: string | null
   business_item: string | null
+  email: string | null
+  fax: string | null
   created_at: string
+  contacts?: CompanyContact[]
 }
 
 export interface QuotationItem {

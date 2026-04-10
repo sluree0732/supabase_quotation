@@ -94,7 +94,16 @@ export default function CompaniesPage() {
                       <Building2 size={18} className="text-[#2980b9]" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-[#1e2a3a] text-sm truncate">{company.name}</p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-semibold text-[#1e2a3a] text-sm truncate">{company.name}</p>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0 ${
+                          company.company_type === 'sender'
+                            ? 'bg-[#ebf5fb] text-[#2980b9]'
+                            : 'bg-[#f5eefa] text-[#8e44ad]'
+                        }`}>
+                          {company.company_type === 'sender' ? '자사' : '광고주'}
+                        </span>
+                      </div>
                       {company.phone && (
                         <p className="text-xs text-[#718096] flex items-center gap-1 mt-0.5">
                           <Phone size={10} />
@@ -120,8 +129,9 @@ export default function CompaniesPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-gray-50 border-b border-gray-100">
+                      <th className="text-left px-5 py-3 font-semibold text-[#4a5568]">구분</th>
                       <th className="text-left px-5 py-3 font-semibold text-[#4a5568]">업체명</th>
-                      <th className="text-left px-5 py-3 font-semibold text-[#4a5568]">전화번호</th>
+                      <th className="text-left px-5 py-3 font-semibold text-[#4a5568]">연락처</th>
                       <th className="text-left px-5 py-3 font-semibold text-[#4a5568]">주소</th>
                       <th className="text-left px-5 py-3 font-semibold text-[#4a5568]">업태</th>
                       <th className="w-12" />
@@ -134,6 +144,15 @@ export default function CompaniesPage() {
                         onClick={() => setSelected(company)}
                         className="group hover:bg-[#f0f7fd] cursor-pointer transition-colors"
                       >
+                        <td className="px-5 py-3.5">
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                            company.company_type === 'sender'
+                              ? 'bg-[#ebf5fb] text-[#2980b9]'
+                              : 'bg-[#f5eefa] text-[#8e44ad]'
+                          }`}>
+                            {company.company_type === 'sender' ? '자사' : '광고주'}
+                          </span>
+                        </td>
                         <td className="px-5 py-3.5 font-medium text-[#1e2a3a]">{company.name}</td>
                         <td className="px-5 py-3.5 text-[#718096]">{company.phone || '—'}</td>
                         <td className="px-5 py-3.5 text-[#718096] max-w-xs truncate">{company.address || '—'}</td>
