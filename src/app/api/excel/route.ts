@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import ExcelJS from 'exceljs'
+import path from 'path'
 import { SUPPLIER } from '@/lib/supplier'
 
 const VAT_MAP: Record<string, string> = {
@@ -204,6 +205,15 @@ export async function POST(req: NextRequest) {
     vatCell.font = { bold: true, size: 9, color: { argb: 'FFCC0000' } }
     vatCell.alignment = { horizontal: 'center', vertical: 'middle' }
     applyBorder(vatCell)
+
+    // ── 도장 이미지 삽입 (E2:E3 오버레이) ────────────────
+    const stampFile = path.join(process.cwd(), 'public', 'images', 'stamp.png')
+    const stampId = wb.addImage({ filename: stampFile, extension: 'png' })
+    ws.addImage(stampId, {
+      tl: { col: 4, row: 1 },  // E2 (사업자번호 label)
+      br: { col: 5, row: 3 },  // E3 끝 (연락처 label 포함)
+      editAs: 'oneCell',
+    } as any)
 
     // ── 버퍼 생성 및 반환 ─────────────────────────────────
     const buffer = await wb.xlsx.writeBuffer()
