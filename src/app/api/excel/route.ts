@@ -212,7 +212,7 @@ export async function POST(req: NextRequest) {
     const stampFile = path.join(process.cwd(), 'public', 'images', 'stamp.png')
     const stampId = wb.addImage({ filename: stampFile, extension: 'png' })
     ws.addImage(stampId, {
-      tl: { col: 5, row: 1 },  // F2 (사업자번호 값 앞에 오버레이)
+      tl: { col: 5.08, row: 1 },  // F2 (사업자번호 값 앞에 오버레이, 칼럼선 노출)
       ext: { width: 65, height: 65 },
       editAs: 'oneCell',
     } as any)
