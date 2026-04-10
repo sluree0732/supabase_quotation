@@ -3,6 +3,8 @@
 import { useEffect, useState, useRef } from 'react'
 import { X, Download, Loader2 } from 'lucide-react'
 import type { QuotationFormState } from './QuotationForm'
+import dynamic from 'next/dynamic'
+const PdfViewerBase = dynamic(() => import('@/components/shared/PdfViewerBase'), { ssr: false })
 
 interface Props {
   state: QuotationFormState
@@ -78,7 +80,7 @@ export default function PdfViewerModal({ state, onClose }: Props) {
         </div>
       </div>
 
-      <div className="flex-1 bg-gray-100">
+      <div className="flex-1 overflow-hidden">
         {loading && (
           <div className="flex items-center justify-center h-full gap-2 text-gray-400">
             <Loader2 size={20} className="animate-spin" />
@@ -88,9 +90,7 @@ export default function PdfViewerModal({ state, onClose }: Props) {
         {error && (
           <div className="flex items-center justify-center h-full text-red-400 text-sm">{error}</div>
         )}
-        {blobUrl && (
-          <iframe src={blobUrl} className="w-full h-full border-0" title="PDF 미리보기" />
-        )}
+        {blobUrl && <PdfViewerBase blobUrl={blobUrl} />}
       </div>
     </div>
   )

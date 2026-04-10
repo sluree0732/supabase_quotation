@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { X, Download, Loader2 } from 'lucide-react'
+import dynamic from 'next/dynamic'
+const PdfViewerBase = dynamic(() => import('@/components/shared/PdfViewerBase'), { ssr: false })
 
 interface ContractPdfPayload {
   contractDate: string
@@ -79,7 +81,7 @@ export default function ContractPdfViewerModal({ payload, onClose }: Props) {
         </div>
       </div>
 
-      <div className="flex-1 bg-gray-100">
+      <div className="flex-1 overflow-hidden">
         {loading && (
           <div className="flex items-center justify-center h-full gap-2 text-gray-400">
             <Loader2 size={20} className="animate-spin" />
@@ -89,9 +91,7 @@ export default function ContractPdfViewerModal({ payload, onClose }: Props) {
         {error && (
           <div className="flex items-center justify-center h-full text-red-400 text-sm">{error}</div>
         )}
-        {blobUrl && (
-          <iframe src={blobUrl} className="w-full h-full border-0" title="계약서 PDF 미리보기" />
-        )}
+        {blobUrl && <PdfViewerBase blobUrl={blobUrl} />}
       </div>
     </div>
   )

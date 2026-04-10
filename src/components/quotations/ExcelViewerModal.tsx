@@ -143,15 +143,15 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
 
           {/* 항목 테이블 */}
           <div className="overflow-x-auto">
-            <table className="w-full text-sm border-collapse">
+            <table className="text-sm border-collapse" style={{ minWidth: '640px', width: '100%' }}>
               <thead>
                 <tr className="bg-gray-50">
-                  <th className="border border-gray-200 px-3 py-2.5 text-center font-semibold text-[#4a5568] w-28">대분류</th>
-                  <th className="border border-gray-200 px-3 py-2.5 text-center font-semibold text-[#4a5568]">상품명</th>
-                  <th className="border border-gray-200 px-3 py-2.5 text-center font-semibold text-[#4a5568] w-36">금액</th>
-                  <th className="border border-gray-200 px-3 py-2.5 text-center font-semibold text-[#4a5568] w-36">총액</th>
-                  <th className="border border-gray-200 px-3 py-2.5 text-center font-semibold text-[#4a5568]">비고</th>
-                  <th className="border border-gray-200 w-8" />
+                  <th className="border border-gray-200 px-3 py-2.5 text-center font-semibold text-[#4a5568]" style={{ minWidth: '90px' }}>대분류</th>
+                  <th className="border border-gray-200 px-3 py-2.5 text-center font-semibold text-[#4a5568]" style={{ minWidth: '120px' }}>상품명</th>
+                  <th className="border border-gray-200 px-3 py-2.5 text-center font-semibold text-[#4a5568]" style={{ minWidth: '110px' }}>금액</th>
+                  <th className="border border-gray-200 px-3 py-2.5 text-center font-semibold text-[#4a5568]" style={{ minWidth: '110px' }}>총액</th>
+                  <th className="border border-gray-200 px-3 py-2.5 text-center font-semibold text-[#4a5568]" style={{ minWidth: '140px' }}>비고</th>
+                  <th className="border border-gray-200" style={{ width: '32px' }} />
                 </tr>
               </thead>
               <tbody>
