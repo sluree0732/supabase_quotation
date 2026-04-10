@@ -94,12 +94,12 @@ export default function CompaniesPage() {
         </div>
 
         {/* 탭 */}
-        <div className="flex gap-1 mb-3 bg-gray-100 rounded-xl p-1">
+        <div className="inline-flex gap-1 mb-3 bg-gray-100 rounded-xl p-1">
           {TABS.map(tab => (
             <button
               key={tab.value}
               onClick={() => setActiveTab(tab.value)}
-              className={`flex-1 py-1 rounded-lg text-sm font-medium transition-all ${
+              className={`px-4 py-1 rounded-lg text-sm font-medium transition-all ${
                 activeTab === tab.value
                   ? 'bg-white text-[#1e2a3a] shadow-sm'
                   : 'text-[#718096] hover:text-[#4a5568]'
