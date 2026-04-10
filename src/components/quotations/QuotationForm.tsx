@@ -128,16 +128,6 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
 
         {/* ── 왼쪽: 기본 정보 ───────────────────── */}
         <Section title="기본 정보">
-          <Field label="수신인 *">
-            <input
-              type="text"
-              value={state.recipient}
-              onChange={e => set({ recipient: e.target.value })}
-              placeholder="예: 홍길동 대표"
-              className="input-base"
-            />
-          </Field>
-
           <Field label="견적일">
             <input
               type="date"
@@ -172,18 +162,14 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
             )}
           </Field>
 
-          <Field label="계약 기간 (개월)">
-            <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden">
-              <button
-                onClick={() => handlePeriodChange(Math.max(1, state.period - 1))}
-                className="px-4 py-3 text-gray-500 hover:bg-gray-50 text-lg font-bold"
-              >−</button>
-              <span className="flex-1 text-center font-semibold text-[#1e2a3a]">{state.period}개월</span>
-              <button
-                onClick={() => handlePeriodChange(Math.min(24, state.period + 1))}
-                className="px-4 py-3 text-gray-500 hover:bg-gray-50 text-lg font-bold"
-              >+</button>
-            </div>
+          <Field label="수신인 *">
+            <input
+              type="text"
+              value={state.recipient}
+              onChange={e => set({ recipient: e.target.value })}
+              placeholder="예: 홍길동 대표"
+              className="input-base"
+            />
           </Field>
 
           <Field label="부가세">
@@ -201,6 +187,20 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onPdf, 
                   {opt.label}
                 </button>
               ))}
+            </div>
+          </Field>
+
+          <Field label="계약 기간 (개월)">
+            <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden">
+              <button
+                onClick={() => handlePeriodChange(Math.max(1, state.period - 1))}
+                className="px-4 py-3 text-gray-500 hover:bg-gray-50 text-lg font-bold"
+              >−</button>
+              <span className="flex-1 text-center font-semibold text-[#1e2a3a]">{state.period}개월</span>
+              <button
+                onClick={() => handlePeriodChange(Math.min(24, state.period + 1))}
+                className="px-4 py-3 text-gray-500 hover:bg-gray-50 text-lg font-bold"
+              >+</button>
             </div>
           </Field>
         </Section>

@@ -234,10 +234,9 @@ function ContractPage() {
             </div>
             <div className="px-5 py-4 space-y-4">
 
-              <Field label="수신인 *">
-                <input type="text" value={form.recipient}
-                  onChange={e => set({ recipient: e.target.value })}
-                  placeholder="예: 홍길동 대표" className="input-base" autoFocus />
+              <Field label="계약일">
+                <input type="date" value={form.contractDate}
+                  onChange={e => set({ contractDate: e.target.value })} className="input-base" />
               </Field>
 
               <Field label="수신 업체">
@@ -258,9 +257,10 @@ function ContractPage() {
                 </button>
               </Field>
 
-              <Field label="계약일">
-                <input type="date" value={form.contractDate}
-                  onChange={e => set({ contractDate: e.target.value })} className="input-base" />
+              <Field label="수신인 *">
+                <input type="text" value={form.recipient}
+                  onChange={e => set({ recipient: e.target.value })}
+                  placeholder="예: 홍길동 대표" className="input-base" autoFocus />
               </Field>
 
               <div className="grid grid-cols-2 gap-3">
