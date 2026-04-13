@@ -86,6 +86,7 @@ export async function saveItems(quotationId: string, items: QuotationItem[]): Pr
     quotation_id: quotationId,
     sort_order: i,
     category: item.category,
+    sub_category: item.sub_category ?? '',
     item_name: item.item_name,
     period: item.period,
     unit_price: item.unit_price,

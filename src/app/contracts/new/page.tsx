@@ -420,7 +420,12 @@ function ContractPage() {
           onClose={() => setShowCompany(false)} />
       )}
       {showAdd && (
-        <ItemModal onSave={addItem} onClose={() => setShowAdd(false)} />
+        <ItemModal
+          onSave={addItem}
+          onUpdate={(idx, data) => updateItem(idx, data)}
+          items={form.items}
+          onClose={() => setShowAdd(false)}
+        />
       )}
       {editIdx !== null && (
         <ItemModal item={form.items[editIdx]}

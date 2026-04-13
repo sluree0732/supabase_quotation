@@ -61,6 +61,7 @@ export async function saveContractItems(contractId: string, items: ContractItem[
     contract_id: contractId,
     sort_order: i,
     category: it.category,
+    sub_category: it.sub_category ?? '',
     item_name: it.item_name,
     period: it.period,
     unit_price: it.unit_price,

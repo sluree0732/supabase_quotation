@@ -39,6 +39,7 @@ export interface QuotationItem {
   quotation_id?: string
   sort_order: number
   category: string
+  sub_category: string
   item_name: string
   period: number
   unit_price: number
@@ -78,6 +79,7 @@ export interface ContractItem {
   contract_id?: string
   sort_order: number
   category: string
+  sub_category: string
   item_name: string
   period: number
   unit_price: number

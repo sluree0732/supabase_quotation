@@ -454,6 +454,7 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
       {showAdd && (
         <ItemModal
           onSave={addItem}
+          onUpdate={(idx, data) => updateItem(idx, data)}
           items={state.items}
           onAiAllResult={(notes) => {
             setState(s => ({
