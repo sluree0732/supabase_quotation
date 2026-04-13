@@ -129,30 +129,34 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-[70] flex flex-col bg-white">
       {/* 헤더 */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0">
-        <div>
-          <h2 className="font-bold text-[#1e2a3a]">엑셀 미리보기</h2>
-          <p className="text-xs text-gray-400 mt-0.5">셀을 클릭해 내용을 수정할 수 있습니다</p>
+      <div className="border-b border-gray-100 shrink-0">
+        {/* 1줄: 타이틀 + 닫기 */}
+        <div className="flex items-center justify-between px-4 pt-3 pb-2">
+          <div>
+            <h2 className="font-bold text-[#1e2a3a]">엑셀 미리보기</h2>
+            <p className="text-xs text-gray-400 mt-0.5">셀을 클릭해 내용을 수정할 수 있습니다</p>
+          </div>
+          <button onClick={onClose} className="p-1">
+            <X size={20} className="text-gray-400" />
+          </button>
         </div>
-        <div className="flex items-center gap-2">
+        {/* 2줄: 다운로드 버튼 */}
+        <div className="flex gap-2 px-4 pb-3">
           <button
             onClick={handleDownload}
             disabled={downloading || !items.length}
-            className="flex items-center gap-1.5 bg-[#217346] text-white px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50"
+            className="flex-1 flex items-center justify-center gap-1.5 bg-[#217346] text-white px-3 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
           >
             {downloading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
-            엑셀
+            엑셀 다운로드
           </button>
           <button
             onClick={handlePdfDownload}
             disabled={pdfDownloading || !items.length}
-            className="flex items-center gap-1.5 bg-[#e74c3c] text-white px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50"
+            className="flex-1 flex items-center justify-center gap-1.5 bg-[#e74c3c] text-white px-3 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
           >
             {pdfDownloading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
-            PDF
-          </button>
-          <button onClick={onClose}>
-            <X size={20} className="text-gray-400" />
+            PDF 다운로드
           </button>
         </div>
       </div>
