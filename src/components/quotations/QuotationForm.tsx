@@ -2,12 +2,11 @@
 
 import { useState } from 'react'
 import { Building2, ChevronRight, X, Plus, Sparkles, Loader2, Save, FileSignature, ChevronDown, ChevronUp } from 'lucide-react'
-import { BsFiletypePdf, BsFiletypeXlsx } from 'react-icons/bs'
+import { BsFiletypeXlsx } from 'react-icons/bs'
 
 import type { Company, CompanyInfo, QuotationItem, VatType } from '@/types'
 import CompanyPickerModal from './CompanyPickerModal'
 import ItemModal from './ItemModal'
-import PdfViewerModal from './PdfViewerModal'
 import ExcelViewerModal from './ExcelViewerModal'
 import RecipientCombobox from '@/components/shared/RecipientCombobox'
 
@@ -115,7 +114,6 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
   const [aiAllLoading, setAiAllLoading] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [isDirty, setIsDirty] = useState(false)
-  const [showPdfViewer, setShowPdfViewer] = useState(false)
   const [showExcelViewer, setShowExcelViewer] = useState(false)
 
   const isSaved = state.status === 'saved'
@@ -374,16 +372,7 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
                     <div className="w-14 h-14 rounded-2xl bg-[#217346] flex items-center justify-center shadow-sm hover:opacity-90 transition-opacity">
                       <BsFiletypeXlsx size={28} color="white" />
                     </div>
-                    <span className="text-xs text-gray-500">엑셀</span>
-                  </button>
-                  <button
-                    onClick={() => setShowPdfViewer(true)}
-                    className="flex flex-col items-center gap-1.5"
-                  >
-                    <div className="w-14 h-14 rounded-2xl bg-[#e74c3c] flex items-center justify-center shadow-sm hover:opacity-90 transition-opacity">
-                      <BsFiletypePdf size={28} color="white" />
-                    </div>
-                    <span className="text-xs text-gray-500">PDF</span>
+                    <span className="text-xs text-gray-500">엑셀/PDF</span>
                   </button>
                 </div>
               </div>
@@ -429,9 +418,6 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
       )}
 
       {/* ── 뷰어 모달 ─────────────────────────────────── */}
-      {showPdfViewer && (
-        <PdfViewerModal state={state} onClose={() => setShowPdfViewer(false)} />
-      )}
       {showExcelViewer && (
         <ExcelViewerModal state={state} onClose={() => setShowExcelViewer(false)} />
       )}
