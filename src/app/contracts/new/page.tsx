@@ -12,6 +12,7 @@ import { getQuotationWithItems } from '@/lib/quotations'
 import CompanyPickerModal from '@/components/quotations/CompanyPickerModal'
 import ItemModal from '@/components/quotations/ItemModal'
 import ContractPdfViewerModal from '@/components/contracts/ContractPdfViewerModal'
+import RecipientCombobox from '@/components/shared/RecipientCombobox'
 
 function today() {
   return new Date().toISOString().slice(0, 10)
@@ -248,8 +249,8 @@ function ContractPage() {
         <div className="md:grid md:grid-cols-[1fr_1.4fr] md:gap-6 md:items-start space-y-6 md:space-y-0">
 
           {/* ── 왼쪽: 기본 정보 ── */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="px-5 py-4 border-b border-gray-50">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
+            <div className="px-5 py-4 border-b border-gray-50 rounded-t-2xl">
               <h2 className="font-bold text-[#1e2a3a] text-sm">기본 정보</h2>
             </div>
             <div className="px-5 py-4 space-y-4">
@@ -278,9 +279,12 @@ function ContractPage() {
               </Field>
 
               <Field label="수신인 *">
-                <input type="text" value={form.recipient}
-                  onChange={e => set({ recipient: e.target.value })}
-                  placeholder="예: 홍길동 대표" className="input-base" />
+                <RecipientCombobox
+                  companyId={form.company?.id ?? null}
+                  initialContacts={form.company?.contacts}
+                  value={form.recipient}
+                  onChange={v => set({ recipient: v })}
+                />
               </Field>
 
               <div className="grid grid-cols-2 gap-3">

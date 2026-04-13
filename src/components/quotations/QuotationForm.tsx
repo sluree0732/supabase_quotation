@@ -9,6 +9,7 @@ import CompanyPickerModal from './CompanyPickerModal'
 import ItemModal from './ItemModal'
 import PdfViewerModal from './PdfViewerModal'
 import ExcelViewerModal from './ExcelViewerModal'
+import RecipientCombobox from '@/components/shared/RecipientCombobox'
 
 // ── 타입 ──────────────────────────────────────────────────
 export interface QuotationFormState {
@@ -257,12 +258,11 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
 
           {/* 수신인 */}
           <Field label="수신인 *">
-            <input
-              type="text"
+            <RecipientCombobox
+              companyId={state.company?.id ?? null}
+              initialContacts={state.company?.contacts}
               value={state.recipient}
-              onChange={e => set({ recipient: e.target.value })}
-              placeholder="예: 홍길동 대표"
-              className="input-base"
+              onChange={v => set({ recipient: v })}
             />
           </Field>
 
@@ -496,8 +496,8 @@ function Section({ title, action, children }: {
   children: React.ReactNode
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50 rounded-t-2xl">
         <h2 className="font-bold text-[#1e2a3a] text-sm">{title}</h2>
         {action}
       </div>
