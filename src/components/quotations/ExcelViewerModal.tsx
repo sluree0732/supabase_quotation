@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { X, Download, Loader2, Trash2 } from 'lucide-react'
 import type { QuotationFormState } from './QuotationForm'
 
@@ -34,6 +34,8 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
     }))
   )
   const [downloading, setDownloading] = useState(false)
+  const [pdfDownloading, setPdfDownloading] = useState(false)
+  const pdfBlobRef = useRef<string | null>(null)
 
   const total = items.reduce((s, i) => s + i.total_price, 0)
 
@@ -84,6 +86,42 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
     }
   }
 
+  async function handlePdfDownload() {
+    setPdfDownloading(true)
+    try {
+      const res = await fetch('/api/pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectName: state.projectName,
+          quoteDate: state.quoteDate,
+          recipient: state.recipient,
+          senderInfo: state.senderInfo,
+          clientInfo: state.clientInfo,
+          items,
+          totalAmount: total,
+          vatType: state.vatType,
+        }),
+      })
+      if (!res.ok) throw new Error('PDF 생성 실패')
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      pdfBlobRef.current = url
+      const a = document.createElement('a')
+      a.href = url
+      const dateStr = state.quoteDate.replace(/-/g, '')
+      const prefix = state.company?.name ?? state.clientInfo?.name ?? ''
+      a.download = prefix ? `${prefix}_견적서(${dateStr}).pdf` : `견적서(${dateStr}).pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+      pdfBlobRef.current = null
+    } catch (e: any) {
+      alert(e.message ?? 'PDF 생성 실패')
+    } finally {
+      setPdfDownloading(false)
+    }
+  }
+
   function parsePriceInput(raw: string): number {
     return parseInt(raw.replace(/[^0-9]/g, ''), 10) || 0
   }
@@ -103,7 +141,15 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
             className="flex items-center gap-1.5 bg-[#217346] text-white px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50"
           >
             {downloading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
-            엑셀 다운로드
+            엑셀
+          </button>
+          <button
+            onClick={handlePdfDownload}
+            disabled={pdfDownloading || !items.length}
+            className="flex items-center gap-1.5 bg-[#e74c3c] text-white px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50"
+          >
+            {pdfDownloading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+            PDF
           </button>
           <button onClick={onClose}>
             <X size={20} className="text-gray-400" />
@@ -230,7 +276,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
           </div>
 
           <div className="px-6 py-3 text-xs text-gray-400 border-t border-gray-100">
-            * 수정된 내용은 엑셀 다운로드 시 반영됩니다. 견적서 폼의 데이터는 변경되지 않습니다.
+            * 수정된 내용은 엑셀/PDF 다운로드 시 반영됩니다. 견적서 폼의 데이터는 변경되지 않습니다.
           </div>
         </div>
       </div>
