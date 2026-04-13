@@ -339,7 +339,7 @@ export default function ContractDocument({
               <Text style={[S.signValue, { fontSize: 8 }]}>{SUPPLIER.address}</Text>
             </View>
             <View style={S.signRow}>
-              <Text style={S.signLabel}>- 사업자번호 :</Text>
+              <Text style={S.signLabel}>- 사업자 등록번호 :</Text>
               <Text style={S.signValue}>{SUPPLIER.business_no}</Text>
             </View>
             <View style={[S.signRow, { marginTop: 6, alignItems: 'center' }]}>

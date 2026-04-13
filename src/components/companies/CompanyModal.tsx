@@ -71,7 +71,7 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
   async function handleSave() {
     if (!name.trim()) { setError('업체명을 입력해주세요.'); return }
     if (!address.trim()) { setError('주소를 입력해주세요.'); return }
-    if (!businessNo.trim()) { setError('사업자번호를 입력해주세요.'); return }
+    if (!businessNo.trim()) { setError('사업자 등록번호를 입력해주세요.'); return }
     if (!email.trim()) { setError('이메일을 입력해주세요.'); return }
     if (!phone.trim()) { setError('연락처를 입력해주세요.'); return }
 
@@ -239,7 +239,7 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
               </div>
             </Field>
 
-            <Field label="사업자번호 *">
+            <Field label="사업자 등록번호 *">
               <input
                 type="text"
                 inputMode="numeric"

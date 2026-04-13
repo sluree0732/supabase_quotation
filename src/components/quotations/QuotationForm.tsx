@@ -94,7 +94,7 @@ function CompanyInfoEditor({
           {field('업체명', 'name')}
           {field('주소', 'address')}
           {field('연락처', 'phone')}
-          {field('사업자번호', 'business_no')}
+          {field('사업자 등록번호', 'business_no')}
           {field('업태', 'business_type')}
           {field('업종', 'business_item')}
           {field('이메일', 'email')}

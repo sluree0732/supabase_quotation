@@ -179,7 +179,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
             {state.senderInfo && (
               <div className="border border-gray-100 rounded-lg p-3 text-xs text-[#4a5568] space-y-1">
                 <InfoRow label="상&nbsp;&nbsp;호" value={state.senderInfo.name} />
-                <InfoRow label="사업자번호" value={state.senderInfo.business_no} />
+                <InfoRow label="사업자 등록번호" value={state.senderInfo.business_no} />
                 <InfoRow label="사업장" value={state.senderInfo.address} />
                 <InfoRow label="연&nbsp;&nbsp;락&nbsp;&nbsp;처" value={state.senderInfo.phone} />
                 {state.senderInfo.email && <InfoRow label="이메일" value={state.senderInfo.email} />}

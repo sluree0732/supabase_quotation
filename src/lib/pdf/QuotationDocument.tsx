@@ -128,7 +128,7 @@ function SupplierTable() {
               <Text style={S.valText}>{s.name}</Text>
             </View>
             <View style={{ flex: 1, backgroundColor: '#d9d9d9', justifyContent: 'center', alignItems: 'center', paddingVertical: 2 }}>
-              <Text style={S.labelText}>사업자번호</Text>
+              <Text style={S.labelText}>사업자 등록번호</Text>
             </View>
           </View>
           <View style={{ flexDirection: 'row', minHeight: 16 }}>

@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
 
     // 오른쪽: 공급자 테이블 (C~F, 행 2~6)
     const supplierData = [
-      ['상  호', s.name, '사업자번호', s.business_no],
+      ['상  호', s.name, '사업자 등록번호', s.business_no],
       ['대표자', s.ceo, '연  락  처', s.phone],
       ['사업장', s.address, '', ''],
       ['업  태', s.business_type, '종  목', s.business_item],
@@ -226,7 +226,7 @@ export async function POST(req: NextRequest) {
     const stampFile = path.join(process.cwd(), 'public', 'images', 'stamp.png')
     const stampId = wb.addImage({ filename: stampFile, extension: 'png' })
     ws.addImage(stampId, {
-      tl: { col: 5.08, row: 1.12 },  // F2 (사업자번호 값 앞에 오버레이, 칼럼선 노출)
+      tl: { col: 5.08, row: 1.12 },  // F2 (사업자 등록번호 값 앞에 오버레이, 칼럼선 노출)
       ext: { width: 65, height: 65 },
       editAs: 'oneCell',
     } as any)
