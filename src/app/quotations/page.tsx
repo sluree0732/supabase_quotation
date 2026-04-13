@@ -15,6 +15,7 @@ const STATUS_COLOR: Record<string, string> = {
 export default function QuotationsPage() {
   const [quotations, setQuotations] = useState<Quotation[]>([])
   const [loading, setLoading] = useState(true)
+  const [tab, setTab] = useState<'all' | 'draft'>('all')
 
   useEffect(() => { load() }, [])
 
@@ -23,6 +24,8 @@ export default function QuotationsPage() {
     try { setQuotations(await getAllQuotations()) }
     finally { setLoading(false) }
   }
+
+  const filtered = tab === 'all' ? quotations : quotations.filter(q => q.status === tab)
 
   async function handleDelete(id: string, e: React.MouseEvent) {
     e.preventDefault()
@@ -50,21 +53,38 @@ export default function QuotationsPage() {
         </div>
       </div>
 
+      {/* 탭 */}
+      <div className="bg-white border-b border-gray-100 px-4 md:px-8 flex gap-1">
+        {(['all', 'draft'] as const).map(t => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${
+              tab === t
+                ? 'border-[#2980b9] text-[#2980b9]'
+                : 'border-transparent text-gray-400 hover:text-gray-600'
+            }`}
+          >
+            {t === 'all' ? '전체' : '임시저장'}
+          </button>
+        ))}
+      </div>
+
       {/* 목록 */}
       <div className="flex-1 overflow-y-auto">
         {loading ? (
           <div className="flex items-center justify-center h-40 text-gray-400 text-sm">불러오는 중...</div>
-        ) : quotations.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-40 gap-3 text-gray-400">
             <FileText size={32} className="opacity-30" />
-            <p className="text-sm">작성된 견적서가 없습니다.</p>
+            <p className="text-sm">{tab === 'draft' ? '임시저장된 견적서가 없습니다.' : '작성된 견적서가 없습니다.'}</p>
             <Link href="/quotations/new" className="text-[#2980b9] text-sm font-medium">
               + 첫 견적서 작성하기
             </Link>
           </div>
         ) : (
           <ul className="divide-y divide-gray-100">
-            {quotations.map(q => {
+            {filtered.map(q => {
               const companyName = (q.companies as any)?.name ?? '—'
               const total = q.total_amount ?? 0
               return (
