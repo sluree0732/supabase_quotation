@@ -34,7 +34,13 @@ function QuotationPage() {
   const [savedQuotationId, setSavedQuotationId] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!editId) return
+    if (!editId) {
+      setFormState({ ...INITIAL, quoteDate: today() })
+      setSavedQuotationId(null)
+      setLoading(false)
+      return
+    }
+    setLoading(true)
     getQuotationWithItems(editId).then(data => {
       if (!data) return
       setFormState({

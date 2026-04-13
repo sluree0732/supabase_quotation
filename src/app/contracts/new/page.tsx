@@ -162,7 +162,7 @@ function ContractPage() {
   }
 
   async function handleSave(status: ContractStatus) {
-    if (!form.recipient.trim()) { alert('수신인을 입력해주세요.'); return }
+    if (!form.recipient.trim()) { alert('수신 담당자를 입력해주세요.'); return }
     setSaving(true)
     try {
       const payload = {
@@ -278,7 +278,7 @@ function ContractPage() {
                 </button>
               </Field>
 
-              <Field label="수신인 *">
+              <Field label="수신 담당자">
                 <RecipientCombobox
                   companyId={form.company?.id ?? null}
                   initialContacts={form.company?.contacts}

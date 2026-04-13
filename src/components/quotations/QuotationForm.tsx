@@ -62,12 +62,16 @@ function companyToInfo(c: Company): CompanyInfo {
 function CompanyInfoEditor({
   info,
   onChange,
+  open,
+  onOpenChange,
+  extraBottom,
 }: {
   info: CompanyInfo
   onChange: (info: CompanyInfo) => void
+  open: boolean
+  onOpenChange: (v: boolean) => void
+  extraBottom?: React.ReactNode
 }) {
-  const [open, setOpen] = useState(true)
-
   const field = (label: string, key: keyof CompanyInfo) => (
     <div className="space-y-1">
       <label className="text-xs text-[#718096]">{label}</label>
@@ -83,7 +87,7 @@ function CompanyInfoEditor({
   return (
     <div className="mt-1.5 border border-gray-100 rounded-xl overflow-hidden">
       <button
-        onClick={() => setOpen(v => !v)}
+        onClick={() => onOpenChange(!open)}
         className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 text-xs text-[#4a5568] font-medium"
       >
         <span>상세 정보 편집</span>
@@ -99,6 +103,7 @@ function CompanyInfoEditor({
           {field('업종', 'business_item')}
           {field('이메일', 'email')}
           {field('팩스', 'fax')}
+          {extraBottom}
         </div>
       )}
     </div>
@@ -115,6 +120,8 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
   const [toast, setToast] = useState<string | null>(null)
   const [isDirty, setIsDirty] = useState(false)
   const [showExcelViewer, setShowExcelViewer] = useState(false)
+  const [senderInfoOpen, setSenderInfoOpen] = useState(true)
+  const [clientInfoOpen, setClientInfoOpen] = useState(true)
 
   const isSaved = state.status === 'saved'
 
@@ -160,7 +167,7 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
   }
 
   async function handleSave(status: 'draft' | 'saved') {
-    if (!state.recipient.trim()) { alert('수신인을 입력해주세요.'); return }
+    if (!state.recipient.trim()) { alert('수신 담당자를 입력해주세요.'); return }
     if (status === 'saved' && !state.items.length) { alert('항목을 1개 이상 추가해주세요.'); return }
     await onSave(state, status)
     setState(s => ({ ...s, status }))
@@ -221,6 +228,8 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
               <CompanyInfoEditor
                 info={state.senderInfo}
                 onChange={info => set({ senderInfo: info })}
+                open={senderInfoOpen}
+                onOpenChange={setSenderInfoOpen}
               />
             )}
           </Field>
@@ -250,18 +259,21 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
               <CompanyInfoEditor
                 info={state.clientInfo}
                 onChange={info => set({ clientInfo: info })}
+                open={clientInfoOpen}
+                onOpenChange={setClientInfoOpen}
+                extraBottom={
+                  <div className="space-y-1">
+                    <label className="text-xs text-[#718096]">수신 담당자</label>
+                    <RecipientCombobox
+                      companyId={state.company?.id ?? null}
+                      initialContacts={state.company?.contacts}
+                      value={state.recipient}
+                      onChange={v => set({ recipient: v })}
+                    />
+                  </div>
+                }
               />
             )}
-          </Field>
-
-          {/* 수신인 */}
-          <Field label="수신인 *">
-            <RecipientCombobox
-              companyId={state.company?.id ?? null}
-              initialContacts={state.company?.contacts}
-              value={state.recipient}
-              onChange={v => set({ recipient: v })}
-            />
           </Field>
 
           {/* 부가세 */}
