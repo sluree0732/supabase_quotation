@@ -85,16 +85,16 @@ function CompanyInfoEditor({
   )
 
   return (
-    <div className="mt-1.5 border border-gray-100 rounded-xl overflow-hidden">
+    <div className="mt-1.5 border border-gray-100 rounded-xl">
       <button
         onClick={() => onOpenChange(!open)}
-        className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 text-xs text-[#4a5568] font-medium"
+        className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 text-xs text-[#4a5568] font-medium rounded-t-xl"
       >
         <span>상세 정보 편집</span>
         {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
       </button>
       {open && (
-        <div className="px-3 py-3 space-y-2.5 bg-white">
+        <div className="px-3 py-3 space-y-2.5 bg-white rounded-b-xl">
           {field('업체명', 'name')}
           {field('주소', 'address')}
           {field('연락처', 'phone')}
