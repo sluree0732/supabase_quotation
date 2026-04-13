@@ -15,7 +15,7 @@ const STATUS_COLOR: Record<string, string> = {
 export default function QuotationsPage() {
   const [quotations, setQuotations] = useState<Quotation[]>([])
   const [loading, setLoading] = useState(true)
-  const [tab, setTab] = useState<'all' | 'draft'>('all')
+  const [tab, setTab] = useState<'all' | 'draft' | 'saved'>('all')
 
   useEffect(() => { load() }, [])
 
@@ -25,7 +25,7 @@ export default function QuotationsPage() {
     finally { setLoading(false) }
   }
 
-  const filtered = tab === 'all' ? quotations : quotations.filter(q => q.status === tab)
+  const filtered = tab === 'all' ? quotations : quotations.filter(q => q.status === (tab as string))
 
   async function handleDelete(id: string, e: React.MouseEvent) {
     e.preventDefault()
@@ -55,7 +55,7 @@ export default function QuotationsPage() {
 
       {/* 탭 */}
       <div className="bg-white border-b border-gray-100 px-4 md:px-8 flex gap-1">
-        {(['all', 'draft'] as const).map(t => (
+        {(['all', 'draft', 'saved'] as const).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -65,7 +65,7 @@ export default function QuotationsPage() {
                 : 'border-transparent text-gray-400 hover:text-gray-600'
             }`}
           >
-            {t === 'all' ? '전체' : '임시저장'}
+            {t === 'all' ? '전체' : t === 'draft' ? '임시저장' : '저장완료'}
           </button>
         ))}
       </div>
@@ -77,7 +77,7 @@ export default function QuotationsPage() {
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-40 gap-3 text-gray-400">
             <FileText size={32} className="opacity-30" />
-            <p className="text-sm">{tab === 'draft' ? '임시저장된 견적서가 없습니다.' : '작성된 견적서가 없습니다.'}</p>
+            <p className="text-sm">{tab === 'draft' ? '임시저장된 견적서가 없습니다.' : tab === 'saved' ? '저장완료된 견적서가 없습니다.' : '작성된 견적서가 없습니다.'}</p>
             <Link href="/quotations/new" className="text-[#2980b9] text-sm font-medium">
               + 첫 견적서 작성하기
             </Link>
