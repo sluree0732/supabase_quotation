@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Sparkles, Loader2, Plus, Pencil, Check } from 'lucide-react'
+import { X, Sparkles, Loader2, Plus, Pencil, Trash2 } from 'lucide-react'
 import type { QuotationItem } from '@/types'
 
 const DEFAULT_CATEGORIES = ['기획', '디자인', '개발', '마케팅', '광고', '영상', '운영', '유지보수', '기타']
@@ -47,8 +47,6 @@ export default function ItemModal({ item, onSave, onUpdate, onDelete, onClose, i
   // ── 키워드 관리 ─────────────────────────────────────────
   const [categories, setCategories] = useState<string[]>(() => loadKeywords(LS_CATEGORIES, DEFAULT_CATEGORIES))
   const [subCategories, setSubCategories] = useState<string[]>(() => loadKeywords(LS_SUB_CATEGORIES, DEFAULT_SUB_CATEGORIES))
-  const [editingCat, setEditingCat] = useState(false)
-  const [editingSubCat, setEditingSubCat] = useState(false)
   const [newCatInput, setNewCatInput] = useState('')
   const [newSubCatInput, setNewSubCatInput] = useState('')
 
@@ -290,49 +288,42 @@ export default function ItemModal({ item, onSave, onUpdate, onDelete, onClose, i
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium text-[#4a5568]">대분류 *</label>
-              <button
-                onClick={() => { setEditingCat(v => !v); setNewCatInput('') }}
-                className={`flex items-center gap-1 text-xs px-2 py-1 rounded-lg border transition-colors ${editingCat ? 'bg-[#2980b9] text-white border-[#2980b9]' : 'text-[#718096] border-gray-200 hover:border-[#2980b9]'}`}
-              >
-                {editingCat ? <><Check size={11} /> 완료</> : <><Pencil size={11} /> 편집</>}
-              </button>
+              {category && (
+                <button
+                  onClick={() => removeCategory(category)}
+                  className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg border border-red-200 text-red-500 bg-red-50 hover:bg-red-100 transition-colors"
+                >
+                  <Trash2 size={11} /> 삭제
+                </button>
+              )}
             </div>
             <div className="flex flex-wrap gap-2">
               {categories.map(cat => (
-                <div key={cat} className="relative">
-                  <button
-                    onClick={() => !editingCat && setCategory(cat === category ? '' : cat)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                      category === cat ? 'bg-[#2980b9] text-white border-[#2980b9]' : 'bg-white text-[#4a5568] border-gray-200 hover:border-[#2980b9]'
-                    } ${editingCat ? 'pr-6' : ''}`}
-                  >
-                    {cat}
-                  </button>
-                  {editingCat && (
-                    <button
-                      onClick={() => removeCategory(cat)}
-                      className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center"
-                    >
-                      <X size={9} />
-                    </button>
-                  )}
-                </div>
+                <button
+                  key={cat}
+                  onClick={() => setCategory(cat === category ? '' : cat)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                    category === cat
+                      ? 'bg-[#2980b9] text-white border-[#2980b9]'
+                      : 'bg-white text-[#4a5568] border-gray-200 hover:border-[#2980b9]'
+                  }`}
+                >
+                  {cat}
+                </button>
               ))}
-              {editingCat && (
-                <div className="flex items-center gap-1">
-                  <input
-                    type="text"
-                    value={newCatInput}
-                    onChange={e => setNewCatInput(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && addCategory()}
-                    placeholder="새 키워드"
-                    className="w-20 px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-[#2980b9]"
-                  />
-                  <button onClick={addCategory} className="p-1.5 bg-[#2980b9] text-white rounded-lg">
-                    <Plus size={12} />
-                  </button>
-                </div>
-              )}
+              <div className="flex items-center gap-1">
+                <input
+                  type="text"
+                  value={newCatInput}
+                  onChange={e => setNewCatInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && addCategory()}
+                  placeholder="새 키워드"
+                  className="w-20 px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-[#2980b9]"
+                />
+                <button onClick={addCategory} className="p-1.5 bg-[#2980b9] text-white rounded-lg">
+                  <Plus size={12} />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -340,49 +331,42 @@ export default function ItemModal({ item, onSave, onUpdate, onDelete, onClose, i
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium text-[#4a5568]">상세 분류</label>
-              <button
-                onClick={() => { setEditingSubCat(v => !v); setNewSubCatInput('') }}
-                className={`flex items-center gap-1 text-xs px-2 py-1 rounded-lg border transition-colors ${editingSubCat ? 'bg-[#27ae60] text-white border-[#27ae60]' : 'text-[#718096] border-gray-200 hover:border-[#27ae60]'}`}
-              >
-                {editingSubCat ? <><Check size={11} /> 완료</> : <><Pencil size={11} /> 편집</>}
-              </button>
+              {subCategory && (
+                <button
+                  onClick={() => removeSubCategory(subCategory)}
+                  className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg border border-red-200 text-red-500 bg-red-50 hover:bg-red-100 transition-colors"
+                >
+                  <Trash2 size={11} /> 삭제
+                </button>
+              )}
             </div>
             <div className="flex flex-wrap gap-2">
               {subCategories.map(sub => (
-                <div key={sub} className="relative">
-                  <button
-                    onClick={() => !editingSubCat && setSubCategory(sub === subCategory ? '' : sub)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                      subCategory === sub ? 'bg-[#27ae60] text-white border-[#27ae60]' : 'bg-white text-[#4a5568] border-gray-200 hover:border-[#27ae60]'
-                    } ${editingSubCat ? 'pr-6' : ''}`}
-                  >
-                    {sub}
-                  </button>
-                  {editingSubCat && (
-                    <button
-                      onClick={() => removeSubCategory(sub)}
-                      className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center"
-                    >
-                      <X size={9} />
-                    </button>
-                  )}
-                </div>
+                <button
+                  key={sub}
+                  onClick={() => setSubCategory(sub === subCategory ? '' : sub)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                    subCategory === sub
+                      ? 'bg-[#27ae60] text-white border-[#27ae60]'
+                      : 'bg-white text-[#4a5568] border-gray-200 hover:border-[#27ae60]'
+                  }`}
+                >
+                  {sub}
+                </button>
               ))}
-              {editingSubCat && (
-                <div className="flex items-center gap-1">
-                  <input
-                    type="text"
-                    value={newSubCatInput}
-                    onChange={e => setNewSubCatInput(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && addSubCategory()}
-                    placeholder="새 키워드"
-                    className="w-20 px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-[#27ae60]"
-                  />
-                  <button onClick={addSubCategory} className="p-1.5 bg-[#27ae60] text-white rounded-lg">
-                    <Plus size={12} />
-                  </button>
-                </div>
-              )}
+              <div className="flex items-center gap-1">
+                <input
+                  type="text"
+                  value={newSubCatInput}
+                  onChange={e => setNewSubCatInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && addSubCategory()}
+                  placeholder="새 키워드"
+                  className="w-20 px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-[#27ae60]"
+                />
+                <button onClick={addSubCategory} className="p-1.5 bg-[#27ae60] text-white rounded-lg">
+                  <Plus size={12} />
+                </button>
+              </div>
             </div>
           </div>
 
