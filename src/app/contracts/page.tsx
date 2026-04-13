@@ -37,11 +37,13 @@ export default function ContractsPage() {
     }
   }
 
-  async function handleDelete(e: React.MouseEvent, id: string) {
+  async function handleDelete(e: React.MouseEvent, contract: Contract) {
     e.stopPropagation()
-    if (!confirm('계약서를 삭제하시겠습니까?')) return
-    await deleteContract(id)
-    setContracts(prev => prev.filter(c => c.id !== id))
+    const companyName = contract.companies?.name ?? ''
+    const label = companyName ? `${companyName} ` : ''
+    if (!confirm(`${label}계약서를 삭제하시겠습니까?`)) return
+    await deleteContract(contract.id)
+    setContracts(prev => prev.filter(c => c.id !== contract.id))
   }
 
   const filtered = contracts.filter(c => tab === 'all' || c.status === tab)
@@ -130,7 +132,7 @@ export default function ContractsPage() {
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     <button
-                      onClick={e => handleDelete(e, contract.id)}
+                      onClick={e => handleDelete(e, contract)}
                       className="p-1.5 text-gray-300 hover:text-red-400 transition-colors"
                     >
                       <Trash2 size={15} />

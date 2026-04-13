@@ -27,10 +27,12 @@ export default function QuotationsPage() {
 
   const filtered = tab === 'all' ? quotations : quotations.filter(q => q.status === (tab as string))
 
-  async function handleDelete(id: string, e: React.MouseEvent) {
+  async function handleDelete(q: Quotation, e: React.MouseEvent) {
     e.preventDefault()
-    if (!confirm('견적서를 삭제하시겠습니까?')) return
-    await deleteQuotation(id)
+    const companyName = (q.companies as any)?.name ?? ''
+    const label = companyName ? `${companyName} ` : ''
+    if (!confirm(`${label}견적서를 삭제하시겠습니까?`)) return
+    await deleteQuotation(q.id)
     await load()
   }
 
@@ -106,7 +108,7 @@ export default function QuotationsPage() {
                       </p>
                     </div>
                     <button
-                      onClick={e => handleDelete(q.id, e)}
+                      onClick={e => handleDelete(q, e)}
                       className="p-2 text-gray-300 hover:text-red-400 shrink-0"
                     >
                       <Trash2 size={16} />
