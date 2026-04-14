@@ -261,10 +261,10 @@ export default function NoteTemplatesPage() {
 
       {/* 추가/수정 모달 */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center pb-14 md:pb-0">
+        <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center">
           <div className="absolute inset-0 bg-black/50" onClick={closeForm} />
           <div
-            className="relative z-10 w-full md:w-[500px] bg-white rounded-t-2xl md:rounded-2xl shadow-xl flex flex-col max-h-[calc(100dvh-4rem-3.5rem)] md:max-h-[85vh]"
+            className="relative z-10 w-full md:w-[500px] bg-white rounded-t-2xl md:rounded-2xl shadow-xl flex flex-col max-h-[calc(100dvh-3.5rem)] md:max-h-[85vh]"
             onTouchMove={e => e.stopPropagation()}
           >
             {/* 핸들 (모바일) */}
@@ -376,7 +376,7 @@ export default function NoteTemplatesPage() {
 
       {/* 삭제 확인 모달 */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center">
           <div className="absolute inset-0 bg-black/50" onClick={() => setDeleteTarget(null)} />
           <div className="relative z-10 bg-white rounded-2xl shadow-xl p-6 w-80">
             <h3 className="font-bold text-[#1e2a3a] mb-2">템플릿 삭제</h3>
