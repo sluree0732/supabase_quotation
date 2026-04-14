@@ -18,6 +18,7 @@ const EMPTY_FORM: FormState = { category: '', title: '', content: '' }
 export default function NoteTemplatesPage() {
   const [templates, setTemplates] = useState<NoteTemplate[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [activeCategory, setActiveCategory] = useState<string>('전체')
 
   // 폼 상태
@@ -35,8 +36,13 @@ export default function NoteTemplatesPage() {
     setLoading(true)
     try {
       setTemplates(await getNoteTemplates())
-    } catch {
-      alert('불러오기 실패')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err)
+      if (msg.includes('relation') || msg.includes('does not exist') || msg.includes('42P01')) {
+        setLoadError('note_templates 테이블이 존재하지 않습니다.\nSupabase SQL Editor에서 테이블을 먼저 생성해주세요.')
+      } else {
+        setLoadError('데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.')
+      }
     } finally {
       setLoading(false)
     }
@@ -149,6 +155,22 @@ export default function NoteTemplatesPage() {
       {/* 템플릿 목록 */}
       {loading ? (
         <div className="text-center text-[#718096] py-20">불러오는 중...</div>
+      ) : loadError ? (
+        <div className="flex flex-col items-center py-20">
+          <div className="bg-red-50 border border-red-200 rounded-2xl px-6 py-5 max-w-md text-center">
+            <p className="text-red-600 font-semibold text-sm mb-2">테이블 연결 오류</p>
+            <p className="text-red-500 text-xs whitespace-pre-line leading-relaxed">{loadError}</p>
+            <code className="block mt-3 bg-red-100 rounded-lg px-3 py-2 text-[11px] text-red-700 text-left">
+              {`create table note_templates (\n  id uuid primary key default gen_random_uuid(),\n  category text not null,\n  title text not null,\n  content text not null,\n  sort_order int default 0,\n  created_at timestamptz default now()\n);`}
+            </code>
+            <button
+              onClick={() => { setLoadError(null); load() }}
+              className="mt-4 px-4 py-2 bg-red-500 text-white rounded-xl text-xs font-medium hover:bg-red-600 transition-colors"
+            >
+              다시 시도
+            </button>
+          </div>
+        </div>
       ) : displayed.length === 0 ? (
         <div className="text-center py-20">
           <BookText size={40} className="text-gray-300 mx-auto mb-3" />

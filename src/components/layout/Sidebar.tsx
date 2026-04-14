@@ -9,7 +9,7 @@ const NAV_ITEMS = [
   { href: '/companies', label: '업체 등록', icon: Building2 },
   { href: '/quotations', label: '견적서 작성', icon: FileText },
   { href: '/contracts', label: '계약서 작성', icon: FileSignature },
-  { href: '/note-templates', label: '비고 등록', icon: BookText },
+  { href: '/note-templates', label: '비고 관리', icon: BookText },
 ]
 
 interface SidebarProps {
