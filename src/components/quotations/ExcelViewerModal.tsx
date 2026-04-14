@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { X, Download, Loader2, Trash2 } from 'lucide-react'
+import { X, Download, Loader2, Trash2, Smartphone } from 'lucide-react'
 import type { QuotationFormState } from './QuotationForm'
+import { isInAppBrowser } from '@/lib/inAppBrowser'
 
 interface Props {
   state: QuotationFormState
@@ -35,7 +36,13 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
   )
   const [downloading, setDownloading] = useState(false)
   const [pdfDownloading, setPdfDownloading] = useState(false)
+  const [showInAppToast, setShowInAppToast] = useState(false)
   const pdfBlobRef = useRef<string | null>(null)
+
+  function showInAppGuide() {
+    setShowInAppToast(true)
+    setTimeout(() => setShowInAppToast(false), 4000)
+  }
 
   const total = items.reduce((s, i) => s + i.total_price, 0)
 
@@ -53,6 +60,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
   }
 
   async function handleDownload() {
+    if (isInAppBrowser()) { showInAppGuide(); return }
     setDownloading(true)
     try {
       const res = await fetch('/api/excel', {
@@ -87,6 +95,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
   }
 
   async function handlePdfDownload() {
+    if (isInAppBrowser()) { showInAppGuide(); return }
     setPdfDownloading(true)
     try {
       const res = await fetch('/api/pdf', {
@@ -128,6 +137,19 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-[70] flex flex-col bg-white">
+      {/* 인앱 브라우저 다운로드 안내 토스트 */}
+      {showInAppToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[80] w-[calc(100%-2rem)] max-w-sm bg-[#1e2a3a] text-white rounded-2xl shadow-xl px-5 py-4 flex items-start gap-3 animate-fade-in">
+          <Smartphone size={18} className="text-amber-400 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold mb-1">외부 브라우저에서 다운로드하세요</p>
+            <p className="text-xs text-white/70 leading-relaxed">
+              카카오톡 우측 하단 <span className="font-bold text-white">···</span> →<br />
+              <span className="font-bold text-amber-400">'다른 브라우저로 열기'</span> 선택 후 다운로드해주세요
+            </p>
+          </div>
+        </div>
+      )}
       {/* 헤더 */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0">
         <div>
