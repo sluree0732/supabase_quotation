@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Building2, ChevronRight, X, Plus, Sparkles, Loader2, Save, FileSignature, ChevronDown, ChevronUp } from 'lucide-react'
 import { BsFiletypeXlsx } from 'react-icons/bs'
 
@@ -117,6 +117,7 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
   const [showClientPicker, setShowClientPicker] = useState(false)
   const [editIdx, setEditIdx] = useState<number | null>(null)
   const [showAdd, setShowAdd] = useState(false)
+  const prefillAddedRef = useRef(false)
   const [toast, setToast] = useState<string | null>(null)
   const [isDirty, setIsDirty] = useState(false)
   const [showExcelViewer, setShowExcelViewer] = useState(false)
@@ -137,7 +138,8 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
   }
 
   useEffect(() => {
-    if (!itemPrefill) return
+    if (!itemPrefill || prefillAddedRef.current) return
+    prefillAddedRef.current = true
     set({
       items: [{
         category: itemPrefill.category ?? '',
@@ -150,7 +152,7 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
         sort_order: 0,
       }]
     })
-  }, [])
+  }, [itemPrefill])
 
   function updateItem(idx: number, data: Omit<QuotationItem, 'id' | 'quotation_id' | 'sort_order'>) {
     set({ items: state.items.map((it, i) => i === idx ? { ...it, ...data } : it) })
