@@ -9,17 +9,9 @@ import {
   updateNoteTemplate,
   deleteNoteTemplate,
 } from '@/lib/noteTemplates'
+import { getCategories } from '@/lib/categories'
 
 const DEFAULT_CATEGORIES = ['기획', '디자인', '개발', '마케팅', '광고', '영상', '운영', '유지보수', '기타']
-const LS_CATEGORIES = 'item-categories'
-
-function loadCategories(): string[] {
-  if (typeof window === 'undefined') return DEFAULT_CATEGORIES
-  try {
-    const stored = localStorage.getItem(LS_CATEGORIES)
-    return stored ? JSON.parse(stored) : DEFAULT_CATEGORIES
-  } catch { return DEFAULT_CATEGORIES }
-}
 
 type FormState = { category: string; title: string; content: string }
 const EMPTY_FORM: FormState = { category: '', title: '', content: '' }
@@ -41,7 +33,9 @@ export default function NoteTemplatesPage() {
   const [deleteTarget, setDeleteTarget] = useState<NoteTemplate | null>(null)
 
   useEffect(() => {
-    setCategories(loadCategories())
+    getCategories()
+      .then(cats => setCategories(cats.length > 0 ? cats : DEFAULT_CATEGORIES))
+      .catch(() => setCategories(DEFAULT_CATEGORIES))
     load()
   }, [])
 

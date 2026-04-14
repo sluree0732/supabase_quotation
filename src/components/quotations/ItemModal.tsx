@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { X, Sparkles, Loader2, Plus, Pencil, Trash2, ChevronDown } from 'lucide-react'
 import type { QuotationItem, NoteTemplate } from '@/types'
 import { getNoteTemplates } from '@/lib/noteTemplates'
+import { getCategories, addCategory as addCategoryToDb, removeCategory as removeCategoryFromDb } from '@/lib/categories'
 
 const DEFAULT_CATEGORIES = ['기획', '디자인', '개발', '마케팅', '광고', '영상', '운영', '유지보수', '기타']
 const DEFAULT_SUB_CATEGORIES_MAP: Record<string, string[]> = {
@@ -68,10 +69,17 @@ export default function ItemModal({ item, onSave, onUpdate, onDelete, onClose, i
   const [note, setNote] = useState(item?.note ?? '')
 
   // ── 키워드 관리 ─────────────────────────────────────────
-  const [categories, setCategories] = useState<string[]>(() => loadKeywords(LS_CATEGORIES, DEFAULT_CATEGORIES))
+  const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES)
   const [subCategoriesMap, setSubCategoriesMap] = useState<Record<string, string[]>>({})
   const [newCatInput, setNewCatInput] = useState('')
   const [newSubCatInput, setNewSubCatInput] = useState('')
+
+  // 대분류 목록 Supabase에서 로드 (실패 시 localStorage 폴백)
+  useEffect(() => {
+    getCategories()
+      .then(setCategories)
+      .catch(() => setCategories(loadKeywords(LS_CATEGORIES, DEFAULT_CATEGORIES)))
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // 대분류가 선택되면 해당 대분류의 상세 분류를 map에 로드
   useEffect(() => {
@@ -123,20 +131,28 @@ export default function ItemModal({ item, onSave, onUpdate, onDelete, onClose, i
   }, [])
 
   // ── 키워드 추가/삭제 ─────────────────────────────────────
-  function addCategory() {
+  async function addCategory() {
     const v = newCatInput.trim()
     if (!v || categories.includes(v)) return
     const next = [...categories, v]
-    setCategories(next)
-    saveKeywords(LS_CATEGORIES, next)
+    setCategories(next)  // 낙관적 업데이트
     setNewCatInput('')
+    try {
+      await addCategoryToDb(v, next.length)
+    } catch {
+      setCategories(categories)  // 실패 시 롤백
+    }
   }
 
-  function removeCategory(cat: string) {
+  async function removeCategory(cat: string) {
     const next = categories.filter(c => c !== cat)
-    setCategories(next)
-    saveKeywords(LS_CATEGORIES, next)
+    setCategories(next)  // 낙관적 업데이트
     if (category === cat) setCategory('')
+    try {
+      await removeCategoryFromDb(cat)
+    } catch {
+      setCategories(categories)  // 실패 시 롤백
+    }
   }
 
   function addSubCategory() {
