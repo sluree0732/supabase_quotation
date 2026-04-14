@@ -5,10 +5,20 @@ import { X, Sparkles, Loader2, Plus, Pencil, Trash2 } from 'lucide-react'
 import type { QuotationItem } from '@/types'
 
 const DEFAULT_CATEGORIES = ['기획', '디자인', '개발', '마케팅', '광고', '영상', '운영', '유지보수', '기타']
-const DEFAULT_SUB_CATEGORIES = ['기획서', 'PM', '전략', '디자인', '개발', '운영', '관리', '컨설팅']
+const DEFAULT_SUB_CATEGORIES_MAP: Record<string, string[]> = {
+  '기획': ['기획서', 'PM', '전략', '요구사항 분석', '컨설팅'],
+  '디자인': ['UI/UX', '브랜딩', '인쇄물', '모션'],
+  '개발': ['프론트엔드', '백엔드', '앱', 'API', 'DB'],
+  '마케팅': ['SNS', '콘텐츠', '광고', 'SEO'],
+  '광고': ['배너', 'GDN', '키워드 광고', 'SNS 광고'],
+  '영상': ['촬영', '편집', '모션그래픽', '자막'],
+  '운영': ['운영 관리', '고객 대응', '데이터 분석'],
+  '유지보수': ['기술 지원', '업데이트', '모니터링'],
+  '기타': ['기타'],
+}
 
 const LS_CATEGORIES = 'item-categories'
-const LS_SUB_CATEGORIES = 'item-sub-categories'
+const LS_SUB_CATEGORIES_PREFIX = 'item-sub-categories-'
 
 function loadKeywords(key: string, defaults: string[]): string[] {
   if (typeof window === 'undefined') return defaults
@@ -20,6 +30,18 @@ function loadKeywords(key: string, defaults: string[]): string[] {
 
 function saveKeywords(key: string, list: string[]) {
   try { localStorage.setItem(key, JSON.stringify(list)) } catch {}
+}
+
+function loadSubCategories(cat: string): string[] {
+  if (!cat || typeof window === 'undefined') return DEFAULT_SUB_CATEGORIES_MAP[cat] ?? []
+  try {
+    const stored = localStorage.getItem(LS_SUB_CATEGORIES_PREFIX + cat)
+    return stored ? JSON.parse(stored) : (DEFAULT_SUB_CATEGORIES_MAP[cat] ?? [])
+  } catch { return DEFAULT_SUB_CATEGORIES_MAP[cat] ?? [] }
+}
+
+function saveSubCategoriesForCat(cat: string, list: string[]) {
+  try { localStorage.setItem(LS_SUB_CATEGORIES_PREFIX + cat, JSON.stringify(list)) } catch {}
 }
 
 interface Props {
@@ -46,9 +68,18 @@ export default function ItemModal({ item, onSave, onUpdate, onDelete, onClose, i
 
   // ── 키워드 관리 ─────────────────────────────────────────
   const [categories, setCategories] = useState<string[]>(() => loadKeywords(LS_CATEGORIES, DEFAULT_CATEGORIES))
-  const [subCategories, setSubCategories] = useState<string[]>(() => loadKeywords(LS_SUB_CATEGORIES, DEFAULT_SUB_CATEGORIES))
+  const [subCategoriesMap, setSubCategoriesMap] = useState<Record<string, string[]>>({})
   const [newCatInput, setNewCatInput] = useState('')
   const [newSubCatInput, setNewSubCatInput] = useState('')
+
+  // 대분류가 선택되면 해당 대분류의 상세 분류를 map에 로드
+  useEffect(() => {
+    if (!category) return
+    if (subCategoriesMap[category] !== undefined) return
+    setSubCategoriesMap(prev => ({ ...prev, [category]: loadSubCategories(category) }))
+  }, [category]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const currentSubCategories = category ? (subCategoriesMap[category] ?? []) : []
 
   // ── 항목 목록 / 네비게이션 ──────────────────────────────
   const [aiLoading, setAiLoading] = useState(false)
@@ -87,18 +118,20 @@ export default function ItemModal({ item, onSave, onUpdate, onDelete, onClose, i
   }
 
   function addSubCategory() {
+    if (!category) return
     const v = newSubCatInput.trim()
-    if (!v || subCategories.includes(v)) return
-    const next = [...subCategories, v]
-    setSubCategories(next)
-    saveKeywords(LS_SUB_CATEGORIES, next)
+    if (!v || currentSubCategories.includes(v)) return
+    const next = [...currentSubCategories, v]
+    setSubCategoriesMap(prev => ({ ...prev, [category]: next }))
+    saveSubCategoriesForCat(category, next)
     setNewSubCatInput('')
   }
 
   function removeSubCategory(sub: string) {
-    const next = subCategories.filter(s => s !== sub)
-    setSubCategories(next)
-    saveKeywords(LS_SUB_CATEGORIES, next)
+    if (!category) return
+    const next = currentSubCategories.filter(s => s !== sub)
+    setSubCategoriesMap(prev => ({ ...prev, [category]: next }))
+    saveSubCategoriesForCat(category, next)
     if (subCategory === sub) setSubCategory('')
   }
 
@@ -301,7 +334,11 @@ export default function ItemModal({ item, onSave, onUpdate, onDelete, onClose, i
               {categories.map(cat => (
                 <button
                   key={cat}
-                  onClick={() => setCategory(cat === category ? '' : cat)}
+                  onClick={() => {
+                    const next = cat === category ? '' : cat
+                    setCategory(next)
+                    setSubCategory('')
+                  }}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                     category === cat
                       ? 'bg-[#2980b9] text-white border-[#2980b9]'
@@ -328,9 +365,12 @@ export default function ItemModal({ item, onSave, onUpdate, onDelete, onClose, i
           </div>
 
           {/* 상세 분류 */}
-          <div className="space-y-1.5">
+          <div className={`space-y-1.5 ${!category ? 'opacity-40 pointer-events-none' : ''}`}>
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-[#4a5568]">상세 분류</label>
+              <label className="text-sm font-medium text-[#4a5568]">
+                상세 분류
+                {!category && <span className="ml-1.5 text-xs font-normal text-[#a0aec0]">(대분류를 먼저 선택하세요)</span>}
+              </label>
               {subCategory && (
                 <button
                   onClick={() => removeSubCategory(subCategory)}
@@ -341,7 +381,7 @@ export default function ItemModal({ item, onSave, onUpdate, onDelete, onClose, i
               )}
             </div>
             <div className="flex flex-wrap gap-2">
-              {subCategories.map(sub => (
+              {currentSubCategories.map(sub => (
                 <button
                   key={sub}
                   onClick={() => setSubCategory(sub === subCategory ? '' : sub)}
