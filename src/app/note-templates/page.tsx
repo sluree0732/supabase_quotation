@@ -10,13 +10,23 @@ import {
   deleteNoteTemplate,
 } from '@/lib/noteTemplates'
 
-const CATEGORIES = ['기획', '디자인', '개발', '마케팅', '광고', '영상', '운영', '유지보수', '기타']
+const DEFAULT_CATEGORIES = ['기획', '디자인', '개발', '마케팅', '광고', '영상', '운영', '유지보수', '기타']
+const LS_CATEGORIES = 'item-categories'
+
+function loadCategories(): string[] {
+  if (typeof window === 'undefined') return DEFAULT_CATEGORIES
+  try {
+    const stored = localStorage.getItem(LS_CATEGORIES)
+    return stored ? JSON.parse(stored) : DEFAULT_CATEGORIES
+  } catch { return DEFAULT_CATEGORIES }
+}
 
 type FormState = { category: string; title: string; content: string }
 const EMPTY_FORM: FormState = { category: '', title: '', content: '' }
 
 export default function NoteTemplatesPage() {
   const [templates, setTemplates] = useState<NoteTemplate[]>([])
+  const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [activeCategory, setActiveCategory] = useState<string>('전체')
@@ -30,7 +40,10 @@ export default function NoteTemplatesPage() {
   // 삭제 확인
   const [deleteTarget, setDeleteTarget] = useState<NoteTemplate | null>(null)
 
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    setCategories(loadCategories())
+    load()
+  }, [])
 
   async function load() {
     setLoading(true)
@@ -110,7 +123,7 @@ export default function NoteTemplatesPage() {
     }
   }
 
-  const categoryTabs = ['전체', ...CATEGORIES]
+  const categoryTabs = ['전체', ...categories]
 
   return (
     <div className="flex-1 min-h-screen bg-[#f8fafc] p-6">
@@ -254,7 +267,7 @@ export default function NoteTemplatesPage() {
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-[#4a5568]">대분류 *</label>
                 <div className="flex flex-wrap gap-2">
-                  {CATEGORIES.map(cat => (
+                  {categories.map(cat => (
                     <button
                       key={cat}
                       onClick={() => setForm(prev => ({ ...prev, category: cat }))}
