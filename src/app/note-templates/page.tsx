@@ -232,7 +232,7 @@ export default function NoteTemplatesPage() {
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
           <div className="absolute inset-0 bg-black/50" onClick={closeForm} />
-          <div className="relative z-10 w-full md:w-[500px] bg-white rounded-t-2xl md:rounded-2xl shadow-xl flex flex-col max-h-[90vh]">
+          <div className="relative z-10 w-full md:w-[500px] bg-white rounded-t-2xl md:rounded-2xl shadow-xl flex flex-col max-h-[calc(100dvh-4rem)] md:max-h-[85vh]">
             {/* 핸들 (모바일) */}
             <div className="md:hidden flex justify-center pt-3 pb-1">
               <div className="w-10 h-1 bg-gray-300 rounded-full" />
@@ -249,7 +249,7 @@ export default function NoteTemplatesPage() {
             </div>
 
             {/* 폼 */}
-            <div className="px-5 py-4 space-y-4 overflow-y-auto">
+            <div className="px-5 py-4 space-y-4 overflow-y-auto flex-1">
               {/* 대분류 선택 */}
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-[#4a5568]">대분류 *</label>
@@ -297,7 +297,7 @@ export default function NoteTemplatesPage() {
             </div>
 
             {/* 버튼 */}
-            <div className="px-5 py-4 border-t border-gray-100 flex gap-2">
+            <div className="px-5 py-4 border-t border-gray-100 flex gap-2 shrink-0">
               <button
                 onClick={closeForm}
                 className="flex-1 py-3 rounded-xl border border-gray-200 text-[#4a5568] font-medium text-sm"
