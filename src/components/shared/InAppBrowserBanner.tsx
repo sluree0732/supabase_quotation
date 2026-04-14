@@ -6,11 +6,13 @@ import { AlertTriangle, X, Copy, ExternalLink } from 'lucide-react'
 function detectInAppBrowser(): boolean {
   if (typeof window === 'undefined') return false
   const ua = navigator.userAgent
-  // KakaoTalk, Facebook, Instagram, Line, Naver 앱 등
   if (/KAKAOTALK|KAKAO|Line\/|FBAN|FBAV|Instagram|NaverApp|Snapchat/i.test(ua)) return true
-  // iOS에서 Safari 없이 WebKit만 있는 경우 (일반적인 인앱 브라우저 패턴)
   if (/iPhone|iPod|iPad/.test(ua) && /WebKit/.test(ua) && !/Safari/.test(ua)) return true
   return false
+}
+
+function isAndroid(): boolean {
+  return /Android/i.test(navigator.userAgent)
 }
 
 export default function InAppBrowserBanner() {
@@ -24,10 +26,19 @@ export default function InAppBrowserBanner() {
   if (!show) return null
 
   function handleOpenExternal() {
-    // _blank 타겟으로 열기 시도 (Android 대부분, iOS 일부 환경에서 동작)
-    const opened = window.open(window.location.href, '_blank')
-    // 팝업이 차단되거나 실패한 경우 URL 복사로 안내
-    if (!opened) handleCopy()
+    const url = window.location.href
+
+    if (isAndroid()) {
+      // Android: intent:// 스킴으로 기본 브라우저(Chrome 등)에서 강제로 열기
+      // S.browser_fallback_url: Chrome 미설치 시 폴백 URL
+      const host = url.replace(/^https?:\/\//, '')
+      const intentUrl = `intent://${host}#Intent;scheme=https;action=android.intent.action.VIEW;S.browser_fallback_url=${encodeURIComponent(url)};end`
+      window.location.href = intentUrl
+    } else {
+      // iOS: window.open 시도 (동작 안 할 수 있음 → 링크 복사 안내)
+      const opened = window.open(url, '_blank')
+      if (!opened) handleCopy()
+    }
   }
 
   async function handleCopy() {
@@ -36,7 +47,6 @@ export default function InAppBrowserBanner() {
       setCopied(true)
       setTimeout(() => setCopied(false), 2500)
     } catch {
-      // clipboard API 미지원 시 수동 선택 가능하도록 prompt 사용
       window.prompt('아래 링크를 복사하세요:', window.location.href)
     }
   }
