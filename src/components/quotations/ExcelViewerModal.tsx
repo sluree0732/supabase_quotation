@@ -151,7 +151,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
             </div>
           </div>
           <img
-            src="/images/kakao-guide.png"
+            src="/images/kakao_inapp.png"
             alt="다른 브라우저로 열기 안내"
             className="w-full object-cover"
           />
