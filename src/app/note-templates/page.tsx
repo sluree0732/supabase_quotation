@@ -283,7 +283,7 @@ export default function NoteTemplatesPage() {
             </div>
 
             {/* 폼 */}
-            <div className="px-5 py-4 space-y-4 overflow-y-auto flex-1">
+            <div className="px-5 py-4 space-y-4 overflow-y-auto flex-1 min-h-0">
               {/* 대분류 선택 */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
