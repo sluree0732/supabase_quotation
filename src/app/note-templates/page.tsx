@@ -40,6 +40,11 @@ export default function NoteTemplatesPage() {
     load()
   }, [])
 
+  useEffect(() => {
+    document.body.style.overflow = showForm ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [showForm])
+
   async function load() {
     setLoading(true)
     try {
@@ -258,7 +263,10 @@ export default function NoteTemplatesPage() {
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
           <div className="absolute inset-0 bg-black/50" onClick={closeForm} />
-          <div className="relative z-10 w-full md:w-[500px] bg-white rounded-t-2xl md:rounded-2xl shadow-xl flex flex-col max-h-[calc(100dvh-4rem)] md:max-h-[85vh]">
+          <div
+            className="relative z-10 w-full md:w-[500px] bg-white rounded-t-2xl md:rounded-2xl shadow-xl flex flex-col max-h-[calc(100dvh-4rem)] md:max-h-[85vh]"
+            onTouchMove={e => e.stopPropagation()}
+          >
             {/* 핸들 (모바일) */}
             <div className="md:hidden flex justify-center pt-3 pb-1">
               <div className="w-10 h-1 bg-gray-300 rounded-full" />
