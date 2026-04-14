@@ -91,7 +91,7 @@ export default function HomePage() {
           <Link
             key={href}
             href={href}
-            className="flex-1 bg-white rounded-2xl border-2 border-[#e2e8f0] p-3 md:p-6 flex flex-col gap-1.5 md:gap-3 hover:border-[#2980b9] transition-colors shadow-sm active:scale-95"
+            className="bg-white rounded-2xl border-2 border-[#e2e8f0] p-3 md:p-5 flex flex-col gap-1.5 md:gap-3 hover:border-[#2980b9] transition-colors shadow-sm active:scale-95"
           >
             <div className="flex items-center justify-between">
               <div

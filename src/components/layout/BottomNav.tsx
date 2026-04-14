@@ -2,13 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Building2, FileText, FileSignature } from 'lucide-react'
+import { Home, Building2, FileText, FileSignature, BookText } from 'lucide-react'
 
 const NAV_ITEMS = [
   { href: '/', label: '홈', icon: Home },
   { href: '/companies', label: '업체', icon: Building2 },
   { href: '/quotations', label: '견적서', icon: FileText },
   { href: '/contracts', label: '계약서', icon: FileSignature },
+  { href: '/note-templates', label: '비고', icon: BookText },
 ]
 
 interface BottomNavProps {
@@ -26,12 +27,12 @@ export default function BottomNav({ draftCount }: BottomNavProps) {
           <Link
             key={href}
             href={href}
-            className={`flex-1 flex flex-col items-center justify-center py-2 gap-1 text-xs transition-colors relative ${
+            className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-[10px] transition-colors relative ${
               isActive ? 'text-[#5dade2]' : 'text-[#a0aec0]'
             }`}
           >
             <div className="relative">
-              <Icon size={22} />
+              <Icon size={20} />
             </div>
             <span>{label}</span>
           </Link>
