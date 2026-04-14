@@ -87,12 +87,28 @@ function ContractPage() {
       const raw = sessionStorage.getItem('note_prefill')
       if (raw) {
         try {
-          setItemPrefill(JSON.parse(raw))
-          setShowAdd(true)
-        } catch {}
+          const prefill: ItemPrefill = JSON.parse(raw)
+          setItemPrefill(prefill)
+          setForm({
+            ...INITIAL,
+            items: [{
+              category: prefill.category ?? '',
+              item_name: prefill.itemName ?? '',
+              unit_price: 0,
+              total_price: 0,
+              note: prefill.note ?? '',
+              sub_category: '',
+              period: 0,
+              sort_order: 0,
+            }]
+          })
+        } catch {
+          setForm(INITIAL)
+        }
         sessionStorage.removeItem('note_prefill')
+      } else {
+        setForm(INITIAL)
       }
-      setForm(INITIAL)
       setLoading(false)
       return
     }
