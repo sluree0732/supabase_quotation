@@ -116,7 +116,6 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
   const [showClientPicker, setShowClientPicker] = useState(false)
   const [editIdx, setEditIdx] = useState<number | null>(null)
   const [showAdd, setShowAdd] = useState(false)
-  const [aiAllLoading, setAiAllLoading] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [isDirty, setIsDirty] = useState(false)
   const [showExcelViewer, setShowExcelViewer] = useState(false)
@@ -142,23 +141,6 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
 
   function deleteItem(idx: number) {
     set({ items: state.items.filter((_, i) => i !== idx).map((it, i) => ({ ...it, sort_order: i })) })
-  }
-
-  async function handleAiAll() {
-    if (!state.items.length) { alert('항목을 먼저 추가해주세요.'); return }
-    setAiAllLoading(true)
-    try {
-      const res = await fetch('/api/gemini', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: state.items.map(i => ({ category: i.category, item_name: i.item_name })) }),
-      })
-      const json = await res.json()
-      if (json.notes) {
-        set({ items: state.items.map((it, i) => ({ ...it, note: json.notes[i] || it.note })) })
-      }
-    } catch { alert('AI 생성 실패') }
-    finally { setAiAllLoading(false) }
   }
 
   function showToast(msg: string) {
@@ -302,14 +284,6 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
             title="견적 항목"
             action={
               <div className="flex items-center gap-2">
-                <button
-                  onClick={handleAiAll}
-                  disabled={aiAllLoading || !state.items.length}
-                  className="flex items-center gap-1.5 text-xs text-[#8e44ad] font-medium border border-[#8e44ad]/30 rounded-lg px-2.5 py-1.5 disabled:opacity-40"
-                >
-                  {aiAllLoading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                  전체 AI 비고
-                </button>
                 <button
                   onClick={() => setShowAdd(true)}
                   className="flex items-center gap-1.5 bg-[#2980b9] text-white px-3 py-1.5 rounded-lg text-xs font-semibold"
