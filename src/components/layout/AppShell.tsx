@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Sidebar from './Sidebar'
 import BottomNav from './BottomNav'
+import InAppBrowserBanner from '@/components/shared/InAppBrowserBanner'
 import { supabase } from '@/lib/supabase'
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
@@ -31,6 +32,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen bg-[#f5f6fa]">
       <Sidebar draftCount={draftCount} />
       <main className="flex-1 pb-16 md:pb-0 min-w-0">
+        <InAppBrowserBanner />
         {children}
       </main>
       <BottomNav draftCount={draftCount} />
