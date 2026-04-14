@@ -10,7 +10,7 @@ import {
 } from '@/lib/contracts'
 import { getQuotationWithItems } from '@/lib/quotations'
 import CompanyPickerModal from '@/components/quotations/CompanyPickerModal'
-import ItemModal from '@/components/quotations/ItemModal'
+import ItemModal, { type ItemPrefill } from '@/components/quotations/ItemModal'
 import ContractPdfViewerModal from '@/components/contracts/ContractPdfViewerModal'
 import RecipientCombobox from '@/components/shared/RecipientCombobox'
 
@@ -72,6 +72,7 @@ function ContractPage() {
   const [showAdd, setShowAdd] = useState(false)
   const [editIdx, setEditIdx] = useState<number | null>(null)
   const [toast, setToast] = useState<string | null>(null)
+  const [itemPrefill, setItemPrefill] = useState<ItemPrefill | undefined>(undefined)
 
   function showToast(msg: string) {
     setToast(msg)
@@ -83,6 +84,14 @@ function ContractPage() {
 
   useEffect(() => {
     if (!editId && !quotationId) {
+      const raw = sessionStorage.getItem('note_prefill')
+      if (raw) {
+        try {
+          setItemPrefill(JSON.parse(raw))
+          setShowAdd(true)
+        } catch {}
+        sessionStorage.removeItem('note_prefill')
+      }
       setForm(INITIAL)
       setLoading(false)
       return
@@ -421,10 +430,11 @@ function ContractPage() {
       )}
       {showAdd && (
         <ItemModal
+          prefill={itemPrefill}
           onSave={addItem}
           onUpdate={(idx, data) => updateItem(idx, data)}
           items={form.items}
-          onClose={() => setShowAdd(false)}
+          onClose={() => { setShowAdd(false); setItemPrefill(undefined) }}
         />
       )}
       {editIdx !== null && (

@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Plus, Trash2, Pencil, BookText, X, Check } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Plus, Trash2, Pencil, BookText, X, Check, FileText, FileSignature } from 'lucide-react'
 import type { NoteTemplate } from '@/types'
 import {
   getNoteTemplates,
@@ -17,11 +18,13 @@ type FormState = { category: string; title: string; content: string }
 const EMPTY_FORM: FormState = { category: '', title: '', content: '' }
 
 export default function NoteTemplatesPage() {
+  const router = useRouter()
   const [templates, setTemplates] = useState<NoteTemplate[]>([])
   const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [activeCategory, setActiveCategory] = useState<string>('전체')
+  const [selectedId, setSelectedId] = useState<string | null>(null)
 
   // 폼 상태
   const [showForm, setShowForm] = useState(false)
@@ -141,6 +144,15 @@ export default function NoteTemplatesPage() {
     }
   }
 
+  function handleUseTemplate(t: NoteTemplate, type: 'quotation' | 'contract') {
+    sessionStorage.setItem('note_prefill', JSON.stringify({
+      category: t.category,
+      itemName: t.title,
+      note: t.content,
+    }))
+    router.push(type === 'quotation' ? '/quotations/new' : '/contracts/new')
+  }
+
   const categoryTabs = ['전체', ...categories]
 
   return (
@@ -222,38 +234,67 @@ export default function NoteTemplatesPage() {
             <span className="text-right">관리</span>
           </div>
           {displayed.map((t, i) => (
-            <div
-              key={t.id}
-              className={`grid grid-cols-[120px_1fr_80px] gap-4 px-5 py-3.5 items-center hover:bg-[#f8fafc] transition-colors ${
-                i !== displayed.length - 1 ? 'border-b border-gray-50' : ''
-              }`}
-            >
-              {/* 대분류 */}
-              <span className="shrink-0 bg-[#ebf5fb] text-[#2980b9] text-[10px] font-medium px-2.5 py-1 rounded-full w-fit">
-                {t.category}
-              </span>
+            <div key={t.id}>
+              <div
+                onClick={() => setSelectedId(t.id === selectedId ? null : t.id)}
+                className={`grid grid-cols-[120px_1fr_80px] gap-4 px-5 py-3.5 items-center cursor-pointer transition-colors ${
+                  t.id === selectedId ? 'bg-[#ebf5fb]' : 'hover:bg-[#f8fafc]'
+                } ${i !== displayed.length - 1 || t.id === selectedId ? 'border-b border-gray-50' : ''}`}
+              >
+                {/* 대분류 */}
+                <span className="shrink-0 bg-[#ebf5fb] text-[#2980b9] text-[10px] font-medium px-2.5 py-1 rounded-full w-fit">
+                  {t.category}
+                </span>
 
-              {/* 제목 + 내용 미리보기 */}
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-[#1e2a3a] truncate">{t.title}</p>
-                <p className="text-xs text-[#718096] truncate mt-0.5">{t.content.replace(/\n/g, ' ')}</p>
+                {/* 제목 + 내용 미리보기 */}
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-[#1e2a3a] truncate">{t.title}</p>
+                  <p className="text-xs text-[#718096] truncate mt-0.5">{t.content.replace(/\n/g, ' ')}</p>
+                </div>
+
+                {/* 버튼 */}
+                <div className="flex items-center gap-1 justify-end shrink-0" onClick={e => e.stopPropagation()}>
+                  <button
+                    onClick={() => openEdit(t)}
+                    className="p-1.5 text-[#718096] hover:text-[#2980b9] hover:bg-[#ebf5fb] rounded-lg transition-colors"
+                  >
+                    <Pencil size={13} />
+                  </button>
+                  <button
+                    onClick={() => setDeleteTarget(t)}
+                    className="p-1.5 text-[#718096] hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
               </div>
 
-              {/* 버튼 */}
-              <div className="flex items-center gap-1 justify-end shrink-0">
-                <button
-                  onClick={() => openEdit(t)}
-                  className="p-1.5 text-[#718096] hover:text-[#2980b9] hover:bg-[#ebf5fb] rounded-lg transition-colors"
-                >
-                  <Pencil size={13} />
-                </button>
-                <button
-                  onClick={() => setDeleteTarget(t)}
-                  className="p-1.5 text-[#718096] hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                >
-                  <Trash2 size={13} />
-                </button>
-              </div>
+              {/* 액션 버튼 (행 선택 시 표시) */}
+              {t.id === selectedId && (
+                <div className={`flex items-center gap-2 px-5 py-3 bg-[#f0f7fd] ${i !== displayed.length - 1 ? 'border-b border-gray-50' : ''}`}>
+                  <span className="text-xs text-[#718096] mr-1">사용할 문서:</span>
+                  <button
+                    onClick={() => handleUseTemplate(t, 'quotation')}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#27ae60] text-white text-xs font-medium rounded-lg hover:bg-[#219a52] transition-colors"
+                  >
+                    <FileText size={12} />
+                    견적서
+                  </button>
+                  <button
+                    onClick={() => handleUseTemplate(t, 'contract')}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#8e44ad] text-white text-xs font-medium rounded-lg hover:bg-[#7d3c98] transition-colors"
+                  >
+                    <FileSignature size={12} />
+                    계약서
+                  </button>
+                  <button
+                    onClick={() => setSelectedId(null)}
+                    className="ml-auto p-1.5 text-[#718096] hover:text-gray-900 transition-colors"
+                  >
+                    <X size={13} />
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>

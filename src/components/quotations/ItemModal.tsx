@@ -46,8 +46,15 @@ function saveSubCategoriesForCat(cat: string, list: string[]) {
   try { localStorage.setItem(LS_SUB_CATEGORIES_PREFIX + cat, JSON.stringify(list)) } catch {}
 }
 
+export interface ItemPrefill {
+  category?: string
+  itemName?: string
+  note?: string
+}
+
 interface Props {
   item?: QuotationItem | null
+  prefill?: ItemPrefill
   onSave: (item: Omit<QuotationItem, 'id' | 'quotation_id' | 'sort_order'>) => void
   onUpdate?: (idx: number, item: Omit<QuotationItem, 'id' | 'quotation_id' | 'sort_order'>) => void
   onDelete?: () => void
@@ -58,15 +65,15 @@ interface Props {
 
 type Draft = { category: string; subCategory: string; itemName: string; unitPrice: number; note: string }
 
-export default function ItemModal({ item, onSave, onUpdate, onDelete, onClose, items, onAiAllResult }: Props) {
+export default function ItemModal({ item, prefill, onSave, onUpdate, onDelete, onClose, items, onAiAllResult }: Props) {
   const isEdit = !!item
 
   // ── 폼 상태 ─────────────────────────────────────────────
-  const [category, setCategory] = useState(item?.category ?? '')
+  const [category, setCategory] = useState(item?.category ?? prefill?.category ?? '')
   const [subCategory, setSubCategory] = useState(item?.sub_category ?? '')
-  const [itemName, setItemName] = useState(item?.item_name ?? '')
+  const [itemName, setItemName] = useState(item?.item_name ?? prefill?.itemName ?? '')
   const [unitPrice, setUnitPrice] = useState(item?.unit_price ?? 0)
-  const [note, setNote] = useState(item?.note ?? '')
+  const [note, setNote] = useState(item?.note ?? prefill?.note ?? '')
 
   // ── 키워드 관리 ─────────────────────────────────────────
   const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES)

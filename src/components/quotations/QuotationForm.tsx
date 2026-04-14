@@ -6,7 +6,7 @@ import { BsFiletypeXlsx } from 'react-icons/bs'
 
 import type { Company, CompanyInfo, QuotationItem, VatType } from '@/types'
 import CompanyPickerModal from './CompanyPickerModal'
-import ItemModal from './ItemModal'
+import ItemModal, { type ItemPrefill } from './ItemModal'
 import ExcelViewerModal from './ExcelViewerModal'
 import RecipientCombobox from '@/components/shared/RecipientCombobox'
 
@@ -31,6 +31,7 @@ interface Props {
   onSave: (state: QuotationFormState, status: 'draft' | 'saved') => Promise<void>
   onSaveSuccess: (status: 'draft' | 'saved') => void
   quotationId?: string
+  itemPrefill?: ItemPrefill
 }
 
 const VAT_OPTIONS: { value: VatType; label: string }[] = [
@@ -110,12 +111,12 @@ function CompanyInfoEditor({
   )
 }
 
-export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveSuccess, quotationId }: Props) {
+export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveSuccess, quotationId, itemPrefill }: Props) {
   const [state, setState] = useState<QuotationFormState>(initial)
   const [showSenderPicker, setShowSenderPicker] = useState(false)
   const [showClientPicker, setShowClientPicker] = useState(false)
   const [editIdx, setEditIdx] = useState<number | null>(null)
-  const [showAdd, setShowAdd] = useState(false)
+  const [showAdd, setShowAdd] = useState(!!itemPrefill)
   const [toast, setToast] = useState<string | null>(null)
   const [isDirty, setIsDirty] = useState(false)
   const [showExcelViewer, setShowExcelViewer] = useState(false)
@@ -427,6 +428,7 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
       )}
       {showAdd && (
         <ItemModal
+          prefill={itemPrefill}
           onSave={addItem}
           onUpdate={(idx, data) => updateItem(idx, data)}
           items={state.items}

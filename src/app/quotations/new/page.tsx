@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import type { VatType } from '@/types'
 import { createQuotation, updateQuotation, saveItems, getQuotationWithItems } from '@/lib/quotations'
 import QuotationForm, { type QuotationFormState } from '@/components/quotations/QuotationForm'
+import type { ItemPrefill } from '@/components/quotations/ItemModal'
 
 function today() {
   return new Date().toISOString().slice(0, 10)
@@ -32,9 +33,15 @@ function QuotationPage() {
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(!!editId)
   const [savedQuotationId, setSavedQuotationId] = useState<string | null>(null)
+  const [itemPrefill, setItemPrefill] = useState<ItemPrefill | undefined>(undefined)
 
   useEffect(() => {
     if (!editId) {
+      const raw = sessionStorage.getItem('note_prefill')
+      if (raw) {
+        try { setItemPrefill(JSON.parse(raw)) } catch {}
+        sessionStorage.removeItem('note_prefill')
+      }
       setFormState({ ...INITIAL, quoteDate: today() })
       setSavedQuotationId(null)
       setLoading(false)
@@ -127,6 +134,7 @@ function QuotationPage() {
         onSave={handleSave}
         onSaveSuccess={handleSaveSuccess}
         quotationId={editId ?? savedQuotationId ?? undefined}
+        itemPrefill={itemPrefill}
       />
     </div>
   )
