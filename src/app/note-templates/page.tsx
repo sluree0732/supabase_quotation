@@ -9,7 +9,7 @@ import {
   updateNoteTemplate,
   deleteNoteTemplate,
 } from '@/lib/noteTemplates'
-import { getCategories } from '@/lib/categories'
+import { getCategories, addCategory as addCategoryToDb, removeCategory as removeCategoryFromDb } from '@/lib/categories'
 
 const DEFAULT_CATEGORIES = ['기획', '디자인', '개발', '마케팅', '광고', '영상', '운영', '유지보수', '기타']
 
@@ -28,6 +28,7 @@ export default function NoteTemplatesPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<FormState>(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
+  const [newCatInput, setNewCatInput] = useState('')
 
   // 삭제 확인
   const [deleteTarget, setDeleteTarget] = useState<NoteTemplate | null>(null)
@@ -105,6 +106,24 @@ export default function NoteTemplatesPage() {
     } finally {
       setSaving(false)
     }
+  }
+
+  async function addCategory() {
+    const v = newCatInput.trim()
+    if (!v || categories.includes(v)) return
+    const next = [...categories, v]
+    setCategories(next)
+    setNewCatInput('')
+    try { await addCategoryToDb(v, next.length) }
+    catch { setCategories(categories) }
+  }
+
+  async function removeCategory(cat: string) {
+    const next = categories.filter(c => c !== cat)
+    setCategories(next)
+    if (form.category === cat) setForm(prev => ({ ...prev, category: '' }))
+    try { await removeCategoryFromDb(cat) }
+    catch { setCategories(categories) }
   }
 
   async function handleDelete(t: NoteTemplate) {
@@ -259,12 +278,22 @@ export default function NoteTemplatesPage() {
             <div className="px-5 py-4 space-y-4 overflow-y-auto flex-1">
               {/* 대분류 선택 */}
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-[#4a5568]">대분류 *</label>
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-[#4a5568]">대분류 *</label>
+                  {form.category && (
+                    <button
+                      onClick={() => removeCategory(form.category)}
+                      className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg border border-red-200 text-red-500 bg-red-50 hover:bg-red-100 transition-colors"
+                    >
+                      <Trash2 size={11} /> 삭제
+                    </button>
+                  )}
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {categories.map(cat => (
                     <button
                       key={cat}
-                      onClick={() => setForm(prev => ({ ...prev, category: cat }))}
+                      onClick={() => setForm(prev => ({ ...prev, category: prev.category === cat ? '' : cat }))}
                       className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                         form.category === cat
                           ? 'bg-[#2980b9] text-white border-[#2980b9]'
@@ -274,6 +303,19 @@ export default function NoteTemplatesPage() {
                       {cat}
                     </button>
                   ))}
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="text"
+                      value={newCatInput}
+                      onChange={e => setNewCatInput(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && addCategory()}
+                      placeholder="새 키워드"
+                      className="w-20 px-2 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-[#2980b9]"
+                    />
+                    <button onClick={addCategory} className="p-1.5 bg-[#2980b9] text-white rounded-lg">
+                      <Plus size={12} />
+                    </button>
+                  </div>
                 </div>
               </div>
 
