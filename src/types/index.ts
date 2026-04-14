@@ -107,3 +107,12 @@ export interface ContractWithItems extends Contract {
   items: ContractItem[]
   companies: Company | null
 }
+
+export interface NoteTemplate {
+  id: string
+  category: string
+  title: string
+  content: string
+  sort_order: number
+  created_at: string
+}

@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Sparkles, Loader2, Plus, Pencil, Trash2 } from 'lucide-react'
-import type { QuotationItem } from '@/types'
+import { X, Sparkles, Loader2, Plus, Pencil, Trash2, ChevronDown } from 'lucide-react'
+import type { QuotationItem, NoteTemplate } from '@/types'
+import { getNoteTemplates } from '@/lib/noteTemplates'
 
 const DEFAULT_CATEGORIES = ['기획', '디자인', '개발', '마케팅', '광고', '영상', '운영', '유지보수', '기타']
 const DEFAULT_SUB_CATEGORIES_MAP: Record<string, string[]> = {
@@ -80,6 +81,28 @@ export default function ItemModal({ item, onSave, onUpdate, onDelete, onClose, i
   }, [category]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const currentSubCategories = category ? (subCategoriesMap[category] ?? []) : []
+
+  // ── 비고 템플릿 ─────────────────────────────────────────
+  const [showTemplatePanel, setShowTemplatePanel] = useState(false)
+  const [templateList, setTemplateList] = useState<NoteTemplate[]>([])
+  const [templatesLoading, setTemplatesLoading] = useState(false)
+
+  async function openTemplatePanel() {
+    setShowTemplatePanel(v => !v)
+    if (templateList.length > 0) return
+    setTemplatesLoading(true)
+    try {
+      setTemplateList(await getNoteTemplates())
+    } catch {
+      alert('템플릿 불러오기 실패')
+    } finally {
+      setTemplatesLoading(false)
+    }
+  }
+
+  const filteredTemplates = category
+    ? templateList.filter(t => t.category === category)
+    : templateList
 
   // ── 항목 목록 / 네비게이션 ──────────────────────────────
   const [aiLoading, setAiLoading] = useState(false)
@@ -458,6 +481,17 @@ export default function ItemModal({ item, onSave, onUpdate, onDelete, onClose, i
                   </button>
                 )}
                 <button
+                  onClick={openTemplatePanel}
+                  className={`flex items-center gap-1 text-xs font-medium border rounded-lg px-2.5 py-1.5 transition-colors ${
+                    showTemplatePanel
+                      ? 'bg-[#27ae60] text-white border-[#27ae60]'
+                      : 'text-[#27ae60] border-[#27ae60]/30 bg-[#f0faf5] hover:bg-[#d5f0e3]'
+                  }`}
+                >
+                  {templatesLoading ? <Loader2 size={12} className="animate-spin" /> : <ChevronDown size={12} className={showTemplatePanel ? 'rotate-180 transition-transform' : 'transition-transform'} />}
+                  불러오기
+                </button>
+                <button
                   onClick={handleAiNote}
                   disabled={aiLoading}
                   className="flex items-center gap-1.5 text-xs text-[#8e44ad] font-medium border border-[#8e44ad]/30 rounded-lg px-2.5 py-1.5 bg-[#f9f0ff] hover:bg-[#f3e5ff] disabled:opacity-50 transition-colors"
@@ -467,10 +501,45 @@ export default function ItemModal({ item, onSave, onUpdate, onDelete, onClose, i
                 </button>
               </div>
             </div>
+
+            {/* 템플릿 선택 패널 */}
+            {showTemplatePanel && (
+              <div className="border border-[#27ae60]/30 rounded-xl bg-white shadow-sm overflow-hidden">
+                {templatesLoading ? (
+                  <div className="flex items-center justify-center py-4 text-xs text-[#718096]">
+                    <Loader2 size={14} className="animate-spin mr-1.5" /> 불러오는 중...
+                  </div>
+                ) : filteredTemplates.length === 0 ? (
+                  <div className="py-4 text-center text-xs text-[#718096]">
+                    {category ? `'${category}' 대분류의 템플릿이 없습니다.` : '등록된 템플릿이 없습니다.'}
+                    <span className="block mt-0.5 text-[#a0aec0]">비고 등록 메뉴에서 추가하세요.</span>
+                  </div>
+                ) : (
+                  <div className="max-h-48 overflow-y-auto divide-y divide-gray-50">
+                    {filteredTemplates.map(t => (
+                      <button
+                        key={t.id}
+                        onClick={() => { setNote(t.content); setShowTemplatePanel(false) }}
+                        className="w-full text-left px-3.5 py-2.5 hover:bg-[#f0faf5] transition-colors"
+                      >
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <span className="text-[10px] bg-[#ebf5fb] text-[#2980b9] px-1.5 py-0.5 rounded-full font-medium">
+                            {t.category}
+                          </span>
+                          <span className="text-xs font-semibold text-[#1e2a3a]">{t.title}</span>
+                        </div>
+                        <p className="text-[11px] text-[#718096] line-clamp-2 leading-relaxed">{t.content}</p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             <textarea
               value={note}
               onChange={e => setNote(e.target.value)}
-              placeholder="• 세부 내용 입력&#10;• AI 생성 버튼으로 자동 작성"
+              placeholder="• 세부 내용 입력&#10;• 불러오기 또는 AI 생성 버튼으로 자동 작성"
               rows={4}
               className="input-base resize-none"
             />
