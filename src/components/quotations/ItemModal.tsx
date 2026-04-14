@@ -52,7 +52,7 @@ interface Props {
   onDelete?: () => void
   onClose: (addedCount?: number, totalCount?: number) => void
   items?: QuotationItem[]
-  onAiAllResult?: (notes: string[]) => void
+  onAiAllResult?: (notes: string[]) => void  // 하위 호환성 유지
 }
 
 type Draft = { category: string; subCategory: string; itemName: string; unitPrice: number; note: string }
@@ -106,7 +106,6 @@ export default function ItemModal({ item, onSave, onUpdate, onDelete, onClose, i
 
   // ── 항목 목록 / 네비게이션 ──────────────────────────────
   const [aiLoading, setAiLoading] = useState(false)
-  const [aiAllLoading, setAiAllLoading] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [addedCount, setAddedCount] = useState(0)
   const [showList, setShowList] = useState(false)
@@ -232,27 +231,7 @@ export default function ItemModal({ item, onSave, onUpdate, onDelete, onClose, i
     onClose()
   }
 
-  async function handleAiAll() {
-    const currentHasContent = !!(category && itemName.trim())
-    const allItems = [
-      ...sessionItems.map(it => ({ category: it.category, item_name: it.item_name })),
-      ...(currentHasContent ? [{ category, item_name: itemName.trim() }] : []),
-    ]
-    if (!allItems.length) return
-    setAiAllLoading(true)
-    try {
-      const res = await fetch('/api/gemini', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ items: allItems }) })
-      const json = await res.json()
-      if (json.notes) {
-        const savedNotes = json.notes.slice(0, sessionItems.length)
-        if (savedNotes.length > 0) onAiAllResult?.(savedNotes)
-        if (currentHasContent && json.notes[sessionItems.length]) setNote(json.notes[sessionItems.length])
-      }
-    } catch { alert('AI 생성 실패') }
-    finally { setAiAllLoading(false) }
-  }
-
-  async function handleAiNote() {
+async function handleAiNote() {
     if (!itemName.trim()) { alert('상품명을 먼저 입력해주세요.'); return }
     setAiLoading(true)
     try {
@@ -470,16 +449,6 @@ export default function ItemModal({ item, onSave, onUpdate, onDelete, onClose, i
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium text-[#4a5568]">비고</label>
               <div className="flex items-center gap-1.5">
-                {!isEdit && !isEditingExisting && displayCount >= 1 && (
-                  <button
-                    onClick={handleAiAll}
-                    disabled={aiAllLoading}
-                    className="flex items-center gap-1 text-xs text-[#2980b9] font-medium border border-[#2980b9]/30 rounded-lg px-2.5 py-1.5 bg-[#f0f7fd] hover:bg-[#dbeef8] disabled:opacity-50 transition-colors"
-                  >
-                    {aiAllLoading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                    전체 AI 비고
-                  </button>
-                )}
                 <button
                   onClick={openTemplatePanel}
                   className={`flex items-center gap-1 text-xs font-medium border rounded-lg px-2.5 py-1.5 transition-colors ${
