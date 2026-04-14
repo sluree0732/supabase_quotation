@@ -261,10 +261,10 @@ export default function NoteTemplatesPage() {
 
       {/* 추가/수정 모달 */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
+        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center pb-14 md:pb-0">
           <div className="absolute inset-0 bg-black/50" onClick={closeForm} />
           <div
-            className="relative z-10 w-full md:w-[500px] bg-white rounded-t-2xl md:rounded-2xl shadow-xl flex flex-col max-h-[calc(100dvh-4rem)] md:max-h-[85vh]"
+            className="relative z-10 w-full md:w-[500px] bg-white rounded-t-2xl md:rounded-2xl shadow-xl flex flex-col max-h-[calc(100dvh-4rem-3.5rem)] md:max-h-[85vh]"
             onTouchMove={e => e.stopPropagation()}
           >
             {/* 핸들 (모바일) */}
