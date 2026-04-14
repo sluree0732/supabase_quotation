@@ -85,7 +85,7 @@ export default function ContractPdfViewerModal({ payload, onClose }: Props) {
             </div>
           </div>
           <img
-            src="/images/kakao_inapp.png"
+            src="/images/kakao_guide.png"
             alt="다른 브라우저로 열기 안내"
             className="w-full object-cover"
           />
