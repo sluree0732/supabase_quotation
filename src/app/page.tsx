@@ -2,17 +2,18 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Building2, FileText, FileSignature, ChevronRight } from 'lucide-react'
+import { Building2, FileText, FileSignature, BookText, ChevronRight } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 export default function HomePage() {
   const [draftCount, setDraftCount] = useState(0)
   const [companyCount, setCompanyCount] = useState(0)
   const [contractDraftCount, setContractDraftCount] = useState(0)
+  const [noteTemplateCount, setNoteTemplateCount] = useState(0)
 
   useEffect(() => {
     async function fetchCounts() {
-      const [draftRes, companyRes, contractDraftRes] = await Promise.all([
+      const [draftRes, companyRes, contractDraftRes, noteRes] = await Promise.all([
         supabase
           .from('quotations')
           .select('id', { count: 'exact', head: true })
@@ -24,10 +25,14 @@ export default function HomePage() {
           .from('contracts')
           .select('id', { count: 'exact', head: true })
           .eq('status', 'draft'),
+        supabase
+          .from('note_templates')
+          .select('id', { count: 'exact', head: true }),
       ])
       setDraftCount(draftRes.count ?? 0)
       setCompanyCount(companyRes.count ?? 0)
       setContractDraftCount(contractDraftRes.count ?? 0)
+      setNoteTemplateCount(noteRes.count ?? 0)
     }
     fetchCounts()
   }, [])
@@ -59,6 +64,15 @@ export default function HomePage() {
       badge: contractDraftCount > 0 ? `임시저장 ${contractDraftCount}건` : null,
       badgeColor: 'bg-red-500',
     },
+    {
+      href: '/note-templates',
+      icon: BookText,
+      color: '#e67e22',
+      label: '비고 관리',
+      desc: '비고 템플릿 등록 및 관리',
+      badge: noteTemplateCount > 0 ? `${noteTemplateCount}개` : null,
+      badgeColor: 'bg-[#e67e22]',
+    },
   ]
 
   return (
@@ -72,7 +86,7 @@ export default function HomePage() {
       </div>
 
       {/* 카드 */}
-      <div className="flex flex-col sm:flex-row gap-5 w-full max-w-2xl">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full max-w-3xl">
         {cards.map(({ href, icon: Icon, color, label, desc, badge, badgeColor }) => (
           <Link
             key={href}
