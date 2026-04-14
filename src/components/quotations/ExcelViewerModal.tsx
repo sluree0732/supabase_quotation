@@ -139,7 +139,8 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
     <div className="fixed inset-0 z-[70] flex flex-col bg-white">
       {/* 인앱 브라우저 다운로드 안내 토스트 */}
       {showInAppToast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[80] w-[calc(100%-2rem)] max-w-sm bg-[#1e2a3a] text-white rounded-2xl shadow-xl overflow-hidden animate-fade-in">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[80] w-[calc(100%-2rem)] max-w-sm">
+          <div className="bg-[#1e2a3a] text-white rounded-2xl shadow-xl overflow-hidden animate-slide-up">
           <div className="px-4 pt-4 pb-3 flex items-start gap-3">
             <Smartphone size={18} className="text-amber-400 shrink-0 mt-0.5" />
             <div>
@@ -155,6 +156,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
             alt="다른 브라우저로 열기 안내"
             className="w-full object-cover"
           />
+          </div>
         </div>
       )}
       {/* 헤더 */}
