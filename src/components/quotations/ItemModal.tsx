@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Sparkles, Loader2, Plus, Pencil, Trash2 } from 'lucide-react'
+import { X, Sparkles, Loader2, Plus, Pencil, Trash2, ChevronDown } from 'lucide-react'
 import type { QuotationItem, NoteTemplate } from '@/types'
 import { getNoteTemplates } from '@/lib/noteTemplates'
 import { getCategories, addCategory as addCategoryToDb, removeCategory as removeCategoryFromDb } from '@/lib/categories'
@@ -195,7 +195,6 @@ export default function ItemModal({ item, prefill, onSave, onUpdate, onDelete, o
     setUnitPrice(it.unit_price)
     setNote(it.note)
     setEditingIdx(idx)
-    setShowList(false)
   }
 
   function exitEditItem() {
