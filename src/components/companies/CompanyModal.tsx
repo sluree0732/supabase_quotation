@@ -8,6 +8,7 @@ import {
   getContacts, addContact, deleteContact,
 } from '@/lib/companies'
 import AddressModal from './AddressModal'
+import BusinessTypeSelector from './BusinessTypeSelector'
 
 interface CompanyModalProps {
   company?: Company | null
@@ -276,25 +277,12 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
             <div className="border-t border-gray-100" />
             <p className="text-xs font-semibold text-[#718096] uppercase tracking-wide">선택 정보</p>
 
-            <Field label="업태">
-              <input
-                type="text"
-                value={businessType}
-                onChange={e => setBusinessType(e.target.value)}
-                placeholder="예: 서비스업, 제조업"
-                className="input-base"
-              />
-            </Field>
-
-            <Field label="업종">
-              <input
-                type="text"
-                value={businessItem}
-                onChange={e => setBusinessItem(e.target.value)}
-                placeholder="예: 광고대행업, IT"
-                className="input-base"
-              />
-            </Field>
+            <BusinessTypeSelector
+              bizType={businessType}
+              bizItem={businessItem}
+              onBizTypeChange={setBusinessType}
+              onBizItemChange={setBusinessItem}
+            />
 
             <Field label="팩스번호">
               <input
