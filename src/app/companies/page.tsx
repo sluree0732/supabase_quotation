@@ -195,17 +195,19 @@ export default function CompaniesPage() {
 
             {/* PC: 테이블 */}
             <div className="hidden md:block p-6">
-              <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                <table className="w-full text-sm">
+              <div className="bg-white rounded-2xl border border-gray-100 overflow-x-auto">
+                <table className="min-w-[900px] w-full text-sm">
                   <thead>
                     <tr className="bg-gray-50 border-b border-gray-100">
                       {activeTab === 'all' && (
-                        <th className="text-left px-5 py-3 font-semibold text-[#4a5568]">구분</th>
+                        <th className="text-left px-5 py-3 font-semibold text-[#4a5568] w-20">구분</th>
                       )}
                       <th className="text-left px-5 py-3 font-semibold text-[#4a5568]">업체명</th>
-                      <th className="text-left px-5 py-3 font-semibold text-[#4a5568]">연락처</th>
-                      <th className="text-left px-5 py-3 font-semibold text-[#4a5568]">주소</th>
-                      <th className="text-left px-5 py-3 font-semibold text-[#4a5568]">업태</th>
+                      <th className="text-left px-5 py-3 font-semibold text-[#4a5568] w-36">연락처</th>
+                      <th className="text-left px-5 py-3 font-semibold text-[#4a5568] w-56">주소</th>
+                      <th className="text-left px-5 py-3 font-semibold text-[#4a5568] w-32">업태</th>
+                      <th className="text-left px-5 py-3 font-semibold text-[#4a5568] w-40">업종</th>
+                      <th className="text-left px-5 py-3 font-semibold text-[#4a5568] w-32">팩스번호</th>
                       <th className="w-12" />
                     </tr>
                   </thead>
@@ -215,14 +217,14 @@ export default function CompaniesPage() {
                         {/* 전체 탭 구분선 (PC) */}
                         {activeTab === 'all' && senderCount !== null && idx === 0 && senderCount > 0 && (
                           <tr key="sender-label-pc">
-                            <td colSpan={6} className="px-5 py-2 bg-[#f0f7fd]">
+                            <td colSpan={8} className="px-5 py-2 bg-[#f0f7fd]">
                               <span className="text-[11px] font-semibold text-[#2980b9] uppercase tracking-wide">자사 업체</span>
                             </td>
                           </tr>
                         )}
                         {activeTab === 'all' && senderCount !== null && idx === senderCount && senderCount > 0 && (
                           <tr key="client-label-pc">
-                            <td colSpan={6} className="px-5 py-2 bg-[#f9f4fd]">
+                            <td colSpan={8} className="px-5 py-2 bg-[#f9f4fd]">
                               <span className="text-[11px] font-semibold text-[#8e44ad] uppercase tracking-wide">광고주 업체</span>
                             </td>
                           </tr>
@@ -239,8 +241,10 @@ export default function CompaniesPage() {
                           )}
                           <td className="px-5 py-3.5 font-medium text-[#1e2a3a]">{company.name}</td>
                           <td className="px-5 py-3.5 text-[#718096]">{company.phone || '—'}</td>
-                          <td className="px-5 py-3.5 text-[#718096] max-w-xs truncate">{company.address || '—'}</td>
+                          <td className="px-5 py-3.5 text-[#718096] max-w-[14rem] truncate">{company.address || '—'}</td>
                           <td className="px-5 py-3.5 text-[#718096]">{company.business_type || '—'}</td>
+                          <td className="px-5 py-3.5 text-[#718096]">{company.business_item || '—'}</td>
+                          <td className="px-5 py-3.5 text-[#718096]">{company.fax || ''}</td>
                           <td className="px-3 py-3.5">
                             <button
                               onClick={e => { e.stopPropagation(); setDeleteTarget(company) }}
