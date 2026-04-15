@@ -157,7 +157,7 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
 
   // ── 자동저장 (이탈 시) ────────────────────────────────
   autoSaveRef.current = () => {
-    if (isDirty && state.recipient.trim() && state.items.length) {
+    if (isDirty && state.items.length) {
       onSave(state, 'draft', true).catch(() => {})
     }
   }
@@ -187,7 +187,6 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
   }
 
   async function handleSave(status: 'draft' | 'saved') {
-    if (!state.recipient.trim()) { alert('수신 담당자를 입력해주세요.'); return }
     if (status === 'saved' && !state.items.length) { alert('항목을 1개 이상 추가해주세요.'); return }
     await onSave(state, status)
     setState(s => ({ ...s, status }))

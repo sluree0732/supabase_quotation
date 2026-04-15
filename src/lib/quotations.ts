@@ -6,7 +6,7 @@ import type { Quotation, QuotationItem, QuotationWithItems, VatType } from '@/ty
 export async function createQuotation(
   companyId: string | null,
   quoteDate: string,
-  recipient: string,
+  recipient: string = '',
 ): Promise<Quotation> {
   const { data, error } = await supabase
     .from('quotations')
