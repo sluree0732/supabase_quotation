@@ -12,7 +12,6 @@ import { getQuotationWithItems } from '@/lib/quotations'
 import CompanyPickerModal from '@/components/quotations/CompanyPickerModal'
 import ItemModal, { type ItemPrefill } from '@/components/quotations/ItemModal'
 import ContractPdfViewerModal from '@/components/contracts/ContractPdfViewerModal'
-import ContractExcelViewerModal from '@/components/contracts/ContractExcelViewerModal'
 import RecipientCombobox from '@/components/shared/RecipientCombobox'
 
 function today() {
@@ -70,7 +69,6 @@ function ContractPage() {
   const [loading, setLoading] = useState(!!(editId || quotationId))
   const autoSaveRef = useRef<(() => void) | null>(null)
   const [showPdfViewer, setShowPdfViewer] = useState(false)
-  const [showExcelViewer, setShowExcelViewer] = useState(false)
   const [showCompany, setShowCompany] = useState(false)
   const [showAdd, setShowAdd] = useState(false)
   const [editIdx, setEditIdx] = useState<number | null>(null)
@@ -442,20 +440,12 @@ function ContractPage() {
                 {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                 저장
               </button>
-              <div className="grid grid-cols-2 gap-2">
-                <button onClick={() => setShowExcelViewer(true)}
-                  disabled={!form.items.length}
-                  className="py-3 rounded-xl bg-white border border-gray-200 text-[#4a5568] font-medium text-sm flex items-center justify-center gap-1.5 hover:bg-gray-50 disabled:opacity-40 transition-colors">
-                  <FileDown size={14} />
-                  미리보기
-                </button>
-                <button onClick={() => setShowExcelViewer(true)}
-                  disabled={!form.items.length}
-                  className="py-3 rounded-xl bg-white border border-gray-200 text-[#4a5568] font-medium text-sm flex items-center justify-center gap-1.5 hover:bg-gray-50 disabled:opacity-40 transition-colors">
-                  <FileDown size={14} />
-                  엑셀/PDF
-                </button>
-              </div>
+              <button onClick={() => setShowPdfViewer(true)}
+                disabled={!form.items.length}
+                className="w-full py-3 rounded-xl bg-white border border-gray-200 text-[#4a5568] font-medium text-sm flex items-center justify-center gap-1.5 hover:bg-gray-50 disabled:opacity-40 transition-colors">
+                <FileDown size={14} />
+                미리보기 / 다운로드
+              </button>
             </div>
           </div>
         </div>
@@ -465,22 +455,6 @@ function ContractPage() {
         <ContractPdfViewerModal
           payload={getPdfPayload()}
           onClose={() => setShowPdfViewer(false)}
-        />
-      )}
-      {showExcelViewer && (
-        <ContractExcelViewerModal
-          state={{
-            contractDate: form.contractDate,
-            startDate: form.startDate,
-            endDate: form.endDate,
-            recipient: form.recipient,
-            vatType: form.vatType,
-            items: form.items,
-            specialTerms: form.specialTerms,
-            companyName: form.company?.name ?? '',
-            companyAddress: form.company?.address ?? '',
-          }}
-          onClose={() => setShowExcelViewer(false)}
         />
       )}
       {showCompany && (

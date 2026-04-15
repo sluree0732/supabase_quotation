@@ -173,14 +173,14 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
                     <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">상&nbsp;&nbsp;호</td>
                     <td className="px-2 py-1 border border-gray-200">{SUPPLIER.name}</td>
                     <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">사업자 등록번호</td>
-                    <td rowSpan={2} className="border border-gray-200 p-0.5 text-center" style={{ width: '52px' }}>
+                    <td rowSpan={2} className="border border-gray-200 p-0.5 text-center" style={{ width: '52px', borderRight: 'none' }}>
                       <img
                         src="/images/stamp.png"
                         alt="도장"
                         className="w-11 h-11 object-contain opacity-90 pointer-events-none"
                       />
                     </td>
-                    <td className="px-2 py-1 border border-gray-200">{SUPPLIER.business_no}</td>
+                    <td className="px-2 py-1 border border-gray-200" style={{ borderLeft: 'none' }}>{SUPPLIER.business_no}</td>
                   </tr>
                   {/* 행2: 대표자 / 연락처 */}
                   <tr>
@@ -188,7 +188,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
                     <td className="px-2 py-1 border border-gray-200">{SUPPLIER.ceo}</td>
                     <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">연&nbsp;&nbsp;락&nbsp;&nbsp;처</td>
                     {/* stamp cell continues via rowSpan */}
-                    <td className="px-2 py-1 border border-gray-200">{SUPPLIER.phone}</td>
+                    <td className="px-2 py-1 border border-gray-200" style={{ borderLeft: 'none' }}>{SUPPLIER.phone}</td>
                   </tr>
                   {/* 행3: 사업장 (value colSpan=4) */}
                   <tr>
@@ -200,8 +200,8 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
                     <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">업&nbsp;&nbsp;&nbsp;&nbsp;태</td>
                     <td className="px-2 py-1 border border-gray-200">{SUPPLIER.business_type}</td>
                     <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">종&nbsp;&nbsp;&nbsp;&nbsp;목</td>
-                    <td className="border border-gray-200" />
-                    <td className="px-2 py-1 border border-gray-200">{SUPPLIER.business_item}</td>
+                    <td className="border border-gray-200" style={{ borderLeft: 'none', borderRight: 'none' }} />
+                    <td className="px-2 py-1 border border-gray-200" style={{ borderLeft: 'none' }}>{SUPPLIER.business_item}</td>
                   </tr>
                   {/* 행5: 계좌정보 (value colSpan=4) */}
                   <tr>
