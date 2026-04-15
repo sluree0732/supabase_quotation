@@ -240,11 +240,11 @@ export default function CompaniesPage() {
                             </td>
                           )}
                           <td className="px-5 py-3.5 font-medium text-[#1e2a3a]">{company.name}</td>
-                          <td className="px-5 py-3.5 text-[#718096]">{company.phone || '—'}</td>
-                          <td className="px-5 py-3.5 text-[#718096] max-w-[14rem] truncate">{company.address || '—'}</td>
-                          <td className="px-5 py-3.5 text-[#718096]">{company.business_type || '—'}</td>
-                          <td className="px-5 py-3.5 text-[#718096]">{company.business_item || '—'}</td>
-                          <td className="px-5 py-3.5 text-[#718096]">{company.fax || ''}</td>
+                          <td className="px-5 py-3.5 text-[#718096]">{company.phone || '_'}</td>
+                          <td className="px-5 py-3.5 text-[#718096] max-w-[14rem] truncate">{company.address || '_'}</td>
+                          <td className="px-5 py-3.5 text-[#718096]">{company.business_type || '_'}</td>
+                          <td className="px-5 py-3.5 text-[#718096]">{company.business_item || '_'}</td>
+                          <td className="px-5 py-3.5 text-[#718096]">{company.fax || '_'}</td>
                           <td className="px-3 py-3.5">
                             <button
                               onClick={e => { e.stopPropagation(); setDeleteTarget(company) }}
