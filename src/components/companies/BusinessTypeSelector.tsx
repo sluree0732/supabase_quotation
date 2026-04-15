@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { ChevronDown, Search, X, PencilLine } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import ksicData from '@/data/ksic.json'
 
 interface KsicEntry {
@@ -11,6 +11,7 @@ interface KsicEntry {
 }
 
 const KSIC: KsicEntry[] = ksicData as KsicEntry[]
+const ALL_TYPE_NAMES = KSIC.map(e => e.name)
 
 interface BusinessTypeSelectorProps {
   bizType: string
@@ -27,19 +28,25 @@ export default function BusinessTypeSelector({
 }: BusinessTypeSelectorProps) {
   const [typeOpen, setTypeOpen] = useState(false)
   const [itemOpen, setItemOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [directInput, setDirectInput] = useState(false)
 
   const typeRef = useRef<HTMLDivElement>(null)
   const itemRef = useRef<HTMLDivElement>(null)
 
-  // 선택된 대분류의 업종 목록
+  // 업태 입력값으로 목록 필터링
+  const filteredTypes = bizType.trim()
+    ? ALL_TYPE_NAMES.filter(name =>
+        name.toLowerCase().includes(bizType.toLowerCase())
+      )
+    : ALL_TYPE_NAMES
+
+  // 선택된 업태의 업종 목록 (업태가 정확히 일치하는 경우)
   const selectedEntry = KSIC.find(e => e.name === bizType)
   const allItems = selectedEntry?.items ?? []
 
-  const filteredItems = searchQuery.trim()
+  // 업종 입력값으로 목록 필터링
+  const filteredItems = bizItem.trim()
     ? allItems.filter(item =>
-        item.toLowerCase().includes(searchQuery.toLowerCase())
+        item.toLowerCase().includes(bizItem.toLowerCase())
       )
     : allItems
 
@@ -57,196 +64,136 @@ export default function BusinessTypeSelector({
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
+  function handleTypeInput(value: string) {
+    onBizTypeChange(value)
+    onBizItemChange('')
+    setTypeOpen(true)
+  }
+
   function handleSelectType(name: string) {
     onBizTypeChange(name)
     onBizItemChange('')
-    setSearchQuery('')
-    setDirectInput(false)
     setTypeOpen(false)
+  }
+
+  function handleItemInput(value: string) {
+    onBizItemChange(value)
+    setItemOpen(true)
   }
 
   function handleSelectItem(item: string) {
     onBizItemChange(item)
-    setSearchQuery('')
     setItemOpen(false)
-    setDirectInput(false)
-  }
-
-  function handleClearType() {
-    onBizTypeChange('')
-    onBizItemChange('')
-    setSearchQuery('')
-    setDirectInput(false)
-  }
-
-  function handleClearItem() {
-    onBizItemChange('')
-    setSearchQuery('')
-  }
-
-  function handleToggleDirectInput() {
-    const next = !directInput
-    setDirectInput(next)
-    if (next) {
-      setItemOpen(false)
-      setSearchQuery('')
-    } else {
-      onBizItemChange('')
-    }
   }
 
   return (
     <div className="space-y-3">
-      {/* 업태 드롭다운 */}
+      {/* 업태 콤보박스 */}
       <div className="space-y-1.5">
         <label className="text-sm font-medium text-[#4a5568]">업태</label>
         <div className="relative" ref={typeRef}>
+          <input
+            type="text"
+            value={bizType}
+            onChange={e => handleTypeInput(e.target.value)}
+            onFocus={() => setTypeOpen(true)}
+            placeholder="예: 서비스업, 제조업 (입력하거나 선택)"
+            className="input-base w-full pr-8"
+          />
           <button
             type="button"
+            tabIndex={-1}
             onClick={() => setTypeOpen(v => !v)}
-            className="input-base w-full flex items-center justify-between text-left"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
           >
-            <span className={bizType ? 'text-[#1e2a3a]' : 'text-gray-400'}>
-              {bizType || '업태 선택'}
-            </span>
-            <div className="flex items-center gap-1 shrink-0">
-              {bizType && (
-                <span
-                  role="button"
-                  onClick={e => { e.stopPropagation(); handleClearType() }}
-                  className="p-0.5 text-gray-400 hover:text-gray-600 cursor-pointer"
-                >
-                  <X size={14} />
-                </span>
-              )}
-              <ChevronDown
-                size={16}
-                className={`text-gray-400 transition-transform ${typeOpen ? 'rotate-180' : ''}`}
-              />
-            </div>
+            <ChevronDown
+              size={16}
+              className={`transition-transform ${typeOpen ? 'rotate-180' : ''}`}
+            />
           </button>
 
-          {typeOpen && (
+          {typeOpen && filteredTypes.length > 0 && (
             <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-56 overflow-y-auto">
-              {KSIC.map(entry => (
-                <button
-                  key={entry.code}
-                  type="button"
-                  onClick={() => handleSelectType(entry.name)}
-                  className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors ${
-                    bizType === entry.name ? 'bg-[#ebf5fb] text-[#2980b9] font-medium' : 'text-[#1e2a3a]'
-                  }`}
-                >
-                  <span className="text-xs text-gray-400 mr-2">{entry.code}</span>
-                  {entry.name}
-                  <span className="text-xs text-gray-400 ml-1">({entry.items.length})</span>
-                </button>
-              ))}
+              {filteredTypes.map(name => {
+                const entry = KSIC.find(e => e.name === name)!
+                return (
+                  <button
+                    key={entry.code}
+                    type="button"
+                    onMouseDown={e => e.preventDefault()}
+                    onClick={() => handleSelectType(name)}
+                    className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors ${
+                      bizType === name ? 'bg-[#ebf5fb] text-[#2980b9] font-medium' : 'text-[#1e2a3a]'
+                    }`}
+                  >
+                    <span className="text-xs text-gray-400 mr-2">{entry.code}</span>
+                    {name}
+                    <span className="text-xs text-gray-400 ml-1">({entry.items.length})</span>
+                  </button>
+                )
+              })}
             </div>
           )}
         </div>
       </div>
 
-      {/* 업종 드롭다운 (업태 선택 후 활성화) */}
+      {/* 업종 콤보박스 */}
       <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <label className="text-sm font-medium text-[#4a5568]">업종</label>
-          <button
-            type="button"
-            onClick={handleToggleDirectInput}
-            className={`flex items-center gap-1 text-xs font-medium transition-colors ${
-              directInput
-                ? 'text-[#2980b9]'
-                : 'text-gray-400 hover:text-[#2980b9]'
-            }`}
-          >
-            <PencilLine size={12} />
-            직접 입력
-          </button>
-        </div>
-
-        {directInput ? (
+        <label className="text-sm font-medium text-[#4a5568]">업종</label>
+        <div className="relative" ref={itemRef}>
           <input
             type="text"
             value={bizItem}
-            onChange={e => onBizItemChange(e.target.value)}
-            placeholder="업종을 직접 입력하세요"
-            className="input-base"
+            onChange={e => handleItemInput(e.target.value)}
+            onFocus={() => { if (allItems.length > 0) setItemOpen(true) }}
+            placeholder={
+              selectedEntry
+                ? `예: ${allItems[0] ?? '업종 입력 또는 선택'}`
+                : '예: 광고대행업, IT (직접 입력 가능)'
+            }
+            className="input-base w-full pr-8"
           />
-        ) : (
-          <div className="relative" ref={itemRef}>
+          {allItems.length > 0 && (
             <button
               type="button"
-              disabled={!bizType}
-              onClick={() => { if (bizType) setItemOpen(v => !v) }}
-              className={`input-base w-full flex items-center justify-between text-left ${
-                !bizType ? 'opacity-50 cursor-not-allowed bg-gray-50' : ''
-              }`}
+              tabIndex={-1}
+              onClick={() => setItemOpen(v => !v)}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
             >
-              <span className={bizItem ? 'text-[#1e2a3a]' : 'text-gray-400'}>
-                {bizItem || (bizType ? '업종 검색 또는 선택' : '업태를 먼저 선택하세요')}
-              </span>
-              <div className="flex items-center gap-1 shrink-0">
-                {bizItem && (
-                  <span
-                    role="button"
-                    onClick={e => { e.stopPropagation(); handleClearItem() }}
-                    className="p-0.5 text-gray-400 hover:text-gray-600 cursor-pointer"
-                  >
-                    <X size={14} />
-                  </span>
-                )}
-                <ChevronDown
-                  size={16}
-                  className={`text-gray-400 transition-transform ${itemOpen ? 'rotate-180' : ''}`}
-                />
-              </div>
+              <ChevronDown
+                size={16}
+                className={`transition-transform ${itemOpen ? 'rotate-180' : ''}`}
+              />
             </button>
+          )}
 
-            {itemOpen && (
-              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg">
-                {/* 검색 입력 */}
-                <div className="p-2 border-b border-gray-100 sticky top-0 bg-white">
-                  <div className="relative">
-                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
-                      placeholder="업종 검색..."
-                      className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#2980b9]"
-                      autoFocus
-                    />
-                  </div>
-                  <p className="text-xs text-gray-400 mt-1 px-1">
-                    {filteredItems.length}개 결과
-                  </p>
-                </div>
-
-                {/* 업종 목록 */}
-                <div className="max-h-48 overflow-y-auto">
-                  {filteredItems.length === 0 ? (
-                    <div className="px-4 py-3 text-sm text-gray-400 text-center">
-                      검색 결과가 없습니다
-                    </div>
-                  ) : (
-                    filteredItems.map(item => (
-                      <button
-                        key={item}
-                        type="button"
-                        onClick={() => handleSelectItem(item)}
-                        className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors ${
-                          bizItem === item ? 'bg-[#ebf5fb] text-[#2980b9] font-medium' : 'text-[#1e2a3a]'
-                        }`}
-                      >
-                        {searchQuery ? highlightMatch(item, searchQuery) : item}
-                      </button>
-                    ))
-                  )}
-                </div>
+          {itemOpen && filteredItems.length > 0 && (
+            <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg">
+              <div className="px-3 py-1.5 border-b border-gray-100">
+                <p className="text-xs text-gray-400">{filteredItems.length}개 항목</p>
               </div>
-            )}
-          </div>
+              <div className="max-h-48 overflow-y-auto">
+                {filteredItems.map(item => (
+                  <button
+                    key={item}
+                    type="button"
+                    onMouseDown={e => e.preventDefault()}
+                    onClick={() => handleSelectItem(item)}
+                    className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors ${
+                      bizItem === item ? 'bg-[#ebf5fb] text-[#2980b9] font-medium' : 'text-[#1e2a3a]'
+                    }`}
+                  >
+                    {bizItem.trim() ? highlightMatch(item, bizItem) : item}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        {!selectedEntry && (
+          <p className="text-xs text-gray-400">
+            업태를 먼저 선택하면 업종 목록을 불러올 수 있습니다.
+          </p>
         )}
       </div>
     </div>
@@ -259,7 +206,9 @@ function highlightMatch(text: string, query: string) {
   return (
     <>
       {text.slice(0, idx)}
-      <mark className="bg-yellow-100 text-yellow-800 rounded">{text.slice(idx, idx + query.length)}</mark>
+      <mark className="bg-yellow-100 text-yellow-800 rounded">
+        {text.slice(idx, idx + query.length)}
+      </mark>
       {text.slice(idx + query.length)}
     </>
   )
