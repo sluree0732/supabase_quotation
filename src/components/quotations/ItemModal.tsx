@@ -446,14 +446,14 @@ export default function ItemModal({ item, prefill, onSave, onUpdate, onDelete, o
           </div>
 
           {/* 상품명 */}
-          <div className="space-y-1.5">
+          <div className={`space-y-1.5 rounded-xl transition-colors ${aiErrors.includes('상품명') ? 'outline outline-2 outline-red-400 p-2 -mx-2' : ''}`}>
             <label className="text-sm font-medium text-[#4a5568]">상품명 *</label>
             <input
               type="text"
               value={itemName}
               onChange={e => { setItemName(e.target.value); setAiErrors(prev => prev.filter(f => f !== '상품명')) }}
               placeholder="예: 총괄 PM, 랜딩페이지 제작"
-              className={`input-base ${aiErrors.includes('상품명') ? 'border-red-400 focus:border-red-400' : ''}`}
+              className="input-base"
               autoFocus={!isEdit}
             />
           </div>
