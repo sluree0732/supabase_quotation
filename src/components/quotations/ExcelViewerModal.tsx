@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { X, Download, Loader2, Trash2 } from 'lucide-react'
 import type { QuotationFormState } from './QuotationForm'
+import { SUPPLIER } from '@/lib/supplier'
 
 interface Props {
   state: QuotationFormState
@@ -12,6 +13,7 @@ interface Props {
 interface EditableItem {
   category: string
   item_name: string
+  period: number
   unit_price: number
   total_price: number
   note: string
@@ -28,6 +30,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
     state.items.map(it => ({
       category: it.category,
       item_name: it.item_name,
+      period: it.period ?? 1,
       unit_price: it.unit_price,
       total_price: it.total_price,
       note: it.note,
@@ -113,7 +116,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
       {/* 헤더 */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0">
         <div>
-          <h2 className="font-bold text-[#1e2a3a]">엑셀 미리보기</h2>
+          <h2 className="font-bold text-[#1e2a3a]">견적서 미리보기</h2>
           <p className="text-xs text-gray-400 mt-0.5">셀을 클릭해 내용을 수정할 수 있습니다</p>
         </div>
         <div className="flex items-center gap-2">
@@ -151,41 +154,79 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
           {/* 기본 정보 */}
           <div className="px-6 py-4 border-b border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div className="space-y-1.5">
-              <p className="text-[#718096]">견적일&nbsp;&nbsp;<span className="text-[#1e2a3a] font-medium">{state.quoteDate}</span></p>
-              <p className="text-[#718096]">수&nbsp;&nbsp;신&nbsp;&nbsp;<span className="text-[#1e2a3a] font-medium">{state.recipient}</span></p>
+              <p className="text-[#718096]">{state.quoteDate}</p>
+              {state.recipient && (
+                <p className="text-[#718096]">수 신 : <span className="text-[#1e2a3a] font-medium">{state.recipient}</span></p>
+              )}
               {state.projectName && (
                 <p className="text-[#718096]">프로젝트&nbsp;&nbsp;<span className="text-[#1e2a3a] font-medium">{state.projectName}</span></p>
               )}
               <p className="text-[#718096] mt-2 pt-2 border-t border-gray-50">아래와 같이 견적합니다.</p>
             </div>
-            {state.senderInfo && (
-              <div className="border border-gray-100 rounded-lg p-3 text-xs text-[#4a5568] space-y-1 relative">
-                <InfoRow label="상&nbsp;&nbsp;호" value={state.senderInfo.name} />
-                <InfoRow label="사업자 등록번호" value={state.senderInfo.business_no} />
-                <InfoRow label="사업장" value={state.senderInfo.address} />
-                <InfoRow label="연&nbsp;&nbsp;락&nbsp;&nbsp;처" value={state.senderInfo.phone} />
-                {state.senderInfo.email && <InfoRow label="이메일" value={state.senderInfo.email} />}
-                {/* 도장 */}
-                <img
-                  src="/images/stamp.png"
-                  alt="도장"
-                  className="absolute top-2 right-2 w-12 h-12 object-contain opacity-90 pointer-events-none"
-                />
-              </div>
-            )}
+
+            {/* 발신 업체 정보 - 엑셀과 동일한 테이블 구조 */}
+            <div className="relative">
+              <table className="w-full text-xs border-collapse">
+                <tbody>
+                  <tr>
+                    <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">상&nbsp;&nbsp;호</td>
+                    <td className="px-2 py-1 border border-gray-200">{SUPPLIER.name}</td>
+                    <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">사업자 등록번호</td>
+                    <td className="px-2 py-1 border border-gray-200 pr-10">{SUPPLIER.business_no}</td>
+                  </tr>
+                  <tr>
+                    <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">대&nbsp;&nbsp;표&nbsp;&nbsp;자</td>
+                    <td className="px-2 py-1 border border-gray-200">{SUPPLIER.ceo}</td>
+                    <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">연&nbsp;&nbsp;락&nbsp;&nbsp;처</td>
+                    <td className="px-2 py-1 border border-gray-200">{SUPPLIER.phone}</td>
+                  </tr>
+                  <tr>
+                    <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">사&nbsp;&nbsp;업&nbsp;&nbsp;장</td>
+                    <td colSpan={3} className="px-2 py-1 border border-gray-200">{SUPPLIER.address}</td>
+                  </tr>
+                  <tr>
+                    <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">업&nbsp;&nbsp;&nbsp;&nbsp;태</td>
+                    <td className="px-2 py-1 border border-gray-200">{SUPPLIER.business_type}</td>
+                    <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">종&nbsp;&nbsp;&nbsp;&nbsp;목</td>
+                    <td className="px-2 py-1 border border-gray-200">{SUPPLIER.business_item}</td>
+                  </tr>
+                  <tr>
+                    <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">계좌정보</td>
+                    <td colSpan={3} className="px-2 py-1 border border-gray-200">{SUPPLIER.bank}</td>
+                  </tr>
+                </tbody>
+              </table>
+              {/* 도장 */}
+              <img
+                src="/images/stamp.png"
+                alt="도장"
+                className="absolute top-1 right-1 w-12 h-12 object-contain opacity-90 pointer-events-none"
+              />
+            </div>
           </div>
 
           {/* 항목 테이블 */}
           <div className="overflow-x-auto">
-            <table className="text-sm border-collapse" style={{ minWidth: '640px', width: '100%' }}>
+            <table className="text-sm border-collapse" style={{ minWidth: '700px', width: '100%' }}>
               <thead>
+                {/* 1단 헤더 */}
                 <tr className="bg-gray-50">
-                  <th className="border border-gray-200 px-3 py-2.5 text-center font-semibold text-[#4a5568]" style={{ minWidth: '90px' }}>대분류</th>
-                  <th className="border border-gray-200 px-3 py-2.5 text-center font-semibold text-[#4a5568]" style={{ minWidth: '120px' }}>상품명</th>
-                  <th className="border border-gray-200 px-3 py-2.5 text-center font-semibold text-[#4a5568]" style={{ minWidth: '110px' }}>금액</th>
-                  <th className="border border-gray-200 px-3 py-2.5 text-center font-semibold text-[#4a5568]" style={{ minWidth: '110px' }}>총액</th>
-                  <th className="border border-gray-200 px-3 py-2.5 text-center font-semibold text-[#4a5568]" style={{ minWidth: '140px' }}>비고</th>
+                  <th colSpan={2} className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568]">상&nbsp;&nbsp;품</th>
+                  <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568]" style={{ minWidth: '70px' }}>기간(월)</th>
+                  <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568]" style={{ minWidth: '110px' }}>금&nbsp;&nbsp;액</th>
+                  <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568]" style={{ minWidth: '110px' }}>총&nbsp;&nbsp;액</th>
+                  <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568]" style={{ minWidth: '140px' }}>비&nbsp;&nbsp;고</th>
                   <th className="border border-gray-200" style={{ width: '32px' }} />
+                </tr>
+                {/* 2단 헤더 */}
+                <tr className="bg-gray-50">
+                  <th className="border border-gray-200 px-3 py-1.5 text-center font-semibold text-[#4a5568] text-xs" style={{ minWidth: '90px' }}>대분류</th>
+                  <th className="border border-gray-200 px-3 py-1.5 text-center font-semibold text-[#4a5568] text-xs" style={{ minWidth: '120px' }}>상품명</th>
+                  <th className="border border-gray-200" />
+                  <th className="border border-gray-200" />
+                  <th className="border border-gray-200" />
+                  <th className="border border-gray-200" />
+                  <th className="border border-gray-200" />
                 </tr>
               </thead>
               <tbody>
@@ -203,6 +244,15 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
                         value={item.item_name}
                         onChange={e => updateItem(idx, { item_name: e.target.value })}
                         className="w-full px-2 py-1.5 text-sm focus:outline-none focus:bg-blue-50 rounded transition-colors"
+                      />
+                    </td>
+                    <td className="border border-gray-200 p-1">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={item.period || ''}
+                        onChange={e => updateItem(idx, { period: parseInt(e.target.value.replace(/[^0-9]/g, ''), 10) || 0 })}
+                        className="w-full px-2 py-1.5 text-center text-sm text-[#e67e22] font-medium focus:outline-none focus:bg-blue-50 rounded transition-colors"
                       />
                     </td>
                     <td className="border border-gray-200 p-1">
@@ -248,8 +298,8 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
               </tbody>
               <tfoot>
                 <tr className="bg-gray-50 font-bold">
-                  <td colSpan={3} className="border border-gray-200 px-4 py-3 text-left text-sm text-[#1e2a3a]">
-                    합&nbsp;&nbsp;계 (부가세포함)
+                  <td colSpan={4} className="border border-gray-200 px-4 py-3 text-left text-sm text-[#1e2a3a]">
+                    합&nbsp;&nbsp;계 {VAT_LABEL[state.vatType] ? `(${VAT_LABEL[state.vatType]})` : ''}
                   </td>
                   <td className="border border-gray-200 px-3 py-3 text-right text-sm text-[#1e2a3a]">
                     {total.toLocaleString()}원
@@ -269,15 +319,5 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
         </div>
       </div>
     </div>
-  )
-}
-
-function InfoRow({ label, value }: { label: string; value: string }) {
-  if (!value) return null
-  return (
-    <p>
-      <span className="text-gray-400 inline-block w-20">{label}</span>
-      {value}
-    </p>
   )
 }

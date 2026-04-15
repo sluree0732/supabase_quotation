@@ -394,23 +394,15 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
               저장
             </button>
 
-            {/* 미리보기 / 다운로드 / 계약서 작성 */}
-            <div className="grid grid-cols-3 gap-2">
+            {/* 미리보기 / 계약서 작성 */}
+            <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => setShowExcelViewer(true)}
                 disabled={!state.items.length}
                 className="py-3 rounded-xl bg-white border border-gray-200 text-[#217346] font-medium text-sm flex items-center justify-center gap-1.5 hover:bg-gray-50 disabled:opacity-40 transition-colors"
               >
                 <BsFiletypeXlsx size={16} />
-                미리보기
-              </button>
-              <button
-                onClick={() => setShowExcelViewer(true)}
-                disabled={!state.items.length}
-                className="py-3 rounded-xl bg-white border border-gray-200 text-[#4a5568] font-medium text-sm flex items-center justify-center gap-1.5 hover:bg-gray-50 disabled:opacity-40 transition-colors"
-              >
-                <Save size={14} />
-                엑셀/PDF
+                미리보기 / 다운로드
               </button>
               {isSaved && !isDirty && quotationId ? (
                 <a
