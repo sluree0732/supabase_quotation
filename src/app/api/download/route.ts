@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
   }
 
   const { type, payload, filename } = data as {
-    type: 'excel' | 'pdf' | 'contract-pdf'
+    type: 'excel' | 'pdf' | 'contract-pdf' | 'contract-excel'
     payload: Record<string, any>
     filename: string
   }
@@ -60,6 +60,17 @@ export async function GET(req: NextRequest) {
       return new NextResponse(buffer as unknown as BodyInit, {
         headers: {
           'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename*=UTF-8''${encodedName}`,
+        },
+      })
+    }
+
+    if (type === 'contract-excel') {
+      const buffer = await generateContractExcel(payload)
+      const encodedName = encodeURIComponent(filename)
+      return new NextResponse(buffer as unknown as BodyInit, {
+        headers: {
+          'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
           'Content-Disposition': `attachment; filename*=UTF-8''${encodedName}`,
         },
       })
@@ -256,6 +267,195 @@ async function generatePdf(payload: Record<string, any>): Promise<Buffer> {
   const { quoteDate, recipient, items, totalAmount, vatType } = payload
   const element = createElement(QuotationDocument, { quoteDate, recipient, items, totalAmount, vatType })
   return renderToBuffer(element as any) as Promise<Buffer>
+}
+
+async function generateContractExcel(payload: Record<string, any>): Promise<Buffer> {
+  const {
+    contractDate, startDate, endDate, recipient, companyName, companyAddress,
+    items, totalAmount, vatType, specialTerms,
+  } = payload
+
+  const wb = new ExcelJS.Workbook()
+  const ws = wb.addWorksheet('계약서')
+
+  ws.columns = [
+    { width: 12 }, // A: 대분류
+    { width: 24 }, // B: 항목명
+    { width: 14 }, // C: 금액
+    { width: 14 }, // D: 총액
+    { width: 48 }, // E: 비고
+  ]
+
+  function applyBorder(cell: ExcelJS.Cell) {
+    cell.border = {
+      top: { style: 'thin' }, left: { style: 'thin' },
+      bottom: { style: 'thin' }, right: { style: 'thin' },
+    }
+  }
+
+  function headerCell(cell: ExcelJS.Cell, value: string) {
+    cell.value = value
+    cell.font = { bold: true, size: 9 }
+    cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9D9D9' } }
+    applyBorder(cell)
+  }
+
+  function dataCell(cell: ExcelJS.Cell, value: string | number, align: 'left' | 'center' | 'right' = 'center') {
+    cell.value = value
+    cell.font = { size: 9 }
+    cell.alignment = { horizontal: align, vertical: 'middle', wrapText: true }
+    applyBorder(cell)
+  }
+
+  // ── 제목 ─────────────────────────────────────────────
+  ws.mergeCells('A1:E1')
+  const titleCell = ws.getCell('A1')
+  titleCell.value = '계  약  서'
+  titleCell.font = { bold: true, size: 18 }
+  titleCell.alignment = { horizontal: 'center', vertical: 'middle' }
+  ws.getRow(1).height = 40
+
+  // ── 기본 정보 (왼쪽: 날짜/수신, 오른쪽: 수신처/주소) ─
+  ws.getRow(2).height = 20
+  ws.getRow(3).height = 20
+  ws.getRow(4).height = 20
+  ws.getRow(5).height = 20
+
+  ws.getCell('A2').value = `계약일 : ${contractDate}`
+  ws.getCell('A2').font = { size: 9 }
+  ws.mergeCells('A2:B2')
+
+  ws.getCell('A3').value = `수  신 : ${recipient}`
+  ws.getCell('A3').font = { size: 9 }
+  ws.mergeCells('A3:B3')
+
+  if (startDate) {
+    ws.getCell('A4').value = `시작일 : ${startDate}`
+    ws.getCell('A4').font = { size: 9 }
+    ws.mergeCells('A4:B4')
+  }
+  if (endDate) {
+    ws.getCell('A5').value = `종료일 : ${endDate}`
+    ws.getCell('A5').font = { size: 9 }
+    ws.mergeCells('A5:B5')
+  }
+
+  // 오른쪽: 수신처 정보 (C~E)
+  if (companyName) {
+    const nameLabel = ws.getCell('C2')
+    nameLabel.value = '수  신  처'
+    nameLabel.font = { bold: true, size: 8 }
+    nameLabel.alignment = { horizontal: 'center', vertical: 'middle' }
+    nameLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9D9D9' } }
+    applyBorder(nameLabel)
+
+    ws.mergeCells('D2:E2')
+    const nameVal = ws.getCell('D2')
+    nameVal.value = companyName
+    nameVal.font = { size: 8 }
+    nameVal.alignment = { horizontal: 'left', vertical: 'middle' }
+    applyBorder(nameVal)
+
+    if (companyAddress) {
+      const addrLabel = ws.getCell('C3')
+      addrLabel.value = '주  소'
+      addrLabel.font = { bold: true, size: 8 }
+      addrLabel.alignment = { horizontal: 'center', vertical: 'middle' }
+      addrLabel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9D9D9' } }
+      applyBorder(addrLabel)
+
+      ws.mergeCells('D3:E3')
+      const addrVal = ws.getCell('D3')
+      addrVal.value = companyAddress
+      addrVal.font = { size: 8 }
+      addrVal.alignment = { horizontal: 'left', vertical: 'middle' }
+      applyBorder(addrVal)
+    }
+
+    // 도장 이미지 (오른쪽 상단)
+    const stampFile = path.join(process.cwd(), 'public', 'images', 'stamp.png')
+    const stampId = wb.addImage({ filename: stampFile, extension: 'png' })
+    ws.addImage(stampId, {
+      tl: { col: 4.08, row: 1.12 },
+      ext: { width: 65, height: 65 },
+      editAs: 'oneCell',
+    } as any)
+  }
+
+  // ── 테이블 헤더 ───────────────────────────────────────
+  const headerRow = 7
+  ws.getRow(headerRow).height = 22
+  headerCell(ws.getCell(`A${headerRow}`), '대분류')
+  headerCell(ws.getCell(`B${headerRow}`), '항목명')
+  headerCell(ws.getCell(`C${headerRow}`), '금  액')
+  headerCell(ws.getCell(`D${headerRow}`), '총  액')
+  headerCell(ws.getCell(`E${headerRow}`), '비  고')
+
+  // ── 데이터 행 ─────────────────────────────────────────
+  function calcRowHeight(note: string): number {
+    if (!note) return 40
+    const lines = note.split('\n').filter(Boolean)
+    const totalLines = lines.reduce((acc: number, line: string) => acc + Math.max(1, Math.ceil(line.length / 28)), 0)
+    return Math.max(40, totalLines * 14 + 10)
+  }
+
+  const dataStartRow = headerRow + 1
+  items.forEach((item: any, i: number) => {
+    const r = dataStartRow + i
+    ws.getRow(r).height = calcRowHeight(item.note ?? '')
+    dataCell(ws.getCell(`A${r}`), item.category ?? '', 'center')
+    dataCell(ws.getCell(`B${r}`), item.item_name ?? '', 'center')
+    dataCell(ws.getCell(`C${r}`), item.unit_price ?? 0, 'right')
+    dataCell(ws.getCell(`D${r}`), item.total_price ?? 0, 'right')
+    dataCell(ws.getCell(`E${r}`), item.note ?? '', 'left')
+    ws.getCell(`C${r}`).numFmt = '#,##0'
+    ws.getCell(`D${r}`).numFmt = '#,##0'
+  })
+
+  // ── 합계 행 ───────────────────────────────────────────
+  const totalRow = dataStartRow + items.length
+  ws.getRow(totalRow).height = 22
+  ws.mergeCells(`A${totalRow}:C${totalRow}`)
+  const totalLabelCell = ws.getCell(`A${totalRow}`)
+  totalLabelCell.value = `합  계 ${VAT_MAP[vatType] ? `(${VAT_MAP[vatType]})` : ''}`
+  totalLabelCell.font = { bold: true, size: 9 }
+  totalLabelCell.alignment = { horizontal: 'left', vertical: 'middle' }
+  applyBorder(totalLabelCell)
+
+  const totalAmountCell = ws.getCell(`D${totalRow}`)
+  totalAmountCell.value = totalAmount
+  totalAmountCell.numFmt = '#,##0'
+  totalAmountCell.font = { bold: true, size: 9 }
+  totalAmountCell.alignment = { horizontal: 'right', vertical: 'middle' }
+  applyBorder(totalAmountCell)
+
+  const vatCell = ws.getCell(`E${totalRow}`)
+  vatCell.value = ''
+  applyBorder(vatCell)
+
+  // ── 특약사항 ──────────────────────────────────────────
+  if (specialTerms) {
+    const termsRow = totalRow + 2
+    ws.getRow(termsRow).height = 18
+    ws.mergeCells(`A${termsRow}:E${termsRow}`)
+    const termsTitle = ws.getCell(`A${termsRow}`)
+    termsTitle.value = '특약사항'
+    termsTitle.font = { bold: true, size: 9 }
+    termsTitle.alignment = { horizontal: 'left', vertical: 'middle' }
+
+    const contentRow = termsRow + 1
+    const lines = specialTerms.split('\n').length
+    ws.getRow(contentRow).height = Math.max(40, lines * 14 + 10)
+    ws.mergeCells(`A${contentRow}:E${contentRow}`)
+    const termsContent = ws.getCell(`A${contentRow}`)
+    termsContent.value = specialTerms
+    termsContent.font = { size: 9 }
+    termsContent.alignment = { horizontal: 'left', vertical: 'top', wrapText: true }
+    applyBorder(termsContent)
+  }
+
+  return wb.xlsx.writeBuffer() as unknown as Promise<Buffer>
 }
 
 async function generateContractPdf(payload: Record<string, any>): Promise<Buffer> {

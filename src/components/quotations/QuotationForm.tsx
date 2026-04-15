@@ -120,6 +120,7 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
   const prefillAddedRef = useRef(false)
   const [toast, setToast] = useState<string | null>(null)
   const [isDirty, setIsDirty] = useState(false)
+  const autoSaveRef = useRef<(() => void) | null>(null)
   const [showExcelViewer, setShowExcelViewer] = useState(false)
   const [senderInfoOpen, setSenderInfoOpen] = useState(true)
   const [clientInfoOpen, setClientInfoOpen] = useState(true)
@@ -153,6 +154,24 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
       }]
     })
   }, [itemPrefill])
+
+  // ── 자동저장 (이탈 시) ────────────────────────────────
+  autoSaveRef.current = () => {
+    if (isDirty && state.recipient.trim() && state.items.length) {
+      onSave(state, 'draft').catch(() => {})
+    }
+  }
+
+  useEffect(() => {
+    const onHidden = () => {
+      if (document.visibilityState === 'hidden') autoSaveRef.current?.()
+    }
+    document.addEventListener('visibilitychange', onHidden)
+    return () => {
+      document.removeEventListener('visibilitychange', onHidden)
+      autoSaveRef.current?.()
+    }
+  }, [])
 
   function updateItem(idx: number, data: Omit<QuotationItem, 'id' | 'quotation_id' | 'sort_order'>) {
     set({ items: state.items.map((it, i) => i === idx ? { ...it, ...data } : it) })
@@ -366,49 +385,54 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
 
           {/* 액션 버튼 */}
           <div className="space-y-2 pb-8">
-            {isSaved && (
-              <div className="bg-white border border-gray-200 rounded-xl px-4 py-3">
-                <p className="text-xs text-gray-400 font-medium mb-3">미리보기 / 다운로드</p>
-                <div className="flex gap-6 justify-center">
-                  <button
-                    onClick={() => setShowExcelViewer(true)}
-                    className="flex flex-col items-center gap-1.5"
-                  >
-                    <div className="w-14 h-14 rounded-2xl bg-[#217346] flex items-center justify-center shadow-sm hover:opacity-90 transition-opacity">
-                      <BsFiletypeXlsx size={28} color="white" />
-                    </div>
-                    <span className="text-xs text-gray-500">엑셀/PDF</span>
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {isSaved && !isDirty && quotationId ? (
-              <a
-                href={`/contracts/new?quotationId=${quotationId}`}
-                className="w-full py-3.5 rounded-xl bg-[#8e44ad] text-white font-semibold flex items-center justify-center gap-2"
-              >
-                <FileSignature size={16} />
-                계약서 작성
-              </a>
-            ) : (
-              <button
-                onClick={() => handleSave('saved')}
-                disabled={saving}
-                className="w-full py-3.5 rounded-xl bg-[#27ae60] text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                저장
-              </button>
-            )}
-
+            {/* 저장 */}
             <button
-              onClick={() => handleSave('draft')}
+              onClick={() => handleSave('saved')}
               disabled={saving}
-              className="w-full py-3.5 rounded-xl bg-gray-100 text-[#4a5568] font-medium text-sm disabled:opacity-50"
+              className="w-full py-3.5 rounded-xl bg-[#27ae60] text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              임시저장
+              {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+              저장
             </button>
+
+            {/* 미리보기 / 다운로드 / 계약서 작성 */}
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                onClick={() => setShowExcelViewer(true)}
+                disabled={!state.items.length}
+                className="py-3 rounded-xl bg-white border border-gray-200 text-[#217346] font-medium text-sm flex items-center justify-center gap-1.5 hover:bg-gray-50 disabled:opacity-40 transition-colors"
+              >
+                <BsFiletypeXlsx size={16} />
+                미리보기
+              </button>
+              <button
+                onClick={() => setShowExcelViewer(true)}
+                disabled={!state.items.length}
+                className="py-3 rounded-xl bg-white border border-gray-200 text-[#4a5568] font-medium text-sm flex items-center justify-center gap-1.5 hover:bg-gray-50 disabled:opacity-40 transition-colors"
+              >
+                <Save size={14} />
+                엑셀/PDF
+              </button>
+              {isSaved && !isDirty && quotationId ? (
+                <a
+                  href={`/contracts/new?quotationId=${quotationId}`}
+                  className="py-3 rounded-xl bg-[#8e44ad] text-white font-medium text-sm flex items-center justify-center gap-1.5 hover:opacity-90 transition-opacity"
+                >
+                  <FileSignature size={14} />
+                  계약서
+                </a>
+              ) : (
+                <button
+                  onClick={() => handleSave('saved')}
+                  disabled={saving}
+                  className="py-3 rounded-xl bg-[#8e44ad]/20 text-[#8e44ad] font-medium text-sm flex items-center justify-center gap-1.5 disabled:opacity-40 transition-colors"
+                  title="저장 후 계약서 작성 가능합니다"
+                >
+                  <FileSignature size={14} />
+                  계약서
+                </button>
+              )}
+            </div>
           </div>
         </div>
 

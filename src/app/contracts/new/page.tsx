@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, Suspense } from 'react'
+import { useEffect, useState, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Building2, ChevronRight, X, Plus, Loader2, Save, ChevronLeft, FileDown } from 'lucide-react'
 import type { Company, ContractItem, VatType, ContractStatus } from '@/types'
@@ -12,6 +12,7 @@ import { getQuotationWithItems } from '@/lib/quotations'
 import CompanyPickerModal from '@/components/quotations/CompanyPickerModal'
 import ItemModal, { type ItemPrefill } from '@/components/quotations/ItemModal'
 import ContractPdfViewerModal from '@/components/contracts/ContractPdfViewerModal'
+import ContractExcelViewerModal from '@/components/contracts/ContractExcelViewerModal'
 import RecipientCombobox from '@/components/shared/RecipientCombobox'
 
 function today() {
@@ -67,7 +68,9 @@ function ContractPage() {
   const [form, setForm] = useState<ContractFormState>(INITIAL)
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(!!(editId || quotationId))
+  const autoSaveRef = useRef<(() => void) | null>(null)
   const [showPdfViewer, setShowPdfViewer] = useState(false)
+  const [showExcelViewer, setShowExcelViewer] = useState(false)
   const [showCompany, setShowCompany] = useState(false)
   const [showAdd, setShowAdd] = useState(false)
   const [editIdx, setEditIdx] = useState<number | null>(null)
@@ -155,6 +158,24 @@ function ContractPage() {
       }).finally(() => setLoading(false))
     }
   }, [editId, quotationId])
+
+  // ── 자동저장 (이탈 시) ────────────────────────────────
+  autoSaveRef.current = () => {
+    if (form.recipient.trim() && form.items.length && !form.savedId) {
+      handleSave('draft').catch(() => {})
+    }
+  }
+
+  useEffect(() => {
+    const onHidden = () => {
+      if (document.visibilityState === 'hidden') autoSaveRef.current?.()
+    }
+    document.addEventListener('visibilitychange', onHidden)
+    return () => {
+      document.removeEventListener('visibilitychange', onHidden)
+      autoSaveRef.current?.()
+    }
+  }, [])
 
   function addItem(data: Omit<ContractItem, 'id' | 'contract_id' | 'sort_order'>) {
     set({ items: [...form.items, { ...data, sort_order: form.items.length }] })
@@ -415,19 +436,22 @@ function ContractPage() {
                   form.status === 'signed' ? 'bg-[#2980b9]' : 'bg-[#27ae60]'
                 }`}>
                 {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                {form.status === 'signed' ? '계약 완료' : '계약 확정'}
+                저장
               </button>
-              <button onClick={() => handleSave('draft')} disabled={saving}
-                className="w-full py-3.5 rounded-xl bg-gray-100 text-[#4a5568] font-medium text-sm disabled:opacity-50">
-                임시저장
-              </button>
-              {form.status === 'signed' && (
-                <button onClick={() => setShowPdfViewer(true)}
-                  className="w-full py-3.5 rounded-xl border border-[#e74c3c] text-[#e74c3c] font-medium text-sm flex items-center justify-center gap-2 hover:bg-red-50 transition-colors">
-                  <FileDown size={16} />
-                  계약서 PDF 미리보기
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={() => setShowExcelViewer(true)}
+                  disabled={!form.items.length}
+                  className="py-3 rounded-xl bg-white border border-gray-200 text-[#4a5568] font-medium text-sm flex items-center justify-center gap-1.5 hover:bg-gray-50 disabled:opacity-40 transition-colors">
+                  <FileDown size={14} />
+                  미리보기
                 </button>
-              )}
+                <button onClick={() => setShowExcelViewer(true)}
+                  disabled={!form.items.length}
+                  className="py-3 rounded-xl bg-white border border-gray-200 text-[#4a5568] font-medium text-sm flex items-center justify-center gap-1.5 hover:bg-gray-50 disabled:opacity-40 transition-colors">
+                  <FileDown size={14} />
+                  엑셀/PDF
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -437,6 +461,22 @@ function ContractPage() {
         <ContractPdfViewerModal
           payload={getPdfPayload()}
           onClose={() => setShowPdfViewer(false)}
+        />
+      )}
+      {showExcelViewer && (
+        <ContractExcelViewerModal
+          state={{
+            contractDate: form.contractDate,
+            startDate: form.startDate,
+            endDate: form.endDate,
+            recipient: form.recipient,
+            vatType: form.vatType,
+            items: form.items,
+            specialTerms: form.specialTerms,
+            companyName: form.company?.name ?? '',
+            companyAddress: form.company?.address ?? '',
+          }}
+          onClose={() => setShowExcelViewer(false)}
         />
       )}
       {showCompany && (
