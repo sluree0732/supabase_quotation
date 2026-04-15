@@ -485,6 +485,7 @@ function ContractPage() {
       )}
       {showCompany && (
         <CompanyPickerModal selected={form.company}
+          typeFilter="client"
           onSelect={company => set({ company })}
           onClose={() => setShowCompany(false)} />
       )}
