@@ -119,6 +119,9 @@ export default function ItemModal({ item, prefill, onSave, onUpdate, onDelete, o
     ? templateList.filter(t => t.category === category)
     : templateList
 
+  // ── AI 검증 에러 ────────────────────────────────────────
+  const [aiErrors, setAiErrors] = useState<string[]>([])
+
   // ── 항목 목록 / 네비게이션 ──────────────────────────────
   const [aiLoading, setAiLoading] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -254,14 +257,20 @@ export default function ItemModal({ item, prefill, onSave, onUpdate, onDelete, o
     onClose()
   }
 
-async function handleAiNote() {
-    if (!itemName.trim()) { alert('상품명을 먼저 입력해주세요.'); return }
+  async function handleAiNote() {
+    const missing: string[] = []
+    if (!category) missing.push('대분류')
+    if (!subCategory) missing.push('상세분류')
+    if (!itemName.trim()) missing.push('상품명')
+    if (missing.length > 0) { setAiErrors(missing); return }
+    setAiErrors([])
     setAiLoading(true)
     try {
-      const res = await fetch('/api/gemini', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ items: [{ category, item_name: itemName }] }) })
+      const res = await fetch('/api/gemini', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ items: [{ category, sub_category: subCategory, item_name: itemName }] }) })
       const json = await res.json()
-      if (json.notes?.[0]) setNote(json.notes[0])
-    } catch { alert('AI 생성 실패') }
+      if (!res.ok) throw new Error(json.error ?? 'AI 생성 실패')
+      if (json.notes?.[0]) { setNote(json.notes[0]); setShowTemplatePanel(false) }
+    } catch (e: any) { alert(e.message ?? 'AI 생성 실패') }
     finally { setAiLoading(false) }
   }
 
@@ -343,7 +352,7 @@ async function handleAiNote() {
         <div className="px-5 py-4 space-y-4 flex-1 overflow-y-auto">
 
           {/* 대분류 */}
-          <div className="space-y-1.5">
+          <div className={`space-y-1.5 rounded-xl transition-colors ${aiErrors.includes('대분류') ? 'outline outline-2 outline-red-400 p-2 -mx-2' : ''}`}>
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium text-[#4a5568]">대분류 *</label>
               {category && (
@@ -363,6 +372,7 @@ async function handleAiNote() {
                     const next = cat === category ? '' : cat
                     setCategory(next)
                     setSubCategory('')
+                    setAiErrors(prev => prev.filter(f => f !== '대분류'))
                   }}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                     category === cat
@@ -390,7 +400,7 @@ async function handleAiNote() {
           </div>
 
           {/* 상세 분류 */}
-          <div className={`space-y-1.5 ${!category ? 'opacity-40 pointer-events-none' : ''}`}>
+          <div className={`space-y-1.5 rounded-xl transition-colors ${!category ? 'opacity-40 pointer-events-none' : ''} ${aiErrors.includes('상세분류') ? 'outline outline-2 outline-red-400 p-2 -mx-2' : ''}`}>
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium text-[#4a5568]">
                 상세 분류
@@ -409,7 +419,7 @@ async function handleAiNote() {
               {currentSubCategories.map(sub => (
                 <button
                   key={sub}
-                  onClick={() => setSubCategory(sub === subCategory ? '' : sub)}
+                  onClick={() => { setSubCategory(sub === subCategory ? '' : sub); setAiErrors(prev => prev.filter(f => f !== '상세분류')) }}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                     subCategory === sub
                       ? 'bg-[#27ae60] text-white border-[#27ae60]'
@@ -441,9 +451,9 @@ async function handleAiNote() {
             <input
               type="text"
               value={itemName}
-              onChange={e => setItemName(e.target.value)}
+              onChange={e => { setItemName(e.target.value); setAiErrors(prev => prev.filter(f => f !== '상품명')) }}
               placeholder="예: 총괄 PM, 랜딩페이지 제작"
-              className="input-base"
+              className={`input-base ${aiErrors.includes('상품명') ? 'border-red-400 focus:border-red-400' : ''}`}
               autoFocus={!isEdit}
             />
           </div>
@@ -493,6 +503,13 @@ async function handleAiNote() {
                 </button>
               </div>
             </div>
+
+            {/* AI 검증 에러 메시지 */}
+            {aiErrors.length > 0 && (
+              <p className="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2">
+                {aiErrors.join(', ')}을(를) 설정해주세요.
+              </p>
+            )}
 
             {/* 템플릿 선택 패널 */}
             {showTemplatePanel && (
