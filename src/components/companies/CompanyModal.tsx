@@ -169,10 +169,6 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
 
           {/* 폼 */}
           <div className="px-5 py-4 space-y-4 flex-1 overflow-y-auto">
-            {error && (
-              <p className="text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2">{error}</p>
-            )}
-
             {/* 업체 구분 */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-[#4a5568]">업체 구분 *</label>
@@ -398,6 +394,9 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
 
           {/* 하단 버튼 */}
           <div className="px-5 py-4 border-t border-gray-100 space-y-2 shrink-0">
+            {error && (
+              <p className="text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2">{error}</p>
+            )}
             {showDeleteConfirm ? (
               <div className="bg-red-50 rounded-xl p-3 space-y-2">
                 <p className="text-sm text-red-700 font-medium">
