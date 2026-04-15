@@ -65,7 +65,7 @@ function QuotationPage() {
     }).finally(() => setLoading(false))
   }, [editId])
 
-  async function handleSave(state: QuotationFormState, status: 'draft' | 'saved') {
+  async function handleSave(state: QuotationFormState, status: 'draft' | 'saved', silent = false) {
     setSaving(true)
     try {
       const total = state.items.reduce((s, i) => s + i.total_price, 0)
@@ -79,15 +79,16 @@ function QuotationPage() {
         client_info: state.clientInfo ?? null,
       }
 
-      if (editId) {
+      const existingId = editId ?? savedQuotationId
+      if (existingId) {
         await Promise.all([
-          updateQuotation(editId, {
+          updateQuotation(existingId, {
             company_id: state.company?.id ?? null,
             quote_date: state.quoteDate,
             recipient: state.recipient,
             ...extraFields,
           }),
-          saveItems(editId, state.items),
+          saveItems(existingId, state.items),
         ])
       } else {
         const q = await createQuotation(
@@ -102,7 +103,7 @@ function QuotationPage() {
         ])
       }
     } catch (e: any) {
-      alert(e.message ?? '저장 실패')
+      if (!silent) alert(e.message ?? '저장 실패')
       throw e
     } finally {
       setSaving(false)

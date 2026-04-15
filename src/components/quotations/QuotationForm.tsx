@@ -28,7 +28,7 @@ interface Props {
   initial: QuotationFormState
   isEdit: boolean
   saving: boolean
-  onSave: (state: QuotationFormState, status: 'draft' | 'saved') => Promise<void>
+  onSave: (state: QuotationFormState, status: 'draft' | 'saved', silent?: boolean) => Promise<void>
   onSaveSuccess: (status: 'draft' | 'saved') => void
   quotationId?: string
   itemPrefill?: ItemPrefill
@@ -158,7 +158,7 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
   // ── 자동저장 (이탈 시) ────────────────────────────────
   autoSaveRef.current = () => {
     if (isDirty && state.recipient.trim() && state.items.length) {
-      onSave(state, 'draft').catch(() => {})
+      onSave(state, 'draft', true).catch(() => {})
     }
   }
 

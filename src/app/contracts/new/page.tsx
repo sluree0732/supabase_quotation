@@ -161,8 +161,8 @@ function ContractPage() {
 
   // ── 자동저장 (이탈 시) ────────────────────────────────
   autoSaveRef.current = () => {
-    if (form.recipient.trim() && form.items.length && !form.savedId) {
-      handleSave('draft').catch(() => {})
+    if (form.recipient.trim() && form.items.length) {
+      handleSave('draft', true).catch(() => {})
     }
   }
 
@@ -207,8 +207,11 @@ function ContractPage() {
     }
   }
 
-  async function handleSave(status: ContractStatus) {
-    if (!form.recipient.trim()) { alert('수신 담당자를 입력해주세요.'); return }
+  async function handleSave(status: ContractStatus, silent = false) {
+    if (!form.recipient.trim()) {
+      if (!silent) alert('수신 담당자를 입력해주세요.')
+      return
+    }
     setSaving(true)
     try {
       const payload = {
@@ -225,12 +228,13 @@ function ContractPage() {
       }
 
       let savedId = form.savedId
-      if (editId) {
+      const existingId = editId ?? form.savedId
+      if (existingId) {
         await Promise.all([
-          updateContract(editId, payload),
-          saveContractItems(editId, form.items),
+          updateContract(existingId, payload),
+          saveContractItems(existingId, form.items),
         ])
-        savedId = editId
+        savedId = existingId
       } else {
         const c = await createContract({
           quotation_id: quotationId ?? null,
@@ -251,13 +255,13 @@ function ContractPage() {
           await deleteDraftsByQuotationId(qid, savedId)
         }
         set({ status: 'signed', savedId })
-        showToast('계약이 완료되었습니다.')
+        if (!silent) showToast('계약이 완료되었습니다.')
       } else {
         set({ status: 'draft', savedId })
-        showToast('임시저장 완료')
+        if (!silent) showToast('임시저장 완료')
       }
     } catch (e: any) {
-      alert(e.message ?? '저장 실패')
+      if (!silent) alert(e.message ?? '저장 실패')
     } finally {
       setSaving(false)
     }
