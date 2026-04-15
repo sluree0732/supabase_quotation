@@ -164,44 +164,52 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
               <p className="text-[#718096] mt-2 pt-2 border-t border-gray-50">아래와 같이 견적합니다.</p>
             </div>
 
-            {/* 발신 업체 정보 - 엑셀과 동일한 테이블 구조 */}
-            <div className="relative">
+            {/* 발신 업체 정보 - 엑셀과 동일한 테이블 구조 (5열: label1|value1|label2|stamp|value2) */}
+            <div>
               <table className="w-full text-xs border-collapse">
                 <tbody>
+                  {/* 행1: 상호 / 사업자등록번호 + 도장(rowSpan=2) */}
                   <tr>
                     <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">상&nbsp;&nbsp;호</td>
                     <td className="px-2 py-1 border border-gray-200">{SUPPLIER.name}</td>
                     <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">사업자 등록번호</td>
-                    <td className="px-2 py-1 border border-gray-200 pr-10">{SUPPLIER.business_no}</td>
+                    <td rowSpan={2} className="border border-gray-200 p-0.5 text-center" style={{ width: '52px' }}>
+                      <img
+                        src="/images/stamp.png"
+                        alt="도장"
+                        className="w-11 h-11 object-contain opacity-90 pointer-events-none"
+                      />
+                    </td>
+                    <td className="px-2 py-1 border border-gray-200">{SUPPLIER.business_no}</td>
                   </tr>
+                  {/* 행2: 대표자 / 연락처 */}
                   <tr>
                     <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">대&nbsp;&nbsp;표&nbsp;&nbsp;자</td>
                     <td className="px-2 py-1 border border-gray-200">{SUPPLIER.ceo}</td>
                     <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">연&nbsp;&nbsp;락&nbsp;&nbsp;처</td>
+                    {/* stamp cell continues via rowSpan */}
                     <td className="px-2 py-1 border border-gray-200">{SUPPLIER.phone}</td>
                   </tr>
+                  {/* 행3: 사업장 (value colSpan=4) */}
                   <tr>
                     <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">사&nbsp;&nbsp;업&nbsp;&nbsp;장</td>
-                    <td colSpan={3} className="px-2 py-1 border border-gray-200">{SUPPLIER.address}</td>
+                    <td colSpan={4} className="px-2 py-1 border border-gray-200">{SUPPLIER.address}</td>
                   </tr>
+                  {/* 행4: 업태 / 종목 (stamp 없음) */}
                   <tr>
                     <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">업&nbsp;&nbsp;&nbsp;&nbsp;태</td>
                     <td className="px-2 py-1 border border-gray-200">{SUPPLIER.business_type}</td>
                     <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">종&nbsp;&nbsp;&nbsp;&nbsp;목</td>
+                    <td className="border border-gray-200" />
                     <td className="px-2 py-1 border border-gray-200">{SUPPLIER.business_item}</td>
                   </tr>
+                  {/* 행5: 계좌정보 (value colSpan=4) */}
                   <tr>
                     <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">계좌정보</td>
-                    <td colSpan={3} className="px-2 py-1 border border-gray-200">{SUPPLIER.bank}</td>
+                    <td colSpan={4} className="px-2 py-1 border border-gray-200">{SUPPLIER.bank}</td>
                   </tr>
                 </tbody>
               </table>
-              {/* 도장 */}
-              <img
-                src="/images/stamp.png"
-                alt="도장"
-                className="absolute top-1 right-1 w-12 h-12 object-contain opacity-90 pointer-events-none"
-              />
             </div>
           </div>
 
