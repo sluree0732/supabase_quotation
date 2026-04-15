@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Sparkles, Loader2, Plus, Pencil, Trash2, ChevronDown } from 'lucide-react'
+import { X, Sparkles, Loader2, Plus, Pencil, Trash2 } from 'lucide-react'
 import type { QuotationItem, NoteTemplate } from '@/types'
 import { getNoteTemplates } from '@/lib/noteTemplates'
 import { getCategories, addCategory as addCategoryToDb, removeCategory as removeCategoryFromDb } from '@/lib/categories'
@@ -126,7 +126,7 @@ export default function ItemModal({ item, prefill, onSave, onUpdate, onDelete, o
   const [aiLoading, setAiLoading] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [addedCount, setAddedCount] = useState(0)
-  const [showList, setShowList] = useState(false)
+
   const [editingIdx, setEditingIdx] = useState<number | null>(null)  // 목록 항목 편집 중 인덱스
   const [draft, setDraft] = useState<Draft | null>(null)             // 새 항목 작성 draft
 
@@ -297,15 +297,6 @@ export default function ItemModal({ item, prefill, onSave, onUpdate, onDelete, o
             <h2 className="font-bold text-[#1e2a3a] text-lg">
               {isEdit ? '항목 수정' : isEditingExisting ? `${editingIdx! + 1}번째 항목 수정 중` : '항목 추가'}
             </h2>
-            {!isEdit && !isEditingExisting && displayCount > 0 && (
-              <button
-                onClick={() => setShowList(v => !v)}
-                className="text-xs text-[#2980b9] mt-0.5 flex items-center gap-0.5 hover:underline"
-              >
-                {displayCount}개 추가됨
-                <span className="text-[10px]">{showList ? '▲' : '▼'}</span>
-              </button>
-            )}
             {isEditingExisting && (
               <button onClick={exitEditItem} className="text-xs text-[#718096] mt-0.5 hover:underline">
                 ← 새 항목 작성으로 돌아가기
@@ -317,8 +308,8 @@ export default function ItemModal({ item, prefill, onSave, onUpdate, onDelete, o
           </button>
         </div>
 
-        {/* 추가된 항목 목록 패널 */}
-        {!isEdit && !isEditingExisting && showList && sessionItems.length > 0 && (
+        {/* 추가된 항목 목록 (항상 표시) */}
+        {!isEdit && !isEditingExisting && sessionItems.length > 0 && (
           <div className="border-b border-gray-100 bg-[#f8fafc] px-5 py-3 space-y-1 max-h-40 overflow-y-auto">
             {sessionItems.map((it, i) => (
               <button
