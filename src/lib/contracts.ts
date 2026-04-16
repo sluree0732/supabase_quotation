@@ -4,7 +4,7 @@ import type { Contract, ContractItem, ContractStatus, VatType } from '@/types'
 export async function getContracts(): Promise<Contract[]> {
   const { data, error } = await supabase
     .from('contracts')
-    .select('*, companies(name)')
+    .select('*, companies!company_id(name)')
     .order('created_at', { ascending: false })
   if (error) throw new Error(error.message)
   return data ?? []
@@ -13,7 +13,7 @@ export async function getContracts(): Promise<Contract[]> {
 export async function getContractWithItems(id: string) {
   const { data, error } = await supabase
     .from('contracts')
-    .select('*, companies(*), contract_items(*)')
+    .select('*, companies!company_id(*), contract_items(*)')
     .eq('id', id)
     .single()
   if (error) throw new Error(error.message)

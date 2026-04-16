@@ -33,6 +33,8 @@ export default function ContractsPage() {
     try {
       const data = await getContracts()
       setContracts(data)
+    } catch (e) {
+      console.error('계약서 목록 조회 실패:', e)
     } finally {
       setLoading(false)
     }
