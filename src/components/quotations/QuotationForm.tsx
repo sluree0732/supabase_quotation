@@ -16,6 +16,7 @@ export interface QuotationFormState {
   recipient: string
   quoteDate: string
   senderCompany: Company | null
+  senderCompanyId: string | null
   senderInfo: CompanyInfo | null
   company: Company | null
   clientInfo: CompanyInfo | null
@@ -447,7 +448,7 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
         <CompanyPickerModal
           selected={state.senderCompany}
           typeFilter="sender"
-          onSelect={company => set({ senderCompany: company, senderInfo: companyToInfo(company) })}
+          onSelect={company => set({ senderCompany: company, senderCompanyId: company.id, senderInfo: companyToInfo(company) })}
           onClose={() => setShowSenderPicker(false)}
         />
       )}

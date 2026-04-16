@@ -42,7 +42,8 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
   const [stampUrl, setStampUrl] = useState<string>('/images/stamp.png')
 
   useEffect(() => {
-    getSenderStampUrl().then(url => {
+    const id = state.senderCompanyId ?? state.senderCompany?.id ?? undefined
+    getSenderStampUrl(id).then(url => {
       if (url) setStampUrl(url)
     }).catch(() => {})
   }, [])

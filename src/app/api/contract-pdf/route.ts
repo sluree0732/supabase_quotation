@@ -3,6 +3,7 @@ import { renderToBuffer } from '@react-pdf/renderer'
 import { createElement } from 'react'
 import ContractDocument from '@/lib/pdf/ContractDocument'
 import type { VatType } from '@/types'
+import { getStampSrc } from '@/lib/getStampBuffer'
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,6 +24,7 @@ export async function POST(req: NextRequest) {
       specialTerms: string
     }
 
+    const stampSrc = await getStampSrc()
     const element = createElement(ContractDocument, {
       contractDate,
       startDate,
@@ -34,6 +36,7 @@ export async function POST(req: NextRequest) {
       totalAmount,
       vatType,
       specialTerms,
+      stampSrc,
     })
 
     const buffer = await renderToBuffer(element as any)

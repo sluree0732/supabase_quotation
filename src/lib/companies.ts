@@ -91,14 +91,19 @@ export async function deleteContact(contactId: string): Promise<void> {
   if (error) throw error
 }
 
-export async function getSenderStampUrl(): Promise<string | null> {
-  const { data, error } = await supabase
+export async function getSenderStampUrl(companyId?: string | null): Promise<string | null> {
+  let query = supabase
     .from('companies')
     .select('stamp_url')
-    .eq('company_type', 'sender')
     .not('stamp_url', 'is', null)
-    .order('created_at', { ascending: false })
-    .limit(1)
+
+  if (companyId) {
+    query = query.eq('id', companyId)
+  } else {
+    query = query.eq('company_type', 'sender').order('created_at', { ascending: false })
+  }
+
+  const { data, error } = await query.limit(1)
   if (error || !data?.length) return null
   return data[0].stamp_url
 }
