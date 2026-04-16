@@ -16,7 +16,7 @@ Font.register({
   ],
 })
 
-const stampPath = path.join(process.cwd(), 'public', 'images', 'stamp.png')
+const DEFAULT_STAMP_PATH = path.join(process.cwd(), 'public', 'images', 'stamp.png')
 
 // ── 스타일 ────────────────────────────────────────────────
 const S = StyleSheet.create({
@@ -172,11 +172,12 @@ export interface ContractDocProps {
   totalAmount: number
   vatType: VatType
   specialTerms: string
+  stampSrc?: string
 }
 
 export default function ContractDocument({
   contractDate, startDate, endDate, recipient, companyName, companyAddress,
-  items, totalAmount, vatType, specialTerms,
+  items, totalAmount, vatType, specialTerms, stampSrc,
 }: ContractDocProps) {
   const gab = companyName ? `${companyName} (${recipient})` : recipient
 
@@ -345,7 +346,7 @@ export default function ContractDocument({
             <View style={[S.signRow, { marginTop: 6, alignItems: 'center' }]}>
               <Text style={S.signLabel}>- 서    명 :</Text>
               <View style={{ flex: 1 }}>
-                <Image src={stampPath} style={{ width: 48, height: 48 }} />
+                <Image src={stampSrc ?? DEFAULT_STAMP_PATH} style={{ width: 48, height: 48 }} />
               </View>
             </View>
           </View>

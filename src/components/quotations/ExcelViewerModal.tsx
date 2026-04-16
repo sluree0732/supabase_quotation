@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X, Download, Loader2, Trash2 } from 'lucide-react'
 import type { QuotationFormState } from './QuotationForm'
 import { SUPPLIER } from '@/lib/supplier'
+import { getSenderStampUrl } from '@/lib/companies'
 
 interface Props {
   state: QuotationFormState
@@ -38,6 +39,13 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
   )
   const [downloading, setDownloading] = useState(false)
   const [pdfDownloading, setPdfDownloading] = useState(false)
+  const [stampUrl, setStampUrl] = useState<string>('/images/stamp.png')
+
+  useEffect(() => {
+    getSenderStampUrl().then(url => {
+      if (url) setStampUrl(url)
+    }).catch(() => {})
+  }, [])
 
   const total = items.reduce((s, i) => s + i.total_price, 0)
 
@@ -175,7 +183,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
                     <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">사업자 등록번호</td>
                     <td rowSpan={2} className="border border-gray-200 p-0.5 text-center" style={{ width: '52px', borderRight: 'none' }}>
                       <img
-                        src="/images/stamp.png"
+                        src={stampUrl}
                         alt="도장"
                         className="w-11 h-11 object-contain opacity-90 pointer-events-none"
                       />

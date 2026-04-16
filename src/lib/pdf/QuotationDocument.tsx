@@ -107,10 +107,10 @@ const VAT_MAP: Record<VatType, string> = {
   none: '',
 }
 
-const stampPath = path.join(process.cwd(), 'public', 'images', 'stamp.png')
+const DEFAULT_STAMP_PATH = path.join(process.cwd(), 'public', 'images', 'stamp.png')
 
 // ── 공급자 테이블 ─────────────────────────────────────────
-function SupplierTable() {
+function SupplierTable({ stampSrc }: { stampSrc: string }) {
   const s = SUPPLIER
   const bankParts = formatBank(s.bank)
 
@@ -147,7 +147,7 @@ function SupplierTable() {
         <View style={{ flex: 1, borderLeftWidth: 0.5, borderColor: '#333' }}>
           <View style={{ flex: 1, borderBottomWidth: 0.5, borderColor: '#333', flexDirection: 'row', alignItems: 'center' }}>
             <View style={{ width: 42, justifyContent: 'center', alignItems: 'center', paddingVertical: 1 }}>
-              <Image src={stampPath} style={{ width: 40, height: 40 }} />
+              <Image src={stampSrc} style={{ width: 40, height: 40 }} />
             </View>
             <Text style={[S.valText, { flex: 1, paddingHorizontal: 3 }]}>{s.business_no}</Text>
           </View>
@@ -254,10 +254,11 @@ export interface QuotationDocProps {
   items: QuotationItem[]
   totalAmount: number
   vatType: VatType
+  stampSrc?: string
 }
 
 export default function QuotationDocument({
-  quoteDate, recipient, items, totalAmount, vatType,
+  quoteDate, recipient, items, totalAmount, vatType, stampSrc,
 }: QuotationDocProps) {
   return (
     <Document>
@@ -273,7 +274,7 @@ export default function QuotationDocument({
             <Text style={{ ...S.infoBold, marginTop: 16 }}>아래와 같이 견적합니다.</Text>
           </View>
           <View style={S.infoRight}>
-            <SupplierTable />
+            <SupplierTable stampSrc={stampSrc ?? DEFAULT_STAMP_PATH} />
           </View>
         </View>
 

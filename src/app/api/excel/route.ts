@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import ExcelJS from 'exceljs'
 import path from 'path'
 import { SUPPLIER } from '@/lib/supplier'
+import { getStampBuffer } from '@/lib/getStampBuffer'
 
 const VAT_MAP: Record<string, string> = {
   excluded: '부가세 별도',
@@ -223,8 +224,8 @@ export async function POST(req: NextRequest) {
     applyBorder(vatCell)
 
     // ── 도장 이미지 삽입 (E2:E3 오버레이) ────────────────
-    const stampFile = path.join(process.cwd(), 'public', 'images', 'stamp.png')
-    const stampId = wb.addImage({ filename: stampFile, extension: 'png' })
+    const stampBuffer = await getStampBuffer()
+    const stampId = wb.addImage({ buffer: stampBuffer as any, extension: 'png' })
     ws.addImage(stampId, {
       tl: { col: 5.08, row: 1.12 },  // F2 (사업자 등록번호 값 앞에 오버레이, 칼럼선 노출)
       ext: { width: 65, height: 65 },

@@ -7,6 +7,7 @@ import path from 'path'
 import QuotationDocument from '@/lib/pdf/QuotationDocument'
 import ContractDocument from '@/lib/pdf/ContractDocument'
 import { SUPPLIER } from '@/lib/supplier'
+import { getStampBuffer, getStampSrc } from '@/lib/getStampBuffer'
 
 const VAT_MAP: Record<string, string> = {
   excluded: '부가세 별도',
@@ -252,8 +253,8 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
   vatCell.alignment = { horizontal: 'center', vertical: 'middle' }
   applyBorder(vatCell)
 
-  const stampFile = path.join(process.cwd(), 'public', 'images', 'stamp.png')
-  const stampId = wb.addImage({ filename: stampFile, extension: 'png' })
+  const stampBuffer = await getStampBuffer()
+  const stampId = wb.addImage({ buffer: stampBuffer as any, extension: 'png' })
   ws.addImage(stampId, {
     tl: { col: 5.08, row: 1.12 },
     ext: { width: 65, height: 65 },
@@ -265,7 +266,8 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
 
 async function generatePdf(payload: Record<string, any>): Promise<Buffer> {
   const { quoteDate, recipient, items, totalAmount, vatType } = payload
-  const element = createElement(QuotationDocument, { quoteDate, recipient, items, totalAmount, vatType })
+  const stampSrc = await getStampSrc()
+  const element = createElement(QuotationDocument, { quoteDate, recipient, items, totalAmount, vatType, stampSrc })
   return renderToBuffer(element as any) as Promise<Buffer>
 }
 
@@ -374,8 +376,8 @@ async function generateContractExcel(payload: Record<string, any>): Promise<Buff
     }
 
     // 도장 이미지 (오른쪽 상단)
-    const stampFile = path.join(process.cwd(), 'public', 'images', 'stamp.png')
-    const stampId = wb.addImage({ filename: stampFile, extension: 'png' })
+    const stampBuffer = await getStampBuffer()
+    const stampId = wb.addImage({ buffer: stampBuffer as any, extension: 'png' })
     ws.addImage(stampId, {
       tl: { col: 4.08, row: 1.12 },
       ext: { width: 65, height: 65 },
@@ -463,9 +465,10 @@ async function generateContractPdf(payload: Record<string, any>): Promise<Buffer
     contractDate, startDate, endDate, recipient, companyName, companyAddress,
     items, totalAmount, vatType, specialTerms,
   } = payload
+  const stampSrc = await getStampSrc()
   const element = createElement(ContractDocument, {
     contractDate, startDate, endDate, recipient, companyName, companyAddress,
-    items, totalAmount, vatType, specialTerms,
+    items, totalAmount, vatType, specialTerms, stampSrc,
   })
   return renderToBuffer(element as any) as Promise<Buffer>
 }

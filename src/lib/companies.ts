@@ -90,3 +90,12 @@ export async function deleteContact(contactId: string): Promise<void> {
   const { error } = await supabase.from('company_contacts').delete().eq('id', contactId)
   if (error) throw error
 }
+
+export async function getSenderStampUrl(): Promise<string | null> {
+  const { data } = await supabase
+    .from('companies')
+    .select('stamp_url')
+    .eq('company_type', 'sender')
+    .maybeSingle()
+  return data?.stamp_url ?? null
+}
