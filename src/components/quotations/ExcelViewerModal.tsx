@@ -53,7 +53,9 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
     setItems(prev => prev.map((it, i) => {
       if (i !== idx) return it
       const updated = { ...it, ...patch }
-      if ('unit_price' in patch) updated.total_price = updated.unit_price
+      if ('unit_price' in patch || 'period' in patch) {
+        updated.total_price = updated.unit_price * updated.period
+      }
       return updated
     }))
   }
