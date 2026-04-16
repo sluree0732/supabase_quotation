@@ -10,13 +10,20 @@ async function fetchSenderStampUrl(): Promise<string | null> {
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
-    const { data } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from('companies')
       .select('stamp_url')
       .eq('company_type', 'sender')
-      .maybeSingle()
-    return data?.stamp_url ?? null
-  } catch {
+      .not('stamp_url', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
+    if (error) {
+      console.error('[getStampBuffer] DB query error:', error.message)
+      return null
+    }
+    return data?.[0]?.stamp_url ?? null
+  } catch (e: any) {
+    console.error('[getStampBuffer] unexpected error:', e?.message ?? e)
     return null
   }
 }

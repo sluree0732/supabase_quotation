@@ -92,10 +92,13 @@ export async function deleteContact(contactId: string): Promise<void> {
 }
 
 export async function getSenderStampUrl(): Promise<string | null> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('companies')
     .select('stamp_url')
     .eq('company_type', 'sender')
-    .maybeSingle()
-  return data?.stamp_url ?? null
+    .not('stamp_url', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(1)
+  if (error || !data?.length) return null
+  return data[0].stamp_url
 }

@@ -85,6 +85,8 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
       let stamp_url: string | null = company?.stamp_url ?? null
       if (stampFile) {
         stamp_url = await uploadStamp(stampFile, isEdit ? company.id : undefined)
+      } else if (stampPreview === null && isEdit) {
+        stamp_url = null
       }
 
       const payload = {
