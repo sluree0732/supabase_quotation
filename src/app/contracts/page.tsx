@@ -21,6 +21,7 @@ export default function ContractsPage() {
   const router = useRouter()
   const [contracts, setContracts] = useState<Contract[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [tab, setTab] = useState<'all' | 'draft' | 'signed'>('all')
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
@@ -33,8 +34,8 @@ export default function ContractsPage() {
     try {
       const data = await getContracts()
       setContracts(data)
-    } catch (e) {
-      console.error('계약서 목록 조회 실패:', e)
+    } catch (e: any) {
+      setError(e?.message ?? String(e))
     } finally {
       setLoading(false)
     }
@@ -154,6 +155,12 @@ export default function ContractsPage() {
       <div className="flex-1 overflow-y-auto">
         {loading ? (
           <div className="flex items-center justify-center h-40 text-gray-400 text-sm">불러오는 중...</div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center h-40 gap-2 px-6">
+            <p className="text-sm text-red-500 font-medium">데이터를 불러오지 못했습니다</p>
+            <p className="text-xs text-red-400 text-center break-all">{error}</p>
+            <button onClick={fetchContracts} className="text-xs text-[#2980b9] mt-1">다시 시도</button>
+          </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-40 gap-3 text-gray-400">
             <FileSignature size={36} className="text-gray-300" />
