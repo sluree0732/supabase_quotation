@@ -20,6 +20,20 @@ export interface CompanyPayload {
   business_item: string
   email: string
   fax: string
+  stamp_url?: string | null
+}
+
+export async function uploadStamp(file: File, companyId?: string): Promise<string> {
+  const ext = file.name.split('.').pop() ?? 'png'
+  const filename = companyId ? `${companyId}.${ext}` : `temp_${Date.now()}.${ext}`
+  const { data, error } = await supabase.storage
+    .from('company-stamps')
+    .upload(filename, file, { upsert: true, contentType: file.type })
+  if (error) throw new Error(`도장 이미지 업로드 실패: ${error.message}`)
+  const { data: { publicUrl } } = supabase.storage
+    .from('company-stamps')
+    .getPublicUrl(data.path)
+  return publicUrl
 }
 
 export async function createCompany(payload: CompanyPayload): Promise<Company> {

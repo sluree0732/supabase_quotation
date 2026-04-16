@@ -30,6 +30,7 @@ export interface Company {
   business_item: string | null
   email: string | null
   fax: string | null
+  stamp_url: string | null
   created_at: string
   contacts?: CompanyContact[]
 }

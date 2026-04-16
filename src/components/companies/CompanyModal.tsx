@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { X, MapPin, Loader2, Plus, Trash2, UserRound } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { X, MapPin, Loader2, Plus, Trash2, UserRound, ImagePlus } from 'lucide-react'
 import type { Company, CompanyContact, CompanyType } from '@/types'
 import {
   createCompany, updateCompany, deleteCompany,
-  getContacts, addContact, deleteContact,
+  getContacts, addContact, deleteContact, uploadStamp,
 } from '@/lib/companies'
 import AddressModal from './AddressModal'
 
@@ -36,7 +36,10 @@ function formatBusinessNo(value: string): string {
 export default function CompanyModal({ company, onClose, onSaved }: CompanyModalProps) {
   const isEdit = !!company
 
-  const [companyType, setCompanyType] = useState<CompanyType>(company?.company_type ?? 'client')
+  const [companyType, setCompanyType] = useState<CompanyType | null>(company?.company_type ?? null)
+  const [stampFile, setStampFile] = useState<File | null>(null)
+  const [stampPreview, setStampPreview] = useState<string | null>(company?.stamp_url ?? null)
+  const stampInputRef = useRef<HTMLInputElement>(null)
   const [name, setName] = useState(company?.name ?? '')
   const [address, setAddress] = useState(company?.address ?? '')
   const [phone, setPhone] = useState(company?.phone ?? '')
@@ -69,6 +72,7 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
   }, [isEdit, company?.id])
 
   async function handleSave() {
+    if (!companyType) { setError('업체 구분을 선택해주세요.'); return }
     if (!name.trim()) { setError('업체명을 입력해주세요.'); return }
     if (!address.trim()) { setError('주소를 입력해주세요.'); return }
     if (!businessNo.trim()) { setError('사업자 등록번호를 입력해주세요.'); return }
@@ -78,6 +82,11 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
     setLoading(true)
     setError('')
     try {
+      let stamp_url: string | null = company?.stamp_url ?? null
+      if (stampFile) {
+        stamp_url = await uploadStamp(stampFile, isEdit ? company.id : undefined)
+      }
+
       const payload = {
         company_type: companyType,
         name: name.trim(),
@@ -88,6 +97,7 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
         business_item: businessItem.trim(),
         email: email.trim(),
         fax: fax.trim(),
+        stamp_url,
       }
       if (isEdit) {
         await updateCompany(company.id, payload)
@@ -101,6 +111,19 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
     } finally {
       setLoading(false)
     }
+  }
+
+  function handleStampFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setStampFile(file)
+    setStampPreview(URL.createObjectURL(file))
+  }
+
+  function handleStampRemove() {
+    setStampFile(null)
+    setStampPreview(null)
+    if (stampInputRef.current) stampInputRef.current.value = ''
   }
 
   async function handleDelete() {
@@ -192,7 +215,7 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
                     <span className={`text-sm font-semibold ${
                       companyType === opt.value
                         ? opt.value === 'sender' ? 'text-[#2980b9]' : 'text-[#8e44ad]'
-                        : 'text-[#1e2a3a]'
+                        : 'text-[#718096]'
                     }`}>{opt.label}</span>
                     <span className="text-xs text-[#718096] mt-0.5">{opt.desc}</span>
                   </button>
@@ -267,6 +290,51 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
                 className="input-base"
               />
             </Field>
+
+            {/* 자사 업체 전용: 도장 이미지 업로드 */}
+            {companyType === 'sender' && (
+              <Field label="도장 이미지">
+                <input
+                  ref={stampInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleStampFileChange}
+                />
+                {stampPreview ? (
+                  <div className="flex items-center gap-3">
+                    <div className="w-20 h-20 border border-gray-200 rounded-xl overflow-hidden flex items-center justify-center bg-gray-50 shrink-0">
+                      <img src={stampPreview} alt="도장 미리보기" className="w-full h-full object-contain p-1" />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => stampInputRef.current?.click()}
+                        className="text-xs text-[#2980b9] border border-[#2980b9]/30 rounded-lg px-3 py-1.5 hover:bg-[#ebf5fb] transition-colors"
+                      >
+                        이미지 변경
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleStampRemove}
+                        className="text-xs text-red-400 border border-red-200 rounded-lg px-3 py-1.5 hover:bg-red-50 transition-colors"
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => stampInputRef.current?.click()}
+                    className="w-full flex flex-col items-center justify-center gap-2 py-5 border-2 border-dashed border-gray-200 rounded-xl text-gray-400 hover:border-[#2980b9] hover:text-[#2980b9] transition-colors"
+                  >
+                    <ImagePlus size={22} />
+                    <span className="text-xs">도장 이미지 업로드 (PNG, JPG)</span>
+                  </button>
+                )}
+              </Field>
+            )}
 
             {/* 구분선 */}
             <div className="border-t border-gray-100" />
