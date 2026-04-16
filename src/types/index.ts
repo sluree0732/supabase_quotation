@@ -92,6 +92,7 @@ export interface Contract {
   id: string
   quotation_id: string | null
   company_id: string | null
+  sender_company_id: string | null
   contract_date: string
   start_date: string | null
   end_date: string | null

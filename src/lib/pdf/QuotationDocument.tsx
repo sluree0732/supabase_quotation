@@ -109,9 +109,24 @@ const VAT_MAP: Record<VatType, string> = {
 
 const DEFAULT_STAMP_PATH = path.join(process.cwd(), 'public', 'images', 'stamp.png')
 
+interface SenderInfo {
+  name?: string | null
+  address?: string | null
+  phone?: string | null
+  business_no?: string | null
+  business_type?: string | null
+  business_item?: string | null
+}
+
 // ── 공급자 테이블 ─────────────────────────────────────────
-function SupplierTable({ stampSrc }: { stampSrc: string }) {
+function SupplierTable({ stampSrc, senderInfo }: { stampSrc: string; senderInfo?: SenderInfo | null }) {
   const s = SUPPLIER
+  const name = senderInfo?.name ?? s.name
+  const address = senderInfo?.address ?? s.address
+  const phone = senderInfo?.phone ?? s.phone
+  const businessNo = senderInfo?.business_no ?? s.business_no
+  const businessType = senderInfo?.business_type ?? s.business_type
+  const businessItem = senderInfo?.business_item ?? s.business_item
   const bankParts = formatBank(s.bank)
 
   return (
@@ -125,7 +140,7 @@ function SupplierTable({ stampSrc }: { stampSrc: string }) {
               <Text style={S.labelText}>상  호</Text>
             </View>
             <View style={{ width: '43.1%', borderRightWidth: 0.5, borderColor: '#333', justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 2 }}>
-              <Text style={S.valText}>{s.name}</Text>
+              <Text style={S.valText}>{name}</Text>
             </View>
             <View style={{ flex: 1, backgroundColor: '#d9d9d9', justifyContent: 'center', alignItems: 'center', paddingVertical: 2 }}>
               <Text style={S.labelText}>사업자 등록번호</Text>
@@ -149,25 +164,25 @@ function SupplierTable({ stampSrc }: { stampSrc: string }) {
             <View style={{ width: 42, justifyContent: 'center', alignItems: 'center', paddingVertical: 1 }}>
               <Image src={stampSrc} style={{ width: 40, height: 40 }} />
             </View>
-            <Text style={[S.valText, { flex: 1, paddingHorizontal: 3 }]}>{s.business_no}</Text>
+            <Text style={[S.valText, { flex: 1, paddingHorizontal: 3 }]}>{businessNo}</Text>
           </View>
           <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
             <View style={{ width: 42 }} />
-            <Text style={[S.valText, { flex: 1, paddingHorizontal: 3 }]}>{s.phone}</Text>
+            <Text style={[S.valText, { flex: 1, paddingHorizontal: 3 }]}>{phone}</Text>
           </View>
         </View>
       </View>
       {/* row 2: 사업장 (full width) */}
       <View style={S.supplierRow}>
         <View style={S.supplierLabel}><Text style={S.labelText}>사업장</Text></View>
-        <View style={S.supplierValWide}><Text style={S.valText}>{s.address}</Text></View>
+        <View style={S.supplierValWide}><Text style={S.valText}>{address}</Text></View>
       </View>
       {/* row 3: 업태 / 종목 */}
       <View style={S.supplierRow}>
         <View style={S.supplierLabel}><Text style={S.labelText}>업  태</Text></View>
-        <View style={S.supplierVal}><Text style={S.valText}>{s.business_type}</Text></View>
+        <View style={S.supplierVal}><Text style={S.valText}>{businessType}</Text></View>
         <View style={S.supplierLabel2}><Text style={S.labelText}>종  목</Text></View>
-        <View style={S.supplierValWide}><Text style={S.valText}>{s.business_item}</Text></View>
+        <View style={S.supplierValWide}><Text style={S.valText}>{businessItem}</Text></View>
       </View>
       {/* row 4: 계좌정보 (계좌번호 빨간색) */}
       <View style={S.supplierLastRow}>
@@ -255,10 +270,11 @@ export interface QuotationDocProps {
   totalAmount: number
   vatType: VatType
   stampSrc?: string
+  senderInfo?: SenderInfo | null
 }
 
 export default function QuotationDocument({
-  quoteDate, recipient, items, totalAmount, vatType, stampSrc,
+  quoteDate, recipient, items, totalAmount, vatType, stampSrc, senderInfo,
 }: QuotationDocProps) {
   return (
     <Document>
@@ -274,7 +290,7 @@ export default function QuotationDocument({
             <Text style={{ ...S.infoBold, marginTop: 16 }}>아래와 같이 견적합니다.</Text>
           </View>
           <View style={S.infoRight}>
-            <SupplierTable stampSrc={stampSrc ?? DEFAULT_STAMP_PATH} />
+            <SupplierTable stampSrc={stampSrc ?? DEFAULT_STAMP_PATH} senderInfo={senderInfo} />
           </View>
         </View>
 

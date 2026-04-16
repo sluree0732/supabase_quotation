@@ -17,6 +17,10 @@ interface ContractPdfPayload {
   vatType: string
   specialTerms: string
   filename: string
+  senderCompanyId?: string | null
+  senderName?: string
+  senderAddress?: string
+  senderBusinessNo?: string
 }
 
 async function triggerTokenDownload(type: string, filename: string, payload: object) {

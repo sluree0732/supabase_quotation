@@ -9,6 +9,7 @@ import {
   deleteDraftsByQuotationId,
 } from '@/lib/contracts'
 import { getQuotationWithItems } from '@/lib/quotations'
+import { getCompany } from '@/lib/companies'
 import CompanyPickerModal from '@/components/quotations/CompanyPickerModal'
 import ItemModal, { type ItemPrefill } from '@/components/quotations/ItemModal'
 import ContractPdfViewerModal from '@/components/contracts/ContractPdfViewerModal'
@@ -20,6 +21,8 @@ function today() {
 
 interface ContractFormState {
   company: Company | null
+  senderCompany: Company | null
+  senderCompanyId: string | null
   contractDate: string
   startDate: string
   endDate: string
@@ -34,6 +37,8 @@ interface ContractFormState {
 
 const INITIAL: ContractFormState = {
   company: null,
+  senderCompany: null,
+  senderCompanyId: null,
   contractDate: today(),
   startDate: today(),
   endDate: '',
@@ -70,6 +75,7 @@ function ContractPage() {
   const autoSaveRef = useRef<(() => void) | null>(null)
   const [showPdfViewer, setShowPdfViewer] = useState(false)
   const [showCompany, setShowCompany] = useState(false)
+  const [showSenderCompany, setShowSenderCompany] = useState(false)
   const [showAdd, setShowAdd] = useState(false)
   const [editIdx, setEditIdx] = useState<number | null>(null)
   const [toast, setToast] = useState<string | null>(null)
@@ -115,9 +121,13 @@ function ContractPage() {
     }
     if (editId) {
       setLoading(true)
-      getContractWithItems(editId).then(data => {
+      getContractWithItems(editId).then(async data => {
+        const senderCompanyId = data.sender_company_id ?? null
+        const senderCompany = senderCompanyId ? await getCompany(senderCompanyId) : null
         setForm({
           company: data.companies ?? null,
+          senderCompany,
+          senderCompanyId,
           contractDate: data.contract_date,
           startDate: data.start_date ?? today(),
           endDate: data.end_date ?? '',
@@ -134,7 +144,7 @@ function ContractPage() {
     }
     if (quotationId) {
       setLoading(true)
-      getQuotationWithItems(quotationId).then(data => {
+      getQuotationWithItems(quotationId).then(async data => {
         if (!data) return
         const period = data.period ?? 1
         const start = today()
@@ -144,9 +154,13 @@ function ContractPage() {
           d.setDate(d.getDate() - 1)
           return d.toISOString().slice(0, 10)
         })()
+        const senderCompanyId = data.sender_company_id ?? null
+        const senderCompany = senderCompanyId ? await getCompany(senderCompanyId) : null
         setForm(prev => ({
           ...prev,
           company: data.companies ?? null,
+          senderCompany,
+          senderCompanyId,
           recipient: data.recipient,
           vatType: data.vat_type,
           startDate: start,
@@ -190,6 +204,7 @@ function ContractPage() {
   function getPdfPayload() {
     const dateStr = form.contractDate.replace(/-/g, '')
     const name = form.company?.name ?? ''
+    const sender = form.senderCompany
     return {
       contractDate: form.contractDate,
       startDate: form.startDate,
@@ -201,6 +216,10 @@ function ContractPage() {
       totalAmount: total,
       vatType: form.vatType,
       specialTerms: form.specialTerms,
+      senderCompanyId: form.senderCompanyId,
+      senderName: sender?.name,
+      senderAddress: sender?.address ?? undefined,
+      senderBusinessNo: sender?.business_no ?? undefined,
       filename: name ? `${name}_계약서(${dateStr}).pdf` : `계약서(${dateStr}).pdf`,
     }
   }
@@ -214,6 +233,7 @@ function ContractPage() {
     try {
       const payload = {
         company_id: form.company?.id ?? null,
+        sender_company_id: form.senderCompanyId,
         contract_date: form.contractDate,
         start_date: form.startDate || null,
         end_date: form.endDate || null,
@@ -237,6 +257,7 @@ function ContractPage() {
         const c = await createContract({
           quotation_id: quotationId ?? null,
           company_id: form.company?.id ?? null,
+          sender_company_id: form.senderCompanyId,
           contract_date: form.contractDate,
           recipient: form.recipient,
         })
@@ -306,6 +327,24 @@ function ContractPage() {
               <Field label="계약일">
                 <input type="date" value={form.contractDate}
                   onChange={e => set({ contractDate: e.target.value })} className="input-base" />
+              </Field>
+
+              <Field label="발신 업체">
+                <button onClick={() => setShowSenderCompany(true)}
+                  className="w-full flex items-center gap-3 px-4 py-3 border border-gray-200 rounded-xl bg-white hover:border-[#2980b9] transition-colors text-left">
+                  <Building2 size={18} className="text-[#2980b9] shrink-0" />
+                  <span className={`flex-1 text-sm ${form.senderCompany ? 'text-[#1e2a3a] font-medium' : 'text-gray-400'}`}>
+                    {form.senderCompany?.name ?? '자회사 선택 (선택사항)'}
+                  </span>
+                  {form.senderCompany ? (
+                    <button onClick={e => { e.stopPropagation(); set({ senderCompany: null, senderCompanyId: null }) }}
+                      className="p-0.5 text-gray-400 hover:text-gray-600">
+                      <X size={14} />
+                    </button>
+                  ) : (
+                    <ChevronRight size={16} className="text-gray-400" />
+                  )}
+                </button>
               </Field>
 
               <Field label="수신 업체">
@@ -456,6 +495,12 @@ function ContractPage() {
           payload={getPdfPayload()}
           onClose={() => setShowPdfViewer(false)}
         />
+      )}
+      {showSenderCompany && (
+        <CompanyPickerModal selected={form.senderCompany}
+          typeFilter="sender"
+          onSelect={company => set({ senderCompany: company, senderCompanyId: company.id })}
+          onClose={() => setShowSenderCompany(false)} />
       )}
       {showCompany && (
         <CompanyPickerModal selected={form.company}

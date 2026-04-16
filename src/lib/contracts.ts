@@ -26,6 +26,7 @@ export async function getContractWithItems(id: string) {
 export async function createContract(params: {
   quotation_id: string | null
   company_id: string | null
+  sender_company_id?: string | null
   contract_date: string
   recipient: string
 }): Promise<Contract> {
@@ -41,6 +42,7 @@ export async function createContract(params: {
 export async function updateContract(id: string, patch: {
   quotation_id?: string | null
   company_id?: string | null
+  sender_company_id?: string | null
   contract_date?: string
   start_date?: string | null
   end_date?: string | null

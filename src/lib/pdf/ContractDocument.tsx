@@ -173,12 +173,20 @@ export interface ContractDocProps {
   vatType: VatType
   specialTerms: string
   stampSrc?: string
+  senderName?: string
+  senderAddress?: string
+  senderBusinessNo?: string
+  senderPhone?: string
 }
 
 export default function ContractDocument({
   contractDate, startDate, endDate, recipient, companyName, companyAddress,
   items, totalAmount, vatType, specialTerms, stampSrc,
+  senderName, senderAddress, senderBusinessNo, senderPhone,
 }: ContractDocProps) {
+  const resolvedSenderName = senderName ?? SUPPLIER.name
+  const resolvedSenderAddress = senderAddress ?? SUPPLIER.address
+  const resolvedSenderBusinessNo = senderBusinessNo ?? SUPPLIER.business_no
   const gab = companyName ? `${companyName} (${recipient})` : recipient
 
   return (
@@ -196,7 +204,7 @@ export default function ContractDocument({
           </Text>
           <Text>
             <Text style={{ fontWeight: 'bold' }}>을 (대행사) : </Text>
-            <Text>{SUPPLIER.name} 대표 {SUPPLIER.ceo}</Text>
+            <Text>{resolvedSenderName} 대표 {SUPPLIER.ceo}</Text>
           </Text>
           <Text style={{ marginTop: 4 }}>
             위 양 당사자는 아래와 같이 광고 대행 계약을 체결한다.
@@ -247,7 +255,7 @@ export default function ContractDocument({
             - 잔금 (50%): 광고 집행 완료 및 최종 보고서 제출 후 7일 이내 지급
           </Text>
           <Text style={[S.articleBody, { marginTop: 4 }]}>
-            2. 결제 계좌: {SUPPLIER.bank.trim().split(' ').filter(p => !(/\d/.test(p) && p.includes('-'))).join(' ')} {SUPPLIER.bank.trim().split(' ').find(p => /\d/.test(p) && p.includes('-')) ?? ''} (예금주: {SUPPLIER.ceo})
+            2. 결제 계좌: {SUPPLIER.bank.trim().split(' ').filter((p: string) => !(/\d/.test(p) && p.includes('-'))).join(' ')} {SUPPLIER.bank.trim().split(' ').find((p: string) => /\d/.test(p) && p.includes('-')) ?? ''} (예금주: {SUPPLIER.ceo})
           </Text>
         </Article>
 
@@ -329,7 +337,7 @@ export default function ContractDocument({
             <Text style={S.signPartyTitle}>을 (대행사)</Text>
             <View style={S.signRow}>
               <Text style={S.signLabel}>- 상    호 :</Text>
-              <Text style={S.signValue}>{SUPPLIER.name}</Text>
+              <Text style={S.signValue}>{resolvedSenderName}</Text>
             </View>
             <View style={S.signRow}>
               <Text style={S.signLabel}>- 대 표 자 :</Text>
@@ -337,11 +345,11 @@ export default function ContractDocument({
             </View>
             <View style={S.signRow}>
               <Text style={S.signLabel}>- 주    소 :</Text>
-              <Text style={[S.signValue, { fontSize: 8 }]}>{SUPPLIER.address}</Text>
+              <Text style={[S.signValue, { fontSize: 8 }]}>{resolvedSenderAddress}</Text>
             </View>
             <View style={S.signRow}>
               <Text style={S.signLabel}>- 사업자 등록번호 :</Text>
-              <Text style={S.signValue}>{SUPPLIER.business_no}</Text>
+              <Text style={S.signValue}>{resolvedSenderBusinessNo}</Text>
             </View>
             <View style={[S.signRow, { marginTop: 6, alignItems: 'center' }]}>
               <Text style={S.signLabel}>- 서    명 :</Text>

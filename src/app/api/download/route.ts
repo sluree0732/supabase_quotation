@@ -8,6 +8,7 @@ import QuotationDocument from '@/lib/pdf/QuotationDocument'
 import ContractDocument from '@/lib/pdf/ContractDocument'
 import { SUPPLIER } from '@/lib/supplier'
 import { getStampBuffer, getStampSrc } from '@/lib/getStampBuffer'
+import { getSenderCompanyInfo } from '@/lib/getSenderCompanyInfo'
 
 const VAT_MAP: Record<string, string> = {
   excluded: '부가세 별도',
@@ -84,7 +85,7 @@ export async function GET(req: NextRequest) {
 }
 
 async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
-  const { quoteDate, recipient, items, totalAmount, vatType, period = 1 } = payload
+  const { quoteDate, recipient, items, totalAmount, vatType, period = 1, senderCompanyId, senderInfo } = payload
 
   const wb = new ExcelJS.Workbook()
   const ws = wb.addWorksheet('견적서')
@@ -123,7 +124,16 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
   titleCell.alignment = { horizontal: 'center', vertical: 'middle' }
   ws.getRow(1).height = 40
 
-  const s = SUPPLIER
+  const s = {
+    name: senderInfo?.name ?? SUPPLIER.name,
+    ceo: SUPPLIER.ceo,
+    business_no: senderInfo?.business_no ?? SUPPLIER.business_no,
+    phone: senderInfo?.phone ?? SUPPLIER.phone,
+    address: senderInfo?.address ?? SUPPLIER.address,
+    business_type: senderInfo?.business_type ?? SUPPLIER.business_type,
+    business_item: senderInfo?.business_item ?? SUPPLIER.business_item,
+    bank: SUPPLIER.bank,
+  }
   ws.getRow(2).height = 28
   ws.getRow(3).height = 28
   ws.getRow(4).height = 18
@@ -253,7 +263,7 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
   vatCell.alignment = { horizontal: 'center', vertical: 'middle' }
   applyBorder(vatCell)
 
-  const stampBuffer = await getStampBuffer()
+  const stampBuffer = await getStampBuffer(senderCompanyId)
   const stampId = wb.addImage({ buffer: stampBuffer as any, extension: 'png' })
   ws.addImage(stampId, {
     tl: { col: 5.08, row: 1.12 },
@@ -265,16 +275,16 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
 }
 
 async function generatePdf(payload: Record<string, any>): Promise<Buffer> {
-  const { quoteDate, recipient, items, totalAmount, vatType } = payload
-  const stampSrc = await getStampSrc()
-  const element = createElement(QuotationDocument, { quoteDate, recipient, items, totalAmount, vatType, stampSrc })
+  const { quoteDate, recipient, items, totalAmount, vatType, senderCompanyId, senderInfo } = payload
+  const stampSrc = await getStampSrc(senderCompanyId)
+  const element = createElement(QuotationDocument, { quoteDate, recipient, items, totalAmount, vatType, stampSrc, senderInfo })
   return renderToBuffer(element as any) as Promise<Buffer>
 }
 
 async function generateContractExcel(payload: Record<string, any>): Promise<Buffer> {
   const {
     contractDate, startDate, endDate, recipient, companyName, companyAddress,
-    items, totalAmount, vatType, specialTerms,
+    items, totalAmount, vatType, specialTerms, senderCompanyId,
   } = payload
 
   const wb = new ExcelJS.Workbook()
@@ -376,7 +386,7 @@ async function generateContractExcel(payload: Record<string, any>): Promise<Buff
     }
 
     // 도장 이미지 (오른쪽 상단)
-    const stampBuffer = await getStampBuffer()
+    const stampBuffer = await getStampBuffer(senderCompanyId)
     const stampId = wb.addImage({ buffer: stampBuffer as any, extension: 'png' })
     ws.addImage(stampId, {
       tl: { col: 4.08, row: 1.12 },
@@ -463,12 +473,19 @@ async function generateContractExcel(payload: Record<string, any>): Promise<Buff
 async function generateContractPdf(payload: Record<string, any>): Promise<Buffer> {
   const {
     contractDate, startDate, endDate, recipient, companyName, companyAddress,
-    items, totalAmount, vatType, specialTerms,
+    items, totalAmount, vatType, specialTerms, senderCompanyId,
+    senderName, senderAddress, senderBusinessNo,
   } = payload
-  const stampSrc = await getStampSrc()
+  const [stampSrc, senderInfo] = await Promise.all([
+    getStampSrc(senderCompanyId),
+    getSenderCompanyInfo(senderCompanyId, { name: senderName, address: senderAddress, business_no: senderBusinessNo }),
+  ])
   const element = createElement(ContractDocument, {
     contractDate, startDate, endDate, recipient, companyName, companyAddress,
     items, totalAmount, vatType, specialTerms, stampSrc,
+    senderName: senderInfo.name,
+    senderAddress: senderInfo.address,
+    senderBusinessNo: senderInfo.business_no,
   })
   return renderToBuffer(element as any) as Promise<Buffer>
 }

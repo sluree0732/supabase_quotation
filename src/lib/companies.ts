@@ -66,6 +66,16 @@ export async function deleteCompany(id: string): Promise<void> {
   if (error) throw error
 }
 
+export async function getCompany(id: string): Promise<Company | null> {
+  const { data, error } = await supabase
+    .from('companies')
+    .select('*, company_contacts(*)')
+    .eq('id', id)
+    .single()
+  if (error) return null
+  return { ...data, contacts: data.company_contacts ?? [] }
+}
+
 export async function getContacts(companyId: string): Promise<CompanyContact[]> {
   const { data, error } = await supabase
     .from('company_contacts')

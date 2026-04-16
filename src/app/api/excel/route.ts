@@ -12,7 +12,7 @@ const VAT_MAP: Record<string, string> = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { quoteDate, recipient, items, totalAmount, vatType, period = 1 } = await req.json()
+    const { quoteDate, recipient, items, totalAmount, vatType, period = 1, senderCompanyId, senderInfo } = await req.json()
 
     const wb = new ExcelJS.Workbook()
     const ws = wb.addWorksheet('견적서')
@@ -61,7 +61,16 @@ export async function POST(req: NextRequest) {
     ws.getRow(1).height = 40
 
     // ── 날짜 / 수신 + 공급자 정보 ─────────────────────────
-    const s = SUPPLIER
+    const s = {
+      name: senderInfo?.name ?? SUPPLIER.name,
+      ceo: SUPPLIER.ceo,
+      business_no: senderInfo?.business_no ?? SUPPLIER.business_no,
+      phone: senderInfo?.phone ?? SUPPLIER.phone,
+      address: senderInfo?.address ?? SUPPLIER.address,
+      business_type: senderInfo?.business_type ?? SUPPLIER.business_type,
+      business_item: senderInfo?.business_item ?? SUPPLIER.business_item,
+      bank: SUPPLIER.bank,
+    }
 
     ws.getRow(2).height = 28  // 도장 이미지 수용을 위해 높임
     ws.getRow(3).height = 28  // 도장 이미지 수용을 위해 높임
@@ -133,7 +142,7 @@ export async function POST(req: NextRequest) {
           // 계좌번호 부분만 빨간색 Rich Text
           const parts = v1.trim().split(' ')
           wideCell.value = {
-            richText: parts.map((part, i) => {
+            richText: parts.map((part: string, i: number) => {
               const isAccount = /\d/.test(part) && part.includes('-')
               return {
                 text: (i > 0 ? ' ' : '') + part,
@@ -224,7 +233,7 @@ export async function POST(req: NextRequest) {
     applyBorder(vatCell)
 
     // ── 도장 이미지 삽입 (E2:E3 오버레이) ────────────────
-    const stampBuffer = await getStampBuffer()
+    const stampBuffer = await getStampBuffer(senderCompanyId)
     const stampId = wb.addImage({ buffer: stampBuffer as any, extension: 'png' })
     ws.addImage(stampId, {
       tl: { col: 5.08, row: 1.12 },  // F2 (사업자 등록번호 값 앞에 오버레이, 칼럼선 노출)
