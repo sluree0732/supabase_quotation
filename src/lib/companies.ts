@@ -24,16 +24,20 @@ export interface CompanyPayload {
 }
 
 export async function uploadStamp(file: File, companyId?: string): Promise<string> {
-  const ext = file.name.split('.').pop() ?? 'png'
-  const filename = companyId ? `${companyId}.${ext}` : `temp_${Date.now()}.${ext}`
-  const { data, error } = await supabase.storage
-    .from('company-stamps')
-    .upload(filename, file, { upsert: true, contentType: file.type })
-  if (error) throw new Error(`도장 이미지 업로드 실패: ${error.message}`)
-  const { data: { publicUrl } } = supabase.storage
-    .from('company-stamps')
-    .getPublicUrl(data.path)
-  return publicUrl
+  const formData = new FormData()
+  formData.append('file', file)
+  if (companyId) formData.append('companyId', companyId)
+
+  const res = await fetch('/api/upload-stamp', {
+    method: 'POST',
+    body: formData,
+  })
+  if (!res.ok) {
+    const { error } = await res.json()
+    throw new Error(`도장 이미지 업로드 실패: ${error}`)
+  }
+  const { url } = await res.json()
+  return url
 }
 
 export async function createCompany(payload: CompanyPayload): Promise<Company> {
