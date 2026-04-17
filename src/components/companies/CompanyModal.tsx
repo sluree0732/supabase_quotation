@@ -269,7 +269,6 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
                 ref={ocrInputRef}
                 type="file"
                 accept="image/*"
-                capture="environment"
                 className="hidden"
                 onChange={handleOcrFileChange}
               />
