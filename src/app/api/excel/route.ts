@@ -11,7 +11,7 @@ const VAT_MAP: Record<string, string> = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { quoteDate, recipient, items, totalAmount, vatType, period = 1, senderCompanyId, senderInfo } = await req.json()
+    const { quoteDate, recipient, projectName, items, totalAmount, vatType, period = 1, senderCompanyId, senderInfo } = await req.json()
 
     const wb = new ExcelJS.Workbook()
     const ws = wb.addWorksheet('견적서')
@@ -86,6 +86,12 @@ export async function POST(req: NextRequest) {
     ws.getCell('A3').value = `수 신 : ${recipient}`
     ws.getCell('A3').font = { size: 9 }
     ws.mergeCells('A3:B3')
+
+    if (projectName) {
+      ws.getCell('A4').value = `프로젝트 : ${projectName}`
+      ws.getCell('A4').font = { size: 9 }
+      ws.mergeCells('A4:B4')
+    }
 
     ws.getCell('A5').value = '아래와 같이 견적합니다.'
     ws.getCell('A5').font = { bold: true, size: 9 }

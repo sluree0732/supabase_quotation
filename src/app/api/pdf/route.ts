@@ -7,9 +7,10 @@ import type { VatType } from '@/types'
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { quoteDate, recipient, items, totalAmount, vatType } = body as {
+    const { quoteDate, recipient, projectName, items, totalAmount, vatType } = body as {
       quoteDate: string
       recipient: string
+      projectName?: string | null
       items: any[]
       totalAmount: number
       vatType: VatType
@@ -18,6 +19,7 @@ export async function POST(req: NextRequest) {
     const element = createElement(QuotationDocument, {
       quoteDate,
       recipient,
+      projectName,
       items,
       totalAmount,
       vatType,

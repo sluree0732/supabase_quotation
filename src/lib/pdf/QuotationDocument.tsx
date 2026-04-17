@@ -267,6 +267,7 @@ function TotalRow({ total, vatType }: { total: number; vatType: VatType }) {
 export interface QuotationDocProps {
   quoteDate: string
   recipient: string
+  projectName?: string | null
   items: QuotationItem[]
   totalAmount: number
   vatType: VatType
@@ -275,7 +276,7 @@ export interface QuotationDocProps {
 }
 
 export default function QuotationDocument({
-  quoteDate, recipient, items, totalAmount, vatType, stampSrc, senderInfo,
+  quoteDate, recipient, projectName, items, totalAmount, vatType, stampSrc, senderInfo,
 }: QuotationDocProps) {
   return (
     <Document>
@@ -288,6 +289,9 @@ export default function QuotationDocument({
           <View style={S.infoLeft}>
             <Text style={S.infoText}>{quoteDate}</Text>
             <Text style={{ ...S.infoText, marginTop: 8 }}>수 신 : {recipient}</Text>
+            {!!projectName && (
+              <Text style={{ ...S.infoText, marginTop: 4 }}>프로젝트 : {projectName}</Text>
+            )}
             <Text style={{ ...S.infoBold, marginTop: 16 }}>아래와 같이 견적합니다.</Text>
           </View>
           <View style={S.infoRight}>

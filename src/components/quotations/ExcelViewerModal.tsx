@@ -91,6 +91,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
       await triggerTokenDownload('excel', filename, {
         quoteDate: state.quoteDate,
         recipient: state.recipient,
+        projectName: state.projectName ?? null,
         items,
         totalAmount: total,
         vatType: state.vatType,
@@ -112,6 +113,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
       await triggerTokenDownload('pdf', filename, {
         quoteDate: state.quoteDate,
         recipient: state.recipient,
+        projectName: state.projectName ?? null,
         items,
         totalAmount: total,
         vatType: state.vatType,
