@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Plus, FileSignature, ChevronRight, Trash2, X } from 'lucide-react'
 import type { Contract, ContractStatus } from '@/types'
 import { getContracts, deleteContract } from '@/lib/contracts'
@@ -17,12 +17,14 @@ const STATUS_COLOR: Record<ContractStatus, string> = {
   signed: 'bg-green-100 text-green-700',
 }
 
-export default function ContractsPage() {
+function ContractsContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [contracts, setContracts] = useState<Contract[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [tab, setTab] = useState<'all' | 'draft' | 'signed'>('all')
+  const initialTab = (searchParams.get('tab') as 'all' | 'draft' | 'signed') ?? 'all'
+  const [tab, setTab] = useState<'all' | 'draft' | 'signed'>(initialTab)
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
   useEffect(() => {
@@ -244,5 +246,13 @@ export default function ContractsPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function ContractsPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-40 text-gray-400 text-sm">불러오는 중...</div>}>
+      <ContractsContent />
+    </Suspense>
   )
 }

@@ -308,10 +308,16 @@ function ContractPage() {
           await deleteDraftsByQuotationId(qid, savedId)
         }
         set({ status: 'signed', savedId })
-        if (!silent) showToast('계약이 완료되었습니다.')
+        if (!silent) {
+          showToast('계약이 완료되었습니다.')
+          setTimeout(() => router.push('/contracts?tab=signed'), 800)
+        }
       } else {
         set({ status: 'draft', savedId })
-        if (!silent) showToast('임시저장 완료')
+        if (!silent) {
+          showToast('임시저장으로 변경되었습니다.')
+          setTimeout(() => router.push('/contracts?tab=draft'), 800)
+        }
       }
     } catch (e: any) {
       if (!silent) alert(e.message ?? '저장 실패')
@@ -571,12 +577,12 @@ function ContractPage() {
 
             {/* 버튼 */}
             <div className="space-y-2 pb-8">
-              <button onClick={() => handleSave('signed')} disabled={saving}
+              <button onClick={() => handleSave(form.status === 'signed' ? 'draft' : 'signed')} disabled={saving}
                 className={`w-full py-3.5 rounded-xl text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors ${
                   form.status === 'signed' ? 'bg-[#2980b9]' : 'bg-[#27ae60]'
                 }`}>
                 {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                저장
+                {form.status === 'signed' ? '계약 완료' : '저장'}
               </button>
               <button onClick={() => setShowPdfViewer(true)}
                 disabled={!form.items.length}
