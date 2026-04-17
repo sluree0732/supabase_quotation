@@ -392,12 +392,14 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
           <div className="space-y-2 pb-8">
             {/* 저장 */}
             <button
-              onClick={() => handleSave('saved')}
+              onClick={() => handleSave(state.status === 'saved' ? 'draft' : 'saved')}
               disabled={saving}
-              className="w-full py-3.5 rounded-xl bg-[#27ae60] text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+              className={`w-full py-3.5 rounded-xl text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors ${
+                state.status === 'saved' ? 'bg-[#2980b9]' : 'bg-[#27ae60]'
+              }`}
             >
               {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-              저장
+              {state.status === 'saved' ? '저장완료' : '저장'}
             </button>
 
             {/* 미리보기 / 계약서 작성 */}

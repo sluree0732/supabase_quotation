@@ -308,16 +308,10 @@ function ContractPage() {
           await deleteDraftsByQuotationId(qid, savedId)
         }
         set({ status: 'signed', savedId })
-        if (!silent) {
-          showToast('계약이 완료되었습니다.')
-          setTimeout(() => router.push('/contracts?tab=signed'), 800)
-        }
+        if (!silent) showToast('계약이 완료되었습니다.')
       } else {
         set({ status: 'draft', savedId })
-        if (!silent) {
-          showToast('임시저장으로 변경되었습니다.')
-          setTimeout(() => router.push('/contracts?tab=draft'), 800)
-        }
+        if (!silent) showToast('임시저장으로 변경되었습니다.')
       }
     } catch (e: any) {
       if (!silent) alert(e.message ?? '저장 실패')
