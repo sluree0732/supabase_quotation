@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { X, MapPin, Loader2, Plus, Trash2, UserRound, ImagePlus } from 'lucide-react'
+import { X, MapPin, Loader2, Plus, Trash2, UserRound, ImagePlus, Camera } from 'lucide-react'
 import type { Company, CompanyContact, CompanyType } from '@/types'
 import {
   createCompany, updateCompany, deleteCompany,
@@ -61,6 +61,9 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
   const [error, setError] = useState('')
   const [showAddress, setShowAddress] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [ocrLoading, setOcrLoading] = useState(false)
+  const [ocrError, setOcrError] = useState('')
+  const ocrInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
@@ -72,6 +75,35 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
       getContacts(company.id).then(setContacts).catch(() => {})
     }
   }, [isEdit, company?.id])
+
+  async function handleOcrFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (ocrInputRef.current) ocrInputRef.current.value = ''
+
+    setOcrLoading(true)
+    setOcrError('')
+    try {
+      const fd = new FormData()
+      fd.append('image', file)
+      const res = await fetch('/api/ocr-business', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (!res.ok) {
+        setOcrError(data.error ?? 'OCR 처리 실패')
+        return
+      }
+      if (data.name) setName(data.name)
+      if (data.businessNo) setBusinessNo(data.businessNo)
+      if (data.ceo) setCeo(data.ceo)
+      if (data.address) setAddress(data.address)
+      if (data.businessType) setBusinessType(data.businessType)
+      if (data.businessItem) setBusinessItem(data.businessItem)
+    } catch {
+      setOcrError('네트워크 오류가 발생했습니다.')
+    } finally {
+      setOcrLoading(false)
+    }
+  }
 
   async function handleSave() {
     if (!companyType) { setError('업체 구분을 선택해주세요.'); return }
@@ -229,6 +261,32 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* 사업자등록증 OCR */}
+            <div>
+              <input
+                ref={ocrInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={handleOcrFileChange}
+              />
+              <button
+                type="button"
+                onClick={() => ocrInputRef.current?.click()}
+                disabled={ocrLoading}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-[#2980b9]/40 bg-[#ebf5fb]/60 text-[#2980b9] text-sm font-medium hover:bg-[#ebf5fb] hover:border-[#2980b9]/70 transition-colors disabled:opacity-60"
+              >
+                {ocrLoading
+                  ? <><Loader2 size={16} className="animate-spin" />사업자등록증 인식 중...</>
+                  : <><Camera size={16} />사업자등록증으로 자동 입력</>
+                }
+              </button>
+              {ocrError && (
+                <p className="mt-1.5 text-xs text-red-500 text-center">{ocrError}</p>
+              )}
             </div>
 
             {/* 구분선 */}
