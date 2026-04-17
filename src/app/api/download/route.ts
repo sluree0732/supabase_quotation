@@ -126,13 +126,13 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
 
   const s = {
     name: senderInfo?.name ?? SUPPLIER.name,
-    ceo: SUPPLIER.ceo,
+    ceo: senderInfo?.ceo ?? SUPPLIER.ceo,
     business_no: senderInfo?.business_no ?? SUPPLIER.business_no,
     phone: senderInfo?.phone ?? SUPPLIER.phone,
     address: senderInfo?.address ?? SUPPLIER.address,
     business_type: senderInfo?.business_type ?? SUPPLIER.business_type,
     business_item: senderInfo?.business_item ?? SUPPLIER.business_item,
-    bank: SUPPLIER.bank,
+    bank: senderInfo?.bank ?? SUPPLIER.bank,
   }
   ws.getRow(2).height = 28
   ws.getRow(3).height = 28
@@ -486,6 +486,8 @@ async function generateContractPdf(payload: Record<string, any>): Promise<Buffer
     senderName: senderInfo.name,
     senderAddress: senderInfo.address,
     senderBusinessNo: senderInfo.business_no,
+    senderCeo: senderInfo.ceo,
+    senderBank: senderInfo.bank,
   })
   return renderToBuffer(element as any) as Promise<Buffer>
 }

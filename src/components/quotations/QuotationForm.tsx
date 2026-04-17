@@ -57,6 +57,8 @@ function companyToInfo(c: Company): CompanyInfo {
     business_item: c.business_item ?? '',
     email: c.email ?? '',
     fax: c.fax ?? '',
+    ceo: c.ceo ?? '',
+    bank: c.bank ?? '',
   }
 }
 
@@ -79,7 +81,7 @@ function CompanyInfoEditor({
       <label className="text-xs text-[#718096]">{label}</label>
       <input
         type="text"
-        value={info[key]}
+        value={info[key] ?? ''}
         onChange={e => onChange({ ...info, [key]: e.target.value })}
         className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-[#2980b9] transition-colors"
       />

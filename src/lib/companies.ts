@@ -20,6 +20,8 @@ export interface CompanyPayload {
   business_item: string
   email: string
   fax: string
+  ceo?: string
+  bank?: string
   stamp_url?: string | null
 }
 

@@ -49,6 +49,8 @@ export async function POST(req: NextRequest) {
       senderName: senderInfo.name,
       senderAddress: senderInfo.address,
       senderBusinessNo: senderInfo.business_no,
+      senderCeo: senderInfo.ceo,
+      senderBank: senderInfo.bank,
     })
 
     const buffer = await renderToBuffer(element as any)

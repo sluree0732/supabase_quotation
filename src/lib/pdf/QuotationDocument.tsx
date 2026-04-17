@@ -116,6 +116,8 @@ interface SenderInfo {
   business_no?: string | null
   business_type?: string | null
   business_item?: string | null
+  ceo?: string | null
+  bank?: string | null
 }
 
 // ── 공급자 테이블 ─────────────────────────────────────────
@@ -127,7 +129,8 @@ function SupplierTable({ stampSrc, senderInfo }: { stampSrc: string; senderInfo?
   const businessNo = senderInfo?.business_no ?? s.business_no
   const businessType = senderInfo?.business_type ?? s.business_type
   const businessItem = senderInfo?.business_item ?? s.business_item
-  const bankParts = formatBank(s.bank)
+  const ceo = senderInfo?.ceo ?? s.ceo
+  const bankParts = formatBank(senderInfo?.bank ?? s.bank)
 
   return (
     <View style={S.supplierTable}>
@@ -151,7 +154,7 @@ function SupplierTable({ stampSrc, senderInfo }: { stampSrc: string; senderInfo?
               <Text style={S.labelText}>대표자</Text>
             </View>
             <View style={{ width: '43.1%', borderRightWidth: 0.5, borderColor: '#333', justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 2 }}>
-              <Text style={S.valText}>{s.ceo}</Text>
+              <Text style={S.valText}>{ceo}</Text>
             </View>
             <View style={{ flex: 1, backgroundColor: '#d9d9d9', justifyContent: 'center', alignItems: 'center', paddingVertical: 2 }}>
               <Text style={S.labelText}>연  락  처</Text>

@@ -203,7 +203,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
                   {/* 행2: 대표자 / 연락처 */}
                   <tr>
                     <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">대&nbsp;&nbsp;표&nbsp;&nbsp;자</td>
-                    <td className="px-2 py-1 border border-gray-200">{SUPPLIER.ceo}</td>
+                    <td className="px-2 py-1 border border-gray-200">{state.senderInfo?.ceo ?? SUPPLIER.ceo}</td>
                     <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">연&nbsp;&nbsp;락&nbsp;&nbsp;처</td>
                     {/* stamp cell continues via rowSpan */}
                     <td className="px-2 py-1 border border-gray-200" style={{ borderLeft: 'none' }}>{state.senderInfo?.phone ?? SUPPLIER.phone}</td>
@@ -224,7 +224,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
                   {/* 행5: 계좌정보 (value colSpan=4) */}
                   <tr>
                     <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">계좌정보</td>
-                    <td colSpan={4} className="px-2 py-1 border border-gray-200">{SUPPLIER.bank}</td>
+                    <td colSpan={4} className="px-2 py-1 border border-gray-200">{state.senderInfo?.bank ?? SUPPLIER.bank}</td>
                   </tr>
                 </tbody>
               </table>

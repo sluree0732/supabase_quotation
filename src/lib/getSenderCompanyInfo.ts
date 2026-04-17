@@ -7,6 +7,8 @@ export interface SenderCompanyInfo {
   phone?: string
   business_type?: string
   business_item?: string
+  ceo?: string
+  bank?: string
 }
 
 export async function getSenderCompanyInfo(
@@ -25,7 +27,7 @@ export async function getSenderCompanyInfo(
     )
     const { data, error } = await supabaseAdmin
       .from('companies')
-      .select('name, address, business_no, phone, business_type, business_item')
+      .select('name, address, business_no, phone, business_type, business_item, ceo, bank')
       .eq('id', companyId)
       .single()
     if (error || !data) return overrides ?? {}
@@ -36,6 +38,8 @@ export async function getSenderCompanyInfo(
       phone: data.phone ?? undefined,
       business_type: data.business_type ?? undefined,
       business_item: data.business_item ?? undefined,
+      ceo: data.ceo ?? undefined,
+      bank: data.bank ?? undefined,
     }
   } catch {
     return overrides ?? {}

@@ -9,6 +9,8 @@ export interface CompanyInfo {
   business_item: string
   email: string
   fax: string
+  ceo?: string | null
+  bank?: string | null
 }
 
 export interface CompanyContact {
@@ -30,6 +32,8 @@ export interface Company {
   business_item: string | null
   email: string | null
   fax: string | null
+  ceo: string | null
+  bank: string | null
   stamp_url: string | null
   created_at: string
   contacts?: CompanyContact[]

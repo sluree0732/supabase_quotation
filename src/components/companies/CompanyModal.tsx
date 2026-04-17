@@ -48,6 +48,8 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
   const [businessType, setBusinessType] = useState(company?.business_type ?? '')
   const [businessItem, setBusinessItem] = useState(company?.business_item ?? '')
   const [fax, setFax] = useState(company?.fax ?? '')
+  const [ceo, setCeo] = useState(company?.ceo ?? '')
+  const [bank, setBank] = useState(company?.bank ?? '')
 
   const [contacts, setContacts] = useState<CompanyContact[]>([])
   const [newContactName, setNewContactName] = useState('')
@@ -99,6 +101,8 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
         business_item: businessItem.trim(),
         email: email.trim(),
         fax: fax.trim(),
+        ceo: ceo.trim(),
+        bank: bank.trim(),
         stamp_url,
       }
       if (isEdit) {
@@ -293,6 +297,16 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
               />
             </Field>
 
+            <Field label="대표자">
+              <input
+                type="text"
+                value={ceo}
+                onChange={e => setCeo(e.target.value)}
+                placeholder="대표자 이름"
+                className="input-base"
+              />
+            </Field>
+
             {/* 자사 업체 전용: 도장 이미지 업로드 */}
             {companyType === 'sender' && (
               <Field label="도장 이미지">
@@ -372,6 +386,19 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
                 className="input-base"
               />
             </Field>
+
+            {/* 자사 업체 전용: 결제계좌 */}
+            {companyType === 'sender' && (
+              <Field label="결제계좌">
+                <input
+                  type="text"
+                  value={bank}
+                  onChange={e => setBank(e.target.value)}
+                  placeholder="예: 부산은행 112-13-000000-1 홍길동"
+                  className="input-base"
+                />
+              </Field>
+            )}
 
             {/* 담당자 — 편집 모드에서만 */}
             {isEdit && (

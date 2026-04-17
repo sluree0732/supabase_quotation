@@ -177,16 +177,21 @@ export interface ContractDocProps {
   senderAddress?: string
   senderBusinessNo?: string
   senderPhone?: string
+  senderCeo?: string
+  senderBank?: string
 }
 
 export default function ContractDocument({
   contractDate, startDate, endDate, recipient, companyName, companyAddress,
   items, totalAmount, vatType, specialTerms, stampSrc,
   senderName, senderAddress, senderBusinessNo, senderPhone,
+  senderCeo, senderBank,
 }: ContractDocProps) {
   const resolvedSenderName = senderName ?? SUPPLIER.name
   const resolvedSenderAddress = senderAddress ?? SUPPLIER.address
   const resolvedSenderBusinessNo = senderBusinessNo ?? SUPPLIER.business_no
+  const resolvedSenderCeo = senderCeo ?? SUPPLIER.ceo
+  const resolvedSenderBank = senderBank ?? SUPPLIER.bank
   const gab = companyName ? `${companyName} (${recipient})` : recipient
 
   return (
@@ -204,7 +209,7 @@ export default function ContractDocument({
           </Text>
           <Text>
             <Text style={{ fontWeight: 'bold' }}>을 (대행사) : </Text>
-            <Text>{resolvedSenderName} 대표 {SUPPLIER.ceo}</Text>
+            <Text>{resolvedSenderName} 대표 {resolvedSenderCeo}</Text>
           </Text>
           <Text style={{ marginTop: 4 }}>
             위 양 당사자는 아래와 같이 광고 대행 계약을 체결한다.
@@ -255,7 +260,7 @@ export default function ContractDocument({
             - 잔금 (50%): 광고 집행 완료 및 최종 보고서 제출 후 7일 이내 지급
           </Text>
           <Text style={[S.articleBody, { marginTop: 4 }]}>
-            2. 결제 계좌: {SUPPLIER.bank.trim().split(' ').filter((p: string) => !(/\d/.test(p) && p.includes('-'))).join(' ')} {SUPPLIER.bank.trim().split(' ').find((p: string) => /\d/.test(p) && p.includes('-')) ?? ''} (예금주: {SUPPLIER.ceo})
+            2. 결제 계좌: {resolvedSenderBank.trim().split(' ').filter((p: string) => !(/\d/.test(p) && p.includes('-'))).join(' ')} {resolvedSenderBank.trim().split(' ').find((p: string) => /\d/.test(p) && p.includes('-')) ?? ''} (예금주: {resolvedSenderCeo})
           </Text>
         </Article>
 
@@ -341,7 +346,7 @@ export default function ContractDocument({
             </View>
             <View style={S.signRow}>
               <Text style={S.signLabel}>- 대 표 자 :</Text>
-              <Text style={S.signValue}>{SUPPLIER.ceo}</Text>
+              <Text style={S.signValue}>{resolvedSenderCeo}</Text>
             </View>
             <View style={S.signRow}>
               <Text style={S.signLabel}>- 주    소 :</Text>

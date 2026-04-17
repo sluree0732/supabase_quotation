@@ -63,13 +63,13 @@ export async function POST(req: NextRequest) {
     // ── 날짜 / 수신 + 공급자 정보 ─────────────────────────
     const s = {
       name: senderInfo?.name ?? SUPPLIER.name,
-      ceo: SUPPLIER.ceo,
+      ceo: senderInfo?.ceo ?? SUPPLIER.ceo,
       business_no: senderInfo?.business_no ?? SUPPLIER.business_no,
       phone: senderInfo?.phone ?? SUPPLIER.phone,
       address: senderInfo?.address ?? SUPPLIER.address,
       business_type: senderInfo?.business_type ?? SUPPLIER.business_type,
       business_item: senderInfo?.business_item ?? SUPPLIER.business_item,
-      bank: SUPPLIER.bank,
+      bank: senderInfo?.bank ?? SUPPLIER.bank,
     }
 
     ws.getRow(2).height = 28  // 도장 이미지 수용을 위해 높임
