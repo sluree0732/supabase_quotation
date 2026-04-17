@@ -105,6 +105,7 @@ export interface Contract {
   vat_type: VatType
   status: ContractStatus
   special_terms: string | null
+  articles?: Record<string, string> | null
   created_at: string
   companies?: { name: string } | null
 }

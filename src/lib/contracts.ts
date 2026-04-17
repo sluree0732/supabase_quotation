@@ -51,6 +51,7 @@ export async function updateContract(id: string, patch: {
   vat_type?: VatType
   status?: ContractStatus
   special_terms?: string | null
+  articles?: Record<string, string> | null
 }) {
   const { error } = await supabase.from('contracts').update(patch).eq('id', id)
   if (error) throw new Error(error.message)

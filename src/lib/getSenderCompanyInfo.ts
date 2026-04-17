@@ -15,9 +15,6 @@ export async function getSenderCompanyInfo(
   companyId: string | null | undefined,
   overrides?: SenderCompanyInfo,
 ): Promise<SenderCompanyInfo> {
-  // 프론트에서 이미 텍스트가 다 채워져 있으면 DB 조회 불필요
-  if (overrides?.name && overrides?.business_no) return overrides
-
   if (!companyId) return overrides ?? {}
 
   try {

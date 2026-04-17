@@ -473,7 +473,7 @@ async function generateContractPdf(payload: Record<string, any>): Promise<Buffer
   const {
     contractDate, startDate, endDate, recipient, companyName, companyAddress,
     items, totalAmount, vatType, specialTerms, senderCompanyId,
-    senderName, senderAddress, senderBusinessNo, companyRepresentative,
+    senderName, senderAddress, senderBusinessNo, companyRepresentative, articles,
   } = payload
   const [stampSrc, senderInfo] = await Promise.all([
     getStampSrc(senderCompanyId),
@@ -488,6 +488,7 @@ async function generateContractPdf(payload: Record<string, any>): Promise<Buffer
     senderCeo: senderInfo.ceo,
     senderBank: senderInfo.bank,
     companyRepresentative,
+    articles,
   })
   return renderToBuffer(element as any) as Promise<Buffer>
 }

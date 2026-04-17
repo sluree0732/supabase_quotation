@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { X, Download, Loader2 } from 'lucide-react'
 import dynamic from 'next/dynamic'
+import type { ContractArticles } from '@/lib/contractArticles'
 const PdfViewerBase = dynamic(() => import('@/components/shared/PdfViewerBase'), { ssr: false })
 
 interface ContractPdfPayload {
@@ -22,6 +23,7 @@ interface ContractPdfPayload {
   senderName?: string
   senderAddress?: string
   senderBusinessNo?: string
+  articles?: ContractArticles | null
 }
 
 async function triggerTokenDownload(type: string, filename: string, payload: object) {

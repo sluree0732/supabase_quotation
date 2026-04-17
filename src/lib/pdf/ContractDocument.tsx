@@ -4,6 +4,8 @@ import {
 } from '@react-pdf/renderer'
 import path from 'path'
 import type { ContractItem, VatType } from '@/types'
+import { mergeArticles } from '@/lib/contractArticles'
+import type { ContractArticles } from '@/lib/contractArticles'
 
 // ── 폰트 등록 ─────────────────────────────────────────────
 const fontDir = path.join(process.cwd(), 'public', 'fonts')
@@ -179,19 +181,21 @@ export interface ContractDocProps {
   senderCeo?: string
   senderBank?: string
   companyRepresentative?: string
+  articles?: Partial<ContractArticles> | null
 }
 
 export default function ContractDocument({
   contractDate, startDate, endDate, recipient, companyName, companyAddress,
   items, totalAmount, vatType, specialTerms, stampSrc,
   senderName, senderAddress, senderBusinessNo, senderPhone,
-  senderCeo, senderBank, companyRepresentative,
+  senderCeo, senderBank, companyRepresentative, articles,
 }: ContractDocProps) {
   const resolvedSenderName = senderName ?? ''
   const resolvedSenderAddress = senderAddress ?? ''
   const resolvedSenderBusinessNo = senderBusinessNo ?? ''
   const resolvedSenderCeo = senderCeo ?? ''
   const resolvedSenderBank = senderBank ?? ''
+  const A = mergeArticles(articles)
   const gab = companyName
     ? companyRepresentative
       ? `${companyName} 대표 ${companyRepresentative}`
@@ -224,9 +228,7 @@ export default function ContractDocument({
 
         {/* 제1조 */}
         <Article no={1} title="목적">
-          <Text style={S.articleBody}>
-            본 계약은 갑이 을에게 광고 대행 업무를 위탁하고, 을이 이를 성실히 수행함으로써 상호 이익을 도모함을 목적으로 한다.
-          </Text>
+          <Text style={S.articleBody}>{A.a1}</Text>
         </Article>
 
         {/* 제2조 */}
@@ -257,12 +259,9 @@ export default function ContractDocument({
           <Text style={[S.articleBody, { marginTop: 4 }]}>
             2. 지급 방법:
           </Text>
-          <Text style={[S.articleBody, { paddingLeft: 24, marginTop: 2 }]}>
-            - 선금 (50%): 계약 체결 후 3일 이내 지급
-          </Text>
-          <Text style={[S.articleBody, { paddingLeft: 24 }]}>
-            - 잔금 (50%): 광고 집행 완료 및 최종 보고서 제출 후 7일 이내 지급
-          </Text>
+          {A.a4_payment.split('\n').map((line, i) => (
+            <Text key={i} style={[S.articleBody, { paddingLeft: 24, marginTop: i === 0 ? 2 : 0 }]}>{line}</Text>
+          ))}
           <Text style={[S.articleBody, { marginTop: 4 }]}>
             2. 결제 계좌: {resolvedSenderBank.trim().split(' ').filter((p: string) => !(/\d/.test(p) && p.includes('-'))).join(' ')} {resolvedSenderBank.trim().split(' ').find((p: string) => /\d/.test(p) && p.includes('-')) ?? ''} (예금주: {resolvedSenderCeo})
           </Text>
@@ -270,37 +269,27 @@ export default function ContractDocument({
 
         {/* 제5조 */}
         <Article no={5} title="광고물 승인">
-          <Text style={S.articleBody}>
-            을은 광고 제작 시 갑의 사전 승인을 받아야 하며, 갑은 을의 요청에 대해 지체 없이 승인 여부를 통보하여야 한다.
-          </Text>
+          <Text style={S.articleBody}>{A.a5}</Text>
         </Article>
 
         {/* 제6조 */}
         <Article no={6} title="저작권">
-          <Text style={S.articleBody}>
-            본 계약으로 제작된 광고물의 저작권은 을에게 귀속되며, 갑은 계약 기간 내에 한하여 이를 사용할 수 있다.
-          </Text>
+          <Text style={S.articleBody}>{A.a6}</Text>
         </Article>
 
         {/* 제7조 */}
         <Article no={7} title="비밀유지">
-          <Text style={S.articleBody}>
-            양 당사자는 본 계약을 통해 알게 된 상대방의 업무상 비밀을 제3자에게 누설하여서는 아니 된다.
-          </Text>
+          <Text style={S.articleBody}>{A.a7}</Text>
         </Article>
 
         {/* 제8조 */}
         <Article no={8} title="계약의 해지">
-          <Text style={S.articleBody}>
-            일방이 계약상 의무를 이행하지 않을 경우, 상대방은 30일 이상의 유예기간을 두고 서면으로 통지하여 계약을 해지할 수 있다.
-          </Text>
+          <Text style={S.articleBody}>{A.a8}</Text>
         </Article>
 
         {/* 제9조 */}
         <Article no={9} title="관할법원">
-          <Text style={S.articleBody}>
-            본 계약에 관한 분쟁이 발생할 경우 부산지방법원을 관할 법원으로 한다.
-          </Text>
+          <Text style={S.articleBody}>{A.a9}</Text>
         </Article>
 
         {/* 특약사항 */}

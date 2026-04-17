@@ -2,8 +2,10 @@
 
 import { useEffect, useState, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Building2, ChevronRight, X, Plus, Loader2, Save, ChevronLeft, FileDown } from 'lucide-react'
+import { Building2, ChevronRight, X, Plus, Loader2, Save, ChevronLeft, FileDown, ChevronDown } from 'lucide-react'
 import type { Company, ContractItem, VatType, ContractStatus } from '@/types'
+import { mergeArticles, DEFAULT_ARTICLES } from '@/lib/contractArticles'
+import type { ContractArticles } from '@/lib/contractArticles'
 import {
   createContract, updateContract, saveContractItems, getContractWithItems,
   deleteDraftsByQuotationId,
@@ -30,6 +32,7 @@ interface ContractFormState {
   vatType: VatType
   items: ContractItem[]
   specialTerms: string
+  articles: ContractArticles
   status: ContractStatus | null
   savedQuotationId: string | null
   savedId: string | null
@@ -46,6 +49,7 @@ const INITIAL: ContractFormState = {
   vatType: 'excluded',
   items: [],
   specialTerms: '',
+  articles: { ...DEFAULT_ARTICLES },
   status: null,
   savedQuotationId: null,
   savedId: null,
@@ -80,6 +84,7 @@ function ContractPage() {
   const [editIdx, setEditIdx] = useState<number | null>(null)
   const [toast, setToast] = useState<string | null>(null)
   const [itemPrefill, setItemPrefill] = useState<ItemPrefill | undefined>(undefined)
+  const [showArticles, setShowArticles] = useState(false)
 
   function showToast(msg: string) {
     setToast(msg)
@@ -135,6 +140,7 @@ function ContractPage() {
           vatType: data.vat_type,
           items: data.items,
           specialTerms: data.special_terms ?? '',
+          articles: mergeArticles(data.articles as Partial<ContractArticles> | null),
           status: data.status,
           savedQuotationId: data.quotation_id ?? null,
           savedId: editId,
@@ -217,6 +223,7 @@ function ContractPage() {
       totalAmount: total,
       vatType: form.vatType,
       specialTerms: form.specialTerms,
+      articles: form.articles,
       senderCompanyId: form.senderCompanyId,
       senderName: sender?.name,
       senderAddress: sender?.address ?? undefined,
@@ -243,6 +250,7 @@ function ContractPage() {
         vat_type: form.vatType,
         status,
         special_terms: form.specialTerms || null,
+        articles: form.articles as Record<string, string>,
         quotation_id: quotationId ?? null,
       }
 
@@ -410,6 +418,57 @@ function ContractPage() {
                   className="input-base resize-none"
                 />
               </Field>
+
+              {/* 계약서 조항 편집 */}
+              <div className="border border-gray-200 rounded-xl overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setShowArticles(v => !v)}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+                >
+                  <span className="text-sm font-medium text-[#4a5568]">계약서 조항 편집</span>
+                  <ChevronDown
+                    size={16}
+                    className={`text-gray-400 transition-transform ${showArticles ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                {showArticles && (
+                  <div className="px-4 py-4 space-y-4 bg-white">
+                    {(
+                      [
+                        { key: 'a1', label: '제1조 목적', rows: 3 },
+                        { key: 'a4_payment', label: '제4조 지급 방법', rows: 3 },
+                        { key: 'a5', label: '제5조 광고물 승인', rows: 3 },
+                        { key: 'a6', label: '제6조 저작권', rows: 3 },
+                        { key: 'a7', label: '제7조 비밀유지', rows: 2 },
+                        { key: 'a8', label: '제8조 계약의 해지', rows: 3 },
+                        { key: 'a9', label: '제9조 관할법원', rows: 2 },
+                      ] as { key: keyof ContractArticles; label: string; rows: number }[]
+                    ).map(({ key, label, rows }) => (
+                      <div key={key} className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-medium text-[#4a5568]">{label}</label>
+                          {form.articles[key] !== DEFAULT_ARTICLES[key] && (
+                            <button
+                              type="button"
+                              onClick={() => set({ articles: { ...form.articles, [key]: DEFAULT_ARTICLES[key] } })}
+                              className="text-xs text-[#2980b9] hover:underline"
+                            >
+                              초기화
+                            </button>
+                          )}
+                        </div>
+                        <textarea
+                          value={form.articles[key]}
+                          onChange={e => set({ articles: { ...form.articles, [key]: e.target.value } })}
+                          rows={rows}
+                          className="input-base resize-y text-xs"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
