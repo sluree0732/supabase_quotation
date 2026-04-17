@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import type { VatType } from '@/types'
 import { createQuotation, updateQuotation, saveItems, getQuotationWithItems } from '@/lib/quotations'
+import { getCompany } from '@/lib/companies'
 import QuotationForm, { type QuotationFormState } from '@/components/quotations/QuotationForm'
 import type { ItemPrefill } from '@/components/quotations/ItemModal'
 
@@ -49,14 +50,16 @@ function QuotationPage() {
       return
     }
     setLoading(true)
-    getQuotationWithItems(editId).then(data => {
+    getQuotationWithItems(editId).then(async data => {
       if (!data) return
+      const senderCompanyId = data.sender_company_id ?? null
+      const senderCompany = senderCompanyId ? await getCompany(senderCompanyId) : null
       setFormState({
         projectName: data.project_name ?? '',
         recipient: data.recipient,
         quoteDate: data.quote_date,
-        senderCompany: null,
-        senderCompanyId: data.sender_company_id ?? null,
+        senderCompany,
+        senderCompanyId,
         senderInfo: data.sender_info ?? null,
         company: data.companies ?? null,
         clientInfo: data.client_info ?? null,

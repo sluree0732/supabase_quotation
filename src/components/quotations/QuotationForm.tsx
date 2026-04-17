@@ -160,8 +160,11 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
 
   // ── 자동저장 (이탈 시) ────────────────────────────────
   autoSaveRef.current = () => {
-    if (isDirty && state.items.length) {
-      onSave(state, 'draft', true).catch(() => {})
+    const hasContent = state.items.length > 0
+    const needsSave = state.status !== 'saved' || isDirty
+    if (hasContent && needsSave) {
+      const saveAs = state.status === 'saved' ? 'saved' : 'draft'
+      onSave(state, saveAs, true).catch(() => {})
     }
   }
 
