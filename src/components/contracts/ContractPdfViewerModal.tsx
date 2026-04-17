@@ -48,7 +48,6 @@ export default function ContractPdfViewerModal({ payload, onClose }: Props) {
   const [blobUrl, setBlobUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [excelDownloading, setExcelDownloading] = useState(false)
   const blobRef = useRef<string | null>(null)
 
   useEffect(() => {
@@ -83,32 +82,11 @@ export default function ContractPdfViewerModal({ payload, onClose }: Props) {
     }
   }
 
-  async function handleExcelDownload() {
-    setExcelDownloading(true)
-    try {
-      const { filename, ...rest } = payload
-      const excelFilename = filename.replace(/\.pdf$/i, '.xlsx')
-      await triggerTokenDownload('contract-excel', excelFilename, rest)
-    } catch (e: any) {
-      alert(e.message ?? '엑셀 다운로드 실패')
-    } finally {
-      setExcelDownloading(false)
-    }
-  }
-
   return (
     <div className="fixed inset-0 z-[70] flex flex-col bg-white">
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0">
         <h2 className="font-bold text-[#1e2a3a]">계약서 PDF 미리보기</h2>
         <div className="flex items-center gap-2">
-          <button
-            onClick={handleExcelDownload}
-            disabled={excelDownloading}
-            className="flex items-center gap-1.5 bg-[#217346] text-white px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50"
-          >
-            {excelDownloading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
-            엑셀
-          </button>
           {blobUrl && (
             <button
               onClick={handlePdfDownload}
