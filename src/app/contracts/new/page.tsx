@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Building2, ChevronRight, X, Plus, Loader2, Save, ChevronLeft, FileDown, ChevronDown, FolderOpen } from 'lucide-react'
+import { Building2, ChevronRight, X, Plus, Loader2, Save, ChevronLeft, FileDown, ChevronDown, FolderOpen, FileText } from 'lucide-react'
 import type { Company, ContractItem, VatType, ContractStatus, ContractTemplate } from '@/types'
 import { mergeArticles, DEFAULT_ARTICLES } from '@/lib/contractArticles'
 import type { ContractArticles } from '@/lib/contractArticles'
@@ -446,25 +446,30 @@ function ContractPage() {
 
               {/* 계약서 조항 편집 */}
               <div className="border-2 border-[#2980b9]/30 rounded-xl overflow-hidden">
-                <div
-                  onClick={() => setShowArticles(v => !v)}
-                  className="w-full flex items-center justify-between px-4 py-3.5 bg-[#ebf5fb] hover:bg-[#d6eaf8] transition-colors cursor-pointer"
-                >
-                  <span className="text-sm font-bold text-[#2980b9]">계약서 조항 편집</span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={e => { e.stopPropagation(); openTemplatePicker() }}
-                      className="flex items-center gap-1 text-xs bg-[#8e44ad] text-white font-medium px-2.5 py-1.5 rounded-lg hover:bg-[#7d3c98] transition-colors"
-                    >
-                      <FolderOpen size={12} />
-                      양식 불러오기
-                    </button>
-                    <ChevronDown
-                      size={16}
-                      className={`text-[#2980b9] transition-transform ${showArticles ? 'rotate-180' : ''}`}
-                    />
-                  </div>
+                <div className="flex items-center bg-[#ebf5fb]">
+                  {/* 토글 영역 */}
+                  <button
+                    type="button"
+                    onClick={() => setShowArticles(v => !v)}
+                    className="flex-1 flex items-center gap-2 px-4 py-3.5 hover:bg-[#d6eaf8] transition-colors text-left"
+                  >
+                    <FileText size={15} className="text-[#2980b9] shrink-0" />
+                    <span className="text-sm font-bold text-[#2980b9]">계약서 조항 편집</span>
+                    <span className="text-xs text-[#2980b9]/70 ml-0.5">
+                      {showArticles ? '▲ 접기' : '▼ 펼치기'}
+                    </span>
+                  </button>
+                  {/* 구분선 */}
+                  <div className="w-px h-8 bg-[#2980b9]/20 shrink-0" />
+                  {/* 양식 불러오기 버튼 */}
+                  <button
+                    type="button"
+                    onClick={openTemplatePicker}
+                    className="flex items-center gap-1 text-xs bg-[#8e44ad] text-white font-medium px-3 py-2 m-2 rounded-lg hover:bg-[#7d3c98] transition-colors shrink-0"
+                  >
+                    <FolderOpen size={12} />
+                    양식 불러오기
+                  </button>
                 </div>
                 {showArticles && (
                   <div className="px-4 py-4 space-y-4 bg-white">
