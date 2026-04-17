@@ -4,7 +4,6 @@ import {
 } from '@react-pdf/renderer'
 import path from 'path'
 import type { ContractItem, VatType } from '@/types'
-import { SUPPLIER } from '@/lib/supplier'
 
 // ── 폰트 등록 ─────────────────────────────────────────────
 const fontDir = path.join(process.cwd(), 'public', 'fonts')
@@ -179,20 +178,25 @@ export interface ContractDocProps {
   senderPhone?: string
   senderCeo?: string
   senderBank?: string
+  companyRepresentative?: string
 }
 
 export default function ContractDocument({
   contractDate, startDate, endDate, recipient, companyName, companyAddress,
   items, totalAmount, vatType, specialTerms, stampSrc,
   senderName, senderAddress, senderBusinessNo, senderPhone,
-  senderCeo, senderBank,
+  senderCeo, senderBank, companyRepresentative,
 }: ContractDocProps) {
-  const resolvedSenderName = senderName ?? SUPPLIER.name
-  const resolvedSenderAddress = senderAddress ?? SUPPLIER.address
-  const resolvedSenderBusinessNo = senderBusinessNo ?? SUPPLIER.business_no
-  const resolvedSenderCeo = senderCeo ?? SUPPLIER.ceo
-  const resolvedSenderBank = senderBank ?? SUPPLIER.bank
-  const gab = companyName ? `${companyName} (${recipient})` : recipient
+  const resolvedSenderName = senderName ?? ''
+  const resolvedSenderAddress = senderAddress ?? ''
+  const resolvedSenderBusinessNo = senderBusinessNo ?? ''
+  const resolvedSenderCeo = senderCeo ?? ''
+  const resolvedSenderBank = senderBank ?? ''
+  const gab = companyName
+    ? companyRepresentative
+      ? `${companyName} 대표 ${companyRepresentative}`
+      : companyName
+    : recipient
 
   return (
     <Document>
@@ -324,8 +328,8 @@ export default function ContractDocument({
               </View>
             ) : null}
             <View style={S.signRow}>
-              <Text style={S.signLabel}>- 성    명 :</Text>
-              <Text style={S.signValue}>{recipient}</Text>
+              <Text style={S.signLabel}>- 대 표 자 :</Text>
+              <Text style={S.signValue}>{companyRepresentative || recipient}</Text>
             </View>
             <View style={S.signRow}>
               <Text style={S.signLabel}>- 주    소 :</Text>

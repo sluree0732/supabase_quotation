@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     const {
       contractDate, startDate, endDate, recipient, companyName, companyAddress,
       items, totalAmount, vatType, specialTerms, senderCompanyId,
-      senderName, senderAddress, senderBusinessNo,
+      senderName, senderAddress, senderBusinessNo, companyRepresentative,
     } = body as {
       contractDate: string
       startDate: string
@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
       senderName?: string
       senderAddress?: string
       senderBusinessNo?: string
+      companyRepresentative?: string
     }
 
     const [stampSrc, senderInfo] = await Promise.all([
@@ -51,6 +52,7 @@ export async function POST(req: NextRequest) {
       senderBusinessNo: senderInfo.business_no,
       senderCeo: senderInfo.ceo,
       senderBank: senderInfo.bank,
+      companyRepresentative,
     })
 
     const buffer = await renderToBuffer(element as any)

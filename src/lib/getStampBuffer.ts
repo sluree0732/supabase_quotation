@@ -1,8 +1,6 @@
 import fs from 'fs'
 import path from 'path'
 import { createClient } from '@supabase/supabase-js'
-import { SUPPLIER } from '@/lib/supplier'
-
 const DEFAULT_STAMP_PATH = path.join(process.cwd(), 'public', 'images', 'stamp.png')
 
 async function fetchStampUrl(companyId?: string | null): Promise<string | null> {
@@ -27,18 +25,7 @@ async function fetchStampUrl(companyId?: string | null): Promise<string | null> 
       return data?.[0]?.stamp_url ?? null
     }
 
-    // 미선택 시 SUPPLIER 사업자번호로 정확히 매핑
-    const { data: supplierData, error: supplierError } = await supabaseAdmin
-      .from('companies')
-      .select('stamp_url')
-      .eq('business_no', SUPPLIER.business_no)
-      .not('stamp_url', 'is', null)
-      .limit(1)
-    if (!supplierError && supplierData?.[0]?.stamp_url) {
-      return supplierData[0].stamp_url
-    }
-
-    // SUPPLIER 매핑 실패 시 최신 sender 업체 도장으로 fallback
+    // 미선택 시 최신 자사(sender) 업체 도장 사용
     const { data, error } = await supabaseAdmin
       .from('companies')
       .select('stamp_url')

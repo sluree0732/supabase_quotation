@@ -212,6 +212,7 @@ function ContractPage() {
       recipient: form.recipient,
       companyName: name,
       companyAddress: form.company?.address ?? '',
+      companyRepresentative: form.company?.ceo ?? '',
       items: form.items,
       totalAmount: total,
       vatType: form.vatType,

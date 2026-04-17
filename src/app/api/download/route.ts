@@ -6,7 +6,6 @@ import ExcelJS from 'exceljs'
 import path from 'path'
 import QuotationDocument from '@/lib/pdf/QuotationDocument'
 import ContractDocument from '@/lib/pdf/ContractDocument'
-import { SUPPLIER } from '@/lib/supplier'
 import { getStampBuffer, getStampSrc } from '@/lib/getStampBuffer'
 import { getSenderCompanyInfo } from '@/lib/getSenderCompanyInfo'
 
@@ -125,14 +124,14 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
   ws.getRow(1).height = 40
 
   const s = {
-    name: senderInfo?.name ?? SUPPLIER.name,
-    ceo: senderInfo?.ceo ?? SUPPLIER.ceo,
-    business_no: senderInfo?.business_no ?? SUPPLIER.business_no,
-    phone: senderInfo?.phone ?? SUPPLIER.phone,
-    address: senderInfo?.address ?? SUPPLIER.address,
-    business_type: senderInfo?.business_type ?? SUPPLIER.business_type,
-    business_item: senderInfo?.business_item ?? SUPPLIER.business_item,
-    bank: senderInfo?.bank ?? SUPPLIER.bank,
+    name: senderInfo?.name ?? '',
+    ceo: senderInfo?.ceo ?? '',
+    business_no: senderInfo?.business_no ?? '',
+    phone: senderInfo?.phone ?? '',
+    address: senderInfo?.address ?? '',
+    business_type: senderInfo?.business_type ?? '',
+    business_item: senderInfo?.business_item ?? '',
+    bank: senderInfo?.bank ?? '',
   }
   ws.getRow(2).height = 28
   ws.getRow(3).height = 28
@@ -474,7 +473,7 @@ async function generateContractPdf(payload: Record<string, any>): Promise<Buffer
   const {
     contractDate, startDate, endDate, recipient, companyName, companyAddress,
     items, totalAmount, vatType, specialTerms, senderCompanyId,
-    senderName, senderAddress, senderBusinessNo,
+    senderName, senderAddress, senderBusinessNo, companyRepresentative,
   } = payload
   const [stampSrc, senderInfo] = await Promise.all([
     getStampSrc(senderCompanyId),
@@ -488,6 +487,7 @@ async function generateContractPdf(payload: Record<string, any>): Promise<Buffer
     senderBusinessNo: senderInfo.business_no,
     senderCeo: senderInfo.ceo,
     senderBank: senderInfo.bank,
+    companyRepresentative,
   })
   return renderToBuffer(element as any) as Promise<Buffer>
 }

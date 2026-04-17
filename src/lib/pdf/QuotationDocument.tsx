@@ -3,7 +3,6 @@ import {
 } from '@react-pdf/renderer'
 import path from 'path'
 import type { QuotationItem, VatType } from '@/types'
-import { SUPPLIER } from '@/lib/supplier'
 
 // ── 폰트 등록 (서버사이드 전용) ───────────────────────────
 const fontDir = path.join(process.cwd(), 'public', 'fonts')
@@ -122,15 +121,14 @@ interface SenderInfo {
 
 // ── 공급자 테이블 ─────────────────────────────────────────
 function SupplierTable({ stampSrc, senderInfo }: { stampSrc: string; senderInfo?: SenderInfo | null }) {
-  const s = SUPPLIER
-  const name = senderInfo?.name ?? s.name
-  const address = senderInfo?.address ?? s.address
-  const phone = senderInfo?.phone ?? s.phone
-  const businessNo = senderInfo?.business_no ?? s.business_no
-  const businessType = senderInfo?.business_type ?? s.business_type
-  const businessItem = senderInfo?.business_item ?? s.business_item
-  const ceo = senderInfo?.ceo ?? s.ceo
-  const bankParts = formatBank(senderInfo?.bank ?? s.bank)
+  const name = senderInfo?.name ?? ''
+  const address = senderInfo?.address ?? ''
+  const phone = senderInfo?.phone ?? ''
+  const businessNo = senderInfo?.business_no ?? ''
+  const businessType = senderInfo?.business_type ?? ''
+  const businessItem = senderInfo?.business_item ?? ''
+  const ceo = senderInfo?.ceo ?? ''
+  const bankParts = formatBank(senderInfo?.bank ?? '')
 
   return (
     <View style={S.supplierTable}>
