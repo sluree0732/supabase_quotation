@@ -12,6 +12,7 @@ interface ContractPdfPayload {
   recipient: string
   companyName: string
   companyAddress: string
+  companyRepresentative?: string
   items: any[]
   totalAmount: number
   vatType: string
