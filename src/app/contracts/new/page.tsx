@@ -204,7 +204,7 @@ function ContractPage() {
 
   // ── 자동저장 (이탈 시) ────────────────────────────────
   autoSaveRef.current = () => {
-    if (form.recipient.trim() && form.items.length) {
+    if (form.recipient.trim() && form.items.length && form.status !== 'signed') {
       handleSave('draft', true).catch(() => {})
     }
   }
@@ -303,10 +303,6 @@ function ContractPage() {
       }
 
       if (status === 'signed') {
-        const qid = quotationId ?? form.savedQuotationId
-        if (qid && savedId) {
-          await deleteDraftsByQuotationId(qid, savedId)
-        }
         set({ status: 'signed', savedId })
         if (!silent) showToast('계약이 완료되었습니다.')
       } else {
