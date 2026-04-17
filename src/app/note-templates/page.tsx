@@ -19,28 +19,28 @@ export default function NoteTemplatesPage() {
       </div>
 
       {/* 탭 */}
-      <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-xl w-fit">
+      <div className="flex border-b border-gray-200 mb-6">
         <button
           onClick={() => setActiveTab('notes')}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+          className={`flex items-center gap-1.5 px-5 py-3 text-sm font-semibold border-b-2 transition-colors ${
             activeTab === 'notes'
-              ? 'bg-white text-[#1e2a3a] shadow-sm'
-              : 'text-[#718096] hover:text-[#1e2a3a]'
+              ? 'border-[#2980b9] text-[#2980b9]'
+              : 'border-transparent text-[#718096] hover:text-[#1e2a3a] hover:border-gray-300'
           }`}
         >
-          <BookText size={14} />
-          AI 생성 리스트 관리
+          <BookText size={15} />
+          AI 생성 비고 관리
         </button>
         <button
           onClick={() => setActiveTab('contracts')}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+          className={`flex items-center gap-1.5 px-5 py-3 text-sm font-semibold border-b-2 transition-colors ${
             activeTab === 'contracts'
-              ? 'bg-white text-[#1e2a3a] shadow-sm'
-              : 'text-[#718096] hover:text-[#1e2a3a]'
+              ? 'border-[#8e44ad] text-[#8e44ad]'
+              : 'border-transparent text-[#718096] hover:text-[#1e2a3a] hover:border-gray-300'
           }`}
         >
-          <FileSignature size={14} />
-          계약서 관리
+          <FileSignature size={15} />
+          계약서 조항 관리
         </button>
       </div>
 

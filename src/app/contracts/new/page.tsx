@@ -445,24 +445,24 @@ function ContractPage() {
               </Field>
 
               {/* 계약서 조항 편집 */}
-              <div className="border border-gray-200 rounded-xl overflow-hidden">
+              <div className="border-2 border-[#2980b9]/30 rounded-xl overflow-hidden">
                 <div
                   onClick={() => setShowArticles(v => !v)}
-                  className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
+                  className="w-full flex items-center justify-between px-4 py-3.5 bg-[#ebf5fb] hover:bg-[#d6eaf8] transition-colors cursor-pointer"
                 >
-                  <span className="text-sm font-medium text-[#4a5568]">계약서 조항 편집</span>
+                  <span className="text-sm font-bold text-[#2980b9]">계약서 조항 편집</span>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={e => { e.stopPropagation(); openTemplatePicker() }}
-                      className="flex items-center gap-1 text-xs text-[#8e44ad] font-medium hover:text-[#7d3c98] px-2 py-1 rounded-lg hover:bg-purple-50 transition-colors"
+                      className="flex items-center gap-1 text-xs bg-[#8e44ad] text-white font-medium px-2.5 py-1.5 rounded-lg hover:bg-[#7d3c98] transition-colors"
                     >
                       <FolderOpen size={12} />
                       양식 불러오기
                     </button>
                     <ChevronDown
                       size={16}
-                      className={`text-gray-400 transition-transform ${showArticles ? 'rotate-180' : ''}`}
+                      className={`text-[#2980b9] transition-transform ${showArticles ? 'rotate-180' : ''}`}
                     />
                   </div>
                 </div>
