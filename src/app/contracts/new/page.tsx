@@ -2,10 +2,11 @@
 
 import { useEffect, useState, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Building2, ChevronRight, X, Plus, Loader2, Save, ChevronLeft, FileDown, ChevronDown } from 'lucide-react'
-import type { Company, ContractItem, VatType, ContractStatus } from '@/types'
+import { Building2, ChevronRight, X, Plus, Loader2, Save, ChevronLeft, FileDown, ChevronDown, FolderOpen } from 'lucide-react'
+import type { Company, ContractItem, VatType, ContractStatus, ContractTemplate } from '@/types'
 import { mergeArticles, DEFAULT_ARTICLES } from '@/lib/contractArticles'
 import type { ContractArticles } from '@/lib/contractArticles'
+import { getContractTemplates } from '@/lib/contractTemplates'
 import {
   createContract, updateContract, saveContractItems, getContractWithItems,
   deleteDraftsByQuotationId,
@@ -85,10 +86,34 @@ function ContractPage() {
   const [toast, setToast] = useState<string | null>(null)
   const [itemPrefill, setItemPrefill] = useState<ItemPrefill | undefined>(undefined)
   const [showArticles, setShowArticles] = useState(false)
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false)
+  const [availableTemplates, setAvailableTemplates] = useState<ContractTemplate[]>([])
+  const [templatesLoading, setTemplatesLoading] = useState(false)
 
   function showToast(msg: string) {
     setToast(msg)
     setTimeout(() => setToast(null), 2000)
+  }
+
+  async function openTemplatePicker() {
+    setShowTemplatePicker(true)
+    if (availableTemplates.length === 0) {
+      setTemplatesLoading(true)
+      try {
+        setAvailableTemplates(await getContractTemplates())
+      } catch {
+        // 목록 비어 있으면 안내 문구로 처리
+      } finally {
+        setTemplatesLoading(false)
+      }
+    }
+  }
+
+  function applyTemplate(t: ContractTemplate) {
+    set({ articles: { ...DEFAULT_ARTICLES, ...t.articles } as ContractArticles })
+    setShowTemplatePicker(false)
+    setShowArticles(true)
+    showToast(`"${t.name}" 양식을 불러왔습니다.`)
   }
 
   const set = (patch: Partial<ContractFormState>) => setForm(s => ({ ...s, ...patch }))
@@ -421,17 +446,26 @@ function ContractPage() {
 
               {/* 계약서 조항 편집 */}
               <div className="border border-gray-200 rounded-xl overflow-hidden">
-                <button
-                  type="button"
+                <div
                   onClick={() => setShowArticles(v => !v)}
-                  className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+                  className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
                 >
                   <span className="text-sm font-medium text-[#4a5568]">계약서 조항 편집</span>
-                  <ChevronDown
-                    size={16}
-                    className={`text-gray-400 transition-transform ${showArticles ? 'rotate-180' : ''}`}
-                  />
-                </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={e => { e.stopPropagation(); openTemplatePicker() }}
+                      className="flex items-center gap-1 text-xs text-[#8e44ad] font-medium hover:text-[#7d3c98] px-2 py-1 rounded-lg hover:bg-purple-50 transition-colors"
+                    >
+                      <FolderOpen size={12} />
+                      양식 불러오기
+                    </button>
+                    <ChevronDown
+                      size={16}
+                      className={`text-gray-400 transition-transform ${showArticles ? 'rotate-180' : ''}`}
+                    />
+                  </div>
+                </div>
                 {showArticles && (
                   <div className="px-4 py-4 space-y-4 bg-white">
                     {(
@@ -549,6 +583,62 @@ function ContractPage() {
           </div>
         </div>
       </div>
+
+      {/* 조항 양식 불러오기 피커 */}
+      {showTemplatePicker && (
+        <div className="fixed inset-0 z-[70] flex items-end md:items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowTemplatePicker(false)} />
+          <div
+            className="relative z-10 w-full md:w-[500px] bg-white rounded-t-2xl md:rounded-2xl shadow-xl flex flex-col max-h-[70dvh]"
+            onTouchMove={e => e.stopPropagation()}
+          >
+            <div className="md:hidden flex justify-center pt-3 pb-1">
+              <div className="w-10 h-1 bg-gray-300 rounded-full" />
+            </div>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <FolderOpen size={16} className="text-[#8e44ad]" />
+                <h2 className="font-bold text-[#1e2a3a] text-base">저장된 양식 불러오기</h2>
+              </div>
+              <button onClick={() => setShowTemplatePicker(false)}>
+                <X size={20} className="text-gray-400" />
+              </button>
+            </div>
+            <div className="overflow-y-auto flex-1 min-h-0">
+              {templatesLoading ? (
+                <div className="flex items-center justify-center py-12 gap-2 text-gray-400">
+                  <Loader2 size={18} className="animate-spin" />
+                  <span className="text-sm">불러오는 중...</span>
+                </div>
+              ) : availableTemplates.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-[#718096] text-sm">저장된 양식이 없습니다.</p>
+                  <p className="text-xs text-gray-400 mt-1">비고 등록 &gt; 계약서 관리에서 양식을 추가하세요.</p>
+                </div>
+              ) : (
+                <ul className="divide-y divide-gray-50">
+                  {availableTemplates.map(t => (
+                    <li key={t.id}>
+                      <button
+                        onClick={() => applyTemplate(t)}
+                        className="w-full flex items-center justify-between px-5 py-4 hover:bg-purple-50 transition-colors text-left"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-[#1e2a3a] truncate">{t.name}</p>
+                          {t.description && (
+                            <p className="text-xs text-[#718096] truncate mt-0.5">{t.description}</p>
+                          )}
+                        </div>
+                        <span className="text-xs text-[#8e44ad] font-medium shrink-0 ml-3">적용</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {showPdfViewer && (
         <ContractPdfViewerModal

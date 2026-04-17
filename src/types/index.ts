@@ -123,3 +123,12 @@ export interface NoteTemplate {
   sort_order: number
   created_at: string
 }
+
+export interface ContractTemplate {
+  id: string
+  name: string
+  description: string | null
+  articles: Record<string, string>
+  sort_order: number
+  created_at: string
+}
