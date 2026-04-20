@@ -24,8 +24,8 @@ export async function POST(req: NextRequest) {
 - name: 법인명 또는 상호 (법인사업자는 법인명, 개인사업자는 상호)
 - ceo: 대표자 성명
 - address: 사업장 소재지 전체 주소
-- businessType: 업태 (여러 개면 첫 번째 항목만)
-- businessItem: 종목 (여러 개면 첫 번째 항목만)
+- businessType: 업태 첫 번째 행의 값 하나만 (예: "서비스")
+- businessItem: 종목 첫 번째 행 전체 (쉼표로 구분된 값 모두 포함, 예: "광고대행, 광고물작성, 기타광고")
 
 JSON 형식:
 {
@@ -34,13 +34,14 @@ JSON 형식:
   "ceo": "홍길동",
   "address": "부산광역시 해운대구 우동 123",
   "businessType": "서비스",
-  "businessItem": "광고대행"
+  "businessItem": "광고대행, 광고물작성, 기타광고"
 }
 
 규칙:
 - 값이 불명확하거나 없으면 빈 문자열("")로 설정
 - businessNo는 숫자 10자리를 000-00-00000 형식으로 반드시 변환
-- 업태/종목이 여러 개여도 첫 번째 것만 추출
+- businessType: 업태 열의 첫 번째 행 값 하나만 추출
+- businessItem: 종목 열의 첫 번째 행에 있는 모든 값을 쉼표 포함하여 그대로 추출
 - JSON 외 다른 텍스트 없이 순수 JSON만 출력`
 
     const result = await model.generateContent([
