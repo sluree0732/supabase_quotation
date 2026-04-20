@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Trash2, Pencil, BookText, X, Check, FileText, FileSignature } from 'lucide-react'
+import { Plus, Trash2, Pencil, X, Check, FileText, FileSignature } from 'lucide-react'
 import type { NoteTemplate } from '@/types'
 import {
   getNoteTemplates,
@@ -209,52 +209,54 @@ export default function NoteTemplateList() {
         </div>
       ) : displayed.length === 0 ? (
         <div className="text-center py-20">
-          <BookText size={40} className="text-gray-300 mx-auto mb-3" />
+          <span className="text-4xl opacity-30">📝</span>
           <p className="text-[#718096] text-sm">등록된 비고 템플릿이 없습니다.</p>
           <button onClick={openAdd} className="mt-3 text-[#2980b9] text-sm underline">
             첫 템플릿 추가하기
           </button>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="grid grid-cols-[120px_1fr_80px] gap-4 px-5 py-2.5 bg-[#f8fafc] border-b border-gray-100 text-xs font-semibold text-[#718096]">
-            <span>대분류</span>
-            <span>제목 / 내용 미리보기</span>
-            <span className="text-right">관리</span>
-          </div>
-          {displayed.map((t, i) => (
-            <div key={t.id}>
+        <div className="flex flex-col gap-2">
+          {displayed.map(t => (
+            <div
+              key={t.id}
+              className={`bg-white rounded-2xl border shadow-sm transition-all ${
+                t.id === selectedId ? 'border-[#2980b9]' : 'border-[#e2e8f0]'
+              }`}
+            >
               <div
                 onClick={() => setSelectedId(t.id === selectedId ? null : t.id)}
-                className={`grid grid-cols-[120px_1fr_80px] gap-4 px-5 py-3.5 items-center cursor-pointer transition-colors ${
-                  t.id === selectedId ? 'bg-[#ebf5fb]' : 'hover:bg-[#f8fafc]'
-                } ${i !== displayed.length - 1 || t.id === selectedId ? 'border-b border-gray-50' : ''}`}
+                className="px-4 py-3.5 cursor-pointer"
               >
-                <span className="shrink-0 bg-[#ebf5fb] text-[#2980b9] text-[10px] font-medium px-2.5 py-1 rounded-full w-fit">
-                  {t.category}
-                </span>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-[#1e2a3a] truncate">{t.title}</p>
-                  <p className="text-xs text-[#718096] truncate mt-0.5">{t.content.replace(/\n/g, ' ')}</p>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2 flex-wrap flex-1 min-w-0">
+                    <span className="shrink-0 bg-[#ebf5fb] text-[#2980b9] text-[10px] font-medium px-2.5 py-1 rounded-full">
+                      {t.category}
+                    </span>
+                    <p className="text-sm font-semibold text-[#1e2a3a] truncate">{t.title}</p>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                    <button
+                      onClick={() => openEdit(t)}
+                      className="p-1.5 text-[#718096] hover:text-[#2980b9] hover:bg-[#ebf5fb] rounded-lg transition-colors"
+                    >
+                      <Pencil size={13} />
+                    </button>
+                    <button
+                      onClick={() => setDeleteTarget(t)}
+                      className="p-1.5 text-[#718096] hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1 justify-end shrink-0" onClick={e => e.stopPropagation()}>
-                  <button
-                    onClick={() => openEdit(t)}
-                    className="p-1.5 text-[#718096] hover:text-[#2980b9] hover:bg-[#ebf5fb] rounded-lg transition-colors"
-                  >
-                    <Pencil size={13} />
-                  </button>
-                  <button
-                    onClick={() => setDeleteTarget(t)}
-                    className="p-1.5 text-[#718096] hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                  >
-                    <Trash2 size={13} />
-                  </button>
-                </div>
+                <p className="text-xs text-[#718096] mt-1.5 truncate">
+                  {t.content.replace(/\n/g, ' ')}
+                </p>
               </div>
 
               {t.id === selectedId && (
-                <div className={`flex items-center gap-2 px-5 py-3 bg-[#f0f7fd] ${i !== displayed.length - 1 ? 'border-b border-gray-50' : ''}`}>
+                <div className="flex items-center gap-2 px-4 py-3 border-t border-[#e2e8f0] bg-[#f0f7fd] rounded-b-2xl">
                   <span className="text-xs text-[#718096] mr-1">사용할 문서:</span>
                   <button
                     onClick={() => handleUseTemplate(t, 'quotation')}
