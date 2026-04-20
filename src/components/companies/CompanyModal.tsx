@@ -63,7 +63,13 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [ocrLoading, setOcrLoading] = useState(false)
   const [ocrError, setOcrError] = useState('')
+  const [showOcrSheet, setShowOcrSheet] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const ocrInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    setIsMobile(window.matchMedia('(pointer: coarse)').matches)
+  }, [])
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
@@ -79,7 +85,7 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
   async function handleOcrFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    if (ocrInputRef.current) ocrInputRef.current.value = ''
+    e.target.value = ''
 
     setOcrLoading(true)
     setOcrError('')
@@ -274,7 +280,7 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
               />
               <button
                 type="button"
-                onClick={() => ocrInputRef.current?.click()}
+                onClick={() => isMobile ? setShowOcrSheet(true) : ocrInputRef.current?.click()}
                 disabled={ocrLoading}
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-[#2980b9]/40 bg-[#ebf5fb]/60 text-[#2980b9] text-sm font-medium hover:bg-[#ebf5fb] hover:border-[#2980b9]/70 transition-colors disabled:opacity-60"
               >
@@ -603,6 +609,37 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
           onSelect={addr => setAddress(addr)}
           onClose={() => setShowAddress(false)}
         />
+      )}
+
+      {showOcrSheet && (
+        <div className="fixed inset-0 z-[80] flex items-end justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShowOcrSheet(false)} />
+          <div className="relative z-10 w-full md:w-[520px] bg-white rounded-t-2xl shadow-xl">
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="w-10 h-1 bg-gray-300 rounded-full" />
+            </div>
+            <p className="text-center text-sm font-semibold text-[#1e2a3a] pt-2 pb-3">
+              사업자등록증 불러오기
+            </p>
+            <div className="px-4 pb-6 space-y-2">
+              <button
+                type="button"
+                onClick={() => { setShowOcrSheet(false); ocrInputRef.current?.click() }}
+                className="w-full flex items-center gap-3 px-4 py-4 bg-[#ebf5fb] rounded-xl text-[#2980b9] font-semibold text-sm"
+              >
+                <Camera size={20} />
+                카메라/파일첨부
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowOcrSheet(false)}
+                className="w-full py-3 text-sm text-gray-400 font-medium"
+              >
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   )
