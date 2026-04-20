@@ -1,23 +1,77 @@
+/* =====================================================
+   globals.css  ·  삼원기업 문서 관리 시스템
+   Tailwind CSS v4 (CSS-first config)
+   ===================================================== */
+
 @import "tailwindcss";
 
+/* ── Pretendard 폰트 (CDN) ──────────────────────────── */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css");
+
+/* ── 디자인 토큰 (Tailwind v4 @theme) ────────────────── */
+@theme {
+  /* 컬러 팔레트 */
+  --color-brand-blue:   #2980b9;
+  --color-brand-green:  #27ae60;
+  --color-brand-purple: #8e44ad;
+  --color-brand-orange: #e67e22;
+  --color-brand-dark:   #1e2a3a;
+
+  --color-brand-blue-light:   #ebf5fb;
+  --color-brand-green-light:  #eafaf1;
+  --color-brand-purple-light: #f5eef8;
+  --color-brand-orange-light: #fef9e7;
+
+  /* 회색 계열 */
+  --color-text-primary:   #1e2a3a;
+  --color-text-secondary: #4a5568;
+  --color-text-muted:     #718096;
+  --color-text-disabled:  #a0aec0;
+
+  --color-border:       #e2e8f0;
+  --color-border-light: #f1f5f9;
+  --color-surface:      #ffffff;
+  --color-bg:           #f0f4f8;
+
+  /* 폰트 */
+  --font-sans: 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', '맑은 고딕', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* 보더 반경 */
+  --radius-card:  1rem;    /* 16px – 카드 */
+  --radius-modal: 1.25rem; /* 20px – 모달 */
+  --radius-btn:   0.75rem; /* 12px – 버튼 */
+  --radius-input: 0.5rem;  /* 8px  – 인풋 */
+  --radius-badge: 9999px;  /* pill – 뱃지 */
+
+  /* 그림자 */
+  --shadow-card:  0 1px 4px rgba(0,0,0,0.06), 0 2px 12px rgba(0,0,0,0.04);
+  --shadow-modal: 0 8px 40px rgba(0,0,0,0.14);
+}
+
+/* ── CSS 커스텀 프로퍼티 (런타임 참조용) ────────────── */
 :root {
-  --background: #f5f6fa;
+  --background: #f0f4f8;
   --foreground: #1e2a3a;
 }
 
+/* ── 기본 스타일 ─────────────────────────────────────── */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Malgun Gothic', '맑은 고딕', -apple-system, BlinkMacSystemFont,
-    'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
+/* ── 인풋 공통 클래스 ────────────────────────────────── */
 .input-base {
   width: 100%;
   border: 1px solid #cbd5e0;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-input);
   padding: 0.625rem 0.75rem;
   font-size: 0.875rem;
+  font-family: var(--font-sans);
   background-color: #fff;
   outline: none;
   transition: border-color 0.15s;
@@ -25,6 +79,7 @@ body {
 
 .input-base:focus {
   border-color: #2980b9;
+  box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.12);
 }
 
 .input-base:read-only {
@@ -32,6 +87,7 @@ body {
   color: #4a5568;
 }
 
+/* ── 애니메이션 ──────────────────────────────────────── */
 @keyframes fade-in {
   from { opacity: 0; transform: translateX(-50%) translateY(8px); }
   to   { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -40,10 +96,6 @@ body {
 @keyframes slide-up {
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
-}
-
-.animate-slide-up {
-  animation: slide-up 0.25s ease-out;
 }
 
 @keyframes slide-up-in {
@@ -56,23 +108,13 @@ body {
   to   { transform: translateY(100%); }
 }
 
-.animate-slide-up-in {
-  animation: slide-up-in 0.3s ease-out forwards;
-}
-
-.animate-slide-down-out {
-  animation: slide-down-out 0.3s ease-in forwards;
-}
-
-.animate-fade-in {
-  animation: fade-in 0.2s ease-out;
-}
-
 @keyframes fade-in-up {
   from { opacity: 0; transform: translateX(-50%) translateY(12px); }
   to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
-.animate-fade-in-up {
-  animation: fade-in-up 0.25s ease-out;
-}
+.animate-slide-up       { animation: slide-up 0.25s ease-out; }
+.animate-slide-up-in    { animation: slide-up-in 0.3s ease-out forwards; }
+.animate-slide-down-out { animation: slide-down-out 0.3s ease-in forwards; }
+.animate-fade-in        { animation: fade-in 0.2s ease-out; }
+.animate-fade-in-up     { animation: fade-in-up 0.25s ease-out; }
