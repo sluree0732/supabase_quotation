@@ -82,7 +82,7 @@ export default function HomePage() {
         <h1 className="text-3xl font-bold text-[#1e2a3a] mb-2">
           견적서 / 계약서 관리
         </h1>
-        <p className="text-[#718096] text-sm">삼원기업 문서 관리 시스템</p>
+
       </div>
 
       {/* 카드 */}
