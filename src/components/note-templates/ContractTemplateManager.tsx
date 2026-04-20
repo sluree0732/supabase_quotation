@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Plus, Trash2, Pencil, FileSignature, X, Check } from 'lucide-react'
+import { Plus, X, Check } from 'lucide-react'
 import type { ContractTemplate } from '@/types'
 import {
   getContractTemplates,
@@ -140,7 +140,7 @@ export default function ContractTemplateManager() {
       {/* 서브 헤더 */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
-          <FileSignature size={18} className="text-[#8e44ad]" />
+          <span className="text-[#8e44ad] text-lg">✍️</span>
           <span className="text-sm font-semibold text-[#1e2a3a]">계약서 조항 양식</span>
           <span className="text-xs text-[#718096]">({templates.length}개)</span>
         </div>
@@ -179,43 +179,37 @@ export default function ContractTemplateManager() {
         </div>
       ) : templates.length === 0 ? (
         <div className="text-center py-20">
-          <FileSignature size={40} className="text-gray-300 mx-auto mb-3" />
+          <div className="text-5xl mb-3">✍️</div>
           <p className="text-[#718096] text-sm">저장된 계약서 조항 양식이 없습니다.</p>
           <button onClick={openAdd} className="mt-3 text-[#8e44ad] text-sm underline">
             첫 양식 추가하기
           </button>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="grid grid-cols-[1fr_80px] gap-4 px-5 py-2.5 bg-[#f8fafc] border-b border-gray-100 text-xs font-semibold text-[#718096]">
-            <span>양식명 / 메모</span>
-            <span className="text-right">관리</span>
-          </div>
-          {templates.map((t, i) => (
+        <div className="flex flex-col gap-2">
+          {templates.map((t) => (
             <div
               key={t.id}
-              className={`grid grid-cols-[1fr_80px] gap-4 px-5 py-3.5 items-center ${
-                i !== templates.length - 1 ? 'border-b border-gray-50' : ''
-              }`}
+              className="bg-white rounded-2xl border border-[#e2e8f0] shadow-sm px-4 py-3.5 flex items-center justify-between"
             >
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-[#1e2a3a] truncate">{t.name}</p>
                 {t.description && (
                   <p className="text-xs text-[#718096] truncate mt-0.5">{t.description}</p>
                 )}
               </div>
-              <div className="flex items-center gap-1 justify-end shrink-0">
+              <div className="flex items-center gap-1 shrink-0">
                 <button
                   onClick={() => openEdit(t)}
-                  className="p-1.5 text-[#718096] hover:text-[#8e44ad] hover:bg-purple-50 rounded-lg transition-colors"
+                  className="p-1.5 text-[#718096] hover:text-[#8e44ad] hover:bg-purple-50 rounded-lg transition-colors text-sm"
                 >
-                  <Pencil size={13} />
+                  ✏️
                 </button>
                 <button
                   onClick={() => setDeleteTarget(t)}
-                  className="p-1.5 text-[#718096] hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                  className="p-1.5 text-[#718096] hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors text-sm"
                 >
-                  <Trash2 size={13} />
+                  🗑
                 </button>
               </div>
             </div>
