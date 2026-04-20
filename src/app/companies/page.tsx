@@ -80,9 +80,12 @@ export default function CompaniesPage() {
       {/* 헤더 */}
       <div className="bg-white border-b border-gray-100 px-4 py-4 md:px-8">
         <div className="flex items-center justify-between mb-3">
-          <div>
-            <h1 className="text-xl font-bold text-[#1e2a3a]">업체 등록</h1>
-            <p className="text-xs text-[#718096] mt-0.5">총 {companies.length}개 업체</p>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0" style={{ background: '#2980b918' }}>🏢</div>
+            <div>
+              <h1 className="text-xl font-bold text-[#1e2a3a]">업체 등록</h1>
+              <p className="text-xs text-[#718096] mt-0.5">총 {companies.length}개 업체</p>
+            </div>
           </div>
           <button
             onClick={() => setSelected(null)}

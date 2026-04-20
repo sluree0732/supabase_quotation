@@ -13,9 +13,11 @@ export default function NoteTemplatesPage() {
   return (
     <div className="flex-1 min-h-screen bg-[#f8fafc] p-6">
       {/* 헤더 */}
-      <div className="flex items-center gap-2 mb-5">
-        <BookText size={22} className="text-[#2980b9]" />
-        <h1 className="text-xl font-bold text-[#1e2a3a]">비고 등록</h1>
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0" style={{ background: '#e67e2218' }}>📝</div>
+        <div>
+          <h1 className="text-xl font-bold text-[#1e2a3a]">비고 등록</h1>
+        </div>
       </div>
 
       {/* 탭 */}

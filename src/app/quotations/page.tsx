@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Plus, FileText, ChevronRight, Trash2, X } from 'lucide-react'
+import { Plus, FileText, Trash2, X } from 'lucide-react'
 import type { Quotation } from '@/types'
 import { getAllQuotations, deleteQuotation } from '@/lib/quotations'
 
@@ -103,9 +103,12 @@ export default function QuotationsPage() {
           </div>
         ) : (
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-bold text-[#1e2a3a]">견적서</h1>
-              <p className="text-xs text-[#718096] mt-0.5">총 {quotations.length}건</p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0" style={{ background: '#27ae6018' }}>📄</div>
+              <div>
+                <h1 className="text-xl font-bold text-[#1e2a3a]">견적서</h1>
+                <p className="text-xs text-[#718096] mt-0.5">총 {quotations.length}건</p>
+              </div>
             </div>
             <Link
               href="/quotations/new"
@@ -159,50 +162,48 @@ export default function QuotationsPage() {
               />
               <span className="text-xs text-gray-500">전체선택</span>
             </div>
-            <ul className="divide-y divide-gray-100">
+            <div className="px-4 py-3 md:px-8 flex flex-col gap-2">
               {filtered.map(q => {
                 const companyName = (q.companies as any)?.name ?? '—'
                 const total = q.total_amount ?? 0
                 const isSelected = selected.has(q.id)
                 return (
-                  <li key={q.id} className={isSelected ? 'bg-blue-50' : ''}>
-                    <div className="flex items-center gap-3 px-4 py-4 md:px-8">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleSelect(q.id)}
-                        onClick={e => e.stopPropagation()}
-                        className="w-4 h-4 rounded accent-[#2980b9] cursor-pointer shrink-0"
-                      />
-                      <Link href={`/quotations/new?id=${q.id}`} className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className="w-10 h-10 rounded-xl bg-[#eaf4fb] flex items-center justify-center shrink-0">
-                          <FileText size={18} className="text-[#2980b9]" />
+                  <div key={q.id} className={`bg-white rounded-2xl border shadow-sm flex items-center gap-3 px-4 py-3.5 transition-all ${isSelected ? 'border-[#2980b9] bg-blue-50' : 'border-[#e2e8f0]'}`}>
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => toggleSelect(q.id)}
+                      onClick={e => e.stopPropagation()}
+                      className="w-4 h-4 rounded accent-[#2980b9] cursor-pointer shrink-0"
+                    />
+                    <Link href={`/quotations/new?id=${q.id}`} className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-[#eaf4fb] flex items-center justify-center text-lg shrink-0">
+                        📄
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-[#1e2a3a] text-sm truncate">{companyName}</p>
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0 ${STATUS_COLOR[q.status]}`}>
+                            {STATUS_LABEL[q.status]}
+                          </span>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="font-semibold text-[#1e2a3a] text-sm truncate">{companyName}</p>
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0 ${STATUS_COLOR[q.status]}`}>
-                              {STATUS_LABEL[q.status]}
-                            </span>
-                          </div>
-                          <p className="text-xs text-[#718096] mt-0.5">수신: {q.recipient || '—'}</p>
-                          <p className="text-xs text-[#a0aec0]">
-                            {q.quote_date} · {total ? `${total.toLocaleString()}원` : '미계산'}
-                          </p>
-                        </div>
-                      </Link>
-                      <button
-                        onClick={e => handleDelete(q, e)}
-                        className="p-2 text-gray-300 hover:text-red-400 shrink-0"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                      <ChevronRight size={16} className="text-gray-300 shrink-0" />
-                    </div>
-                  </li>
+                        <p className="text-xs text-[#718096] mt-0.5">수신: {q.recipient || '—'}</p>
+                        <p className="text-xs text-[#a0aec0]">
+                          {q.quote_date} · {total ? `${total.toLocaleString()}원` : '미계산'}
+                        </p>
+                      </div>
+                    </Link>
+                    <button
+                      onClick={e => handleDelete(q, e)}
+                      className="p-2 text-gray-300 hover:text-red-400 shrink-0"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                    <span className="text-[#a0aec0] text-sm shrink-0">›</span>
+                  </div>
                 )
               })}
-            </ul>
+            </div>
           </>
         )}
       </div>

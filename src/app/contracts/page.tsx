@@ -121,9 +121,12 @@ function ContractsContent() {
           </div>
         ) : (
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-bold text-[#1e2a3a]">계약서</h1>
-              <p className="text-sm text-gray-400 mt-0.5">총 {contracts.length}건</p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0" style={{ background: '#8e44ad18' }}>✍️</div>
+              <div>
+                <h1 className="text-xl font-bold text-[#1e2a3a]">계약서</h1>
+                <p className="text-sm text-gray-400 mt-0.5">총 {contracts.length}건</p>
+              </div>
             </div>
             <Link
               href="/contracts/new"
