@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
-import { Plus, Search, Building2, Phone, MapPin, ChevronRight, Trash2 } from 'lucide-react'
+import { Plus, Search, Phone, MapPin, Trash2 } from 'lucide-react'
 import type { Company } from '@/types'
 import { getCompanies, deleteCompany } from '@/lib/companies'
 import CompanyModal from '@/components/companies/CompanyModal'
@@ -136,7 +136,7 @@ export default function CompaniesPage() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-40 text-gray-400 gap-2">
-            <Building2 size={32} className="opacity-30" />
+            <span className="text-4xl opacity-30">🏢</span>
             <p className="text-sm">
               {query ? '검색 결과가 없습니다.' : '등록된 업체가 없습니다.'}
             </p>
@@ -144,54 +144,48 @@ export default function CompaniesPage() {
         ) : (
           <>
             {/* 모바일: 카드 목록 */}
-            <ul className="md:hidden divide-y divide-gray-100">
+            <div className="md:hidden px-4 py-3 flex flex-col gap-2">
               {filtered.map((company, idx) => (
-                <>
-                  {/* 전체 탭에서 자사/광고주 구분선 */}
+                <div key={company.id}>
+                  {/* 섹션 레이블 */}
+                  {activeTab === 'all' && senderCount !== null && idx === 0 && senderCount > 0 && (
+                    <p className="text-[11px] font-semibold text-[#2980b9] uppercase tracking-wide mb-2">자사 업체</p>
+                  )}
                   {activeTab === 'all' && senderCount !== null && idx === senderCount && senderCount > 0 && (
-                    <li key={`divider-${idx}`} className="px-4 py-2 bg-gray-50">
-                      <span className="text-[11px] font-semibold text-[#8e44ad] uppercase tracking-wide">광고주 업체</span>
-                    </li>
+                    <p className="text-[11px] font-semibold text-[#8e44ad] uppercase tracking-wide mt-3 mb-2">광고주 업체</p>
                   )}
-                  {activeTab === 'all' && idx === 0 && senderCount !== null && senderCount > 0 && (
-                    <li key="sender-label" className="px-4 py-2 bg-gray-50">
-                      <span className="text-[11px] font-semibold text-[#2980b9] uppercase tracking-wide">자사 업체</span>
-                    </li>
-                  )}
-                  <li key={company.id}>
-                    <button
-                      onClick={() => setSelected(company)}
-                      className="w-full text-left px-4 py-4 flex items-center gap-3 active:bg-gray-50"
-                    >
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                        company.company_type === 'sender' ? 'bg-[#ebf5fb]' : 'bg-[#f5eefa]'
-                      }`}>
-                        <Building2 size={18} className={company.company_type === 'sender' ? 'text-[#2980b9]' : 'text-[#8e44ad]'} />
+                  <button
+                    onClick={() => setSelected(company)}
+                    className="w-full text-left bg-white rounded-2xl border border-[#e2e8f0] px-4 py-3.5 flex items-center gap-3 shadow-sm active:scale-[0.98] transition-transform"
+                  >
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-lg ${
+                      company.company_type === 'sender' ? 'bg-[#ebf5fb]' : 'bg-[#f5eefa]'
+                    }`}>
+                      🏢
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-semibold text-[#1e2a3a] text-sm truncate">{company.name}</p>
+                        {activeTab === 'all' && <TypeBadge type={company.company_type} />}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-semibold text-[#1e2a3a] text-sm truncate">{company.name}</p>
-                          {activeTab === 'all' && <TypeBadge type={company.company_type} />}
-                        </div>
-                        {company.phone && (
-                          <p className="text-xs text-[#718096] flex items-center gap-1 mt-0.5">
-                            <Phone size={10} />
-                            {company.phone}
-                          </p>
-                        )}
-                        {company.address && (
-                          <p className="text-xs text-[#a0aec0] flex items-center gap-1 mt-0.5 truncate">
-                            <MapPin size={10} className="shrink-0" />
-                            {company.address}
-                          </p>
-                        )}
-                      </div>
-                      <ChevronRight size={16} className="text-gray-300 shrink-0" />
-                    </button>
-                  </li>
-                </>
+                      {company.phone && (
+                        <p className="text-xs text-[#718096] flex items-center gap-1 mt-0.5">
+                          <Phone size={10} />
+                          {company.phone}
+                        </p>
+                      )}
+                      {company.address && (
+                        <p className="text-xs text-[#a0aec0] flex items-center gap-1 mt-0.5 truncate">
+                          <MapPin size={10} className="shrink-0" />
+                          {company.address}
+                        </p>
+                      )}
+                    </div>
+                    <span className="text-[#a0aec0] text-sm shrink-0">›</span>
+                  </button>
+                </div>
               ))}
-            </ul>
+            </div>
 
             {/* PC: 테이블 */}
             <div className="hidden md:block p-6">
