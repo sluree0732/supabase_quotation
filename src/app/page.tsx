@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Building2, FileText, FileSignature, BookText, ChevronRight } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 export default function HomePage() {
@@ -40,7 +39,7 @@ export default function HomePage() {
   const cards = [
     {
       href: '/companies',
-      icon: Building2,
+      icon: '🏢',
       color: '#2980b9',
       label: '업체 등록',
       desc: '거래처 정보 관리',
@@ -48,7 +47,7 @@ export default function HomePage() {
     },
     {
       href: '/quotations',
-      icon: FileText,
+      icon: '📄',
       color: '#27ae60',
       label: '견적서 작성',
       desc: '견적서 작성 및 PDF 출력',
@@ -57,7 +56,7 @@ export default function HomePage() {
     },
     {
       href: '/contracts',
-      icon: FileSignature,
+      icon: '✍️',
       color: '#8e44ad',
       label: '계약서 작성',
       desc: '계약서 작성 및 PDF 출력',
@@ -66,7 +65,7 @@ export default function HomePage() {
     },
     {
       href: '/note-templates',
-      icon: BookText,
+      icon: '📝',
       color: '#e67e22',
       label: '비고 관리',
       desc: '비고 템플릿 등록 및 관리',
@@ -87,7 +86,7 @@ export default function HomePage() {
 
       {/* 카드 */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full max-w-3xl">
-        {cards.map(({ href, icon: Icon, color, label, desc, badge, badgeColor }) => (
+        {cards.map(({ href, icon, color, label, desc, badge, badgeColor }) => (
           <Link
             key={href}
             href={href}
@@ -95,12 +94,12 @@ export default function HomePage() {
           >
             <div className="flex items-center justify-between">
               <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center"
+                className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
                 style={{ backgroundColor: `${color}18` }}
               >
-                <Icon size={24} style={{ color }} />
+                {icon}
               </div>
-              <ChevronRight size={18} className="text-[#a0aec0]" />
+              <span className="text-[#a0aec0] text-sm">›</span>
             </div>
             <div>
               <div className="font-semibold text-[#1e2a3a] text-base">{label}</div>
