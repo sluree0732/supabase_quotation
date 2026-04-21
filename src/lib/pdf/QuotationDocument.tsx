@@ -80,7 +80,7 @@ const S = StyleSheet.create({
   totalRow: { flexDirection: 'row', borderWidth: 1, borderColor: '#333' },
   totalLabel: { width: '37%', paddingHorizontal: 6, paddingVertical: 4, justifyContent: 'center' },
   totalAmount: { width: '13%', paddingHorizontal: 6, paddingVertical: 4, justifyContent: 'center', alignItems: 'flex-end', borderLeftWidth: 0.5, borderColor: '#d0d0d0' },
-  totalVat: { flex: 1, paddingHorizontal: 4, paddingVertical: 4, justifyContent: 'center', alignItems: 'flex-start', borderLeftWidth: 0.5, borderColor: '#d0d0d0' },
+  totalVat: { flex: 1, paddingHorizontal: 4, paddingVertical: 4, justifyContent: 'center', alignItems: 'center', borderLeftWidth: 0.5, borderColor: '#d0d0d0' },
 })
 
 // ── 유틸 ──────────────────────────────────────────────────
