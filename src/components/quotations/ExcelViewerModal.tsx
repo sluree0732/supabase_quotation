@@ -239,9 +239,8 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
                 {/* 1단 헤더 */}
                 <tr className="bg-gray-50">
                   <th colSpan={3} className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568]">상&nbsp;&nbsp;품</th>
-                  <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568]" style={{ minWidth: '110px' }}>금&nbsp;&nbsp;액</th>
-                  <th colSpan={2} className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568]" style={{ minWidth: '140px' }}>비&nbsp;&nbsp;고</th>
-                  <th className="border border-gray-200" style={{ width: '32px' }} />
+                  <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568]" style={{ width: '130px' }}>금&nbsp;&nbsp;액</th>
+                  <th colSpan={2} className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568]">비&nbsp;&nbsp;고</th>
                 </tr>
                 {/* 2단 헤더 */}
                 <tr className="bg-gray-50">
@@ -249,7 +248,6 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
                   <th colSpan={2} className="border border-gray-200 px-3 py-1.5 text-center font-semibold text-[#4a5568] text-xs" style={{ minWidth: '120px' }}>상품명</th>
                   <th className="border border-gray-200" />
                   <th colSpan={2} className="border border-gray-200" />
-                  <th className="border border-gray-200" />
                 </tr>
               </thead>
               <tbody>
@@ -278,7 +276,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
                         className="w-full px-2 py-1.5 text-right text-sm focus:outline-none focus:bg-blue-50 rounded transition-colors"
                       />
                     </td>
-                    <td colSpan={2} className="border border-gray-200 p-1">
+                    <td colSpan={2} className="border border-gray-200 p-1 relative">
                       <textarea
                         value={item.note}
                         onChange={e => {
@@ -295,11 +293,9 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
                         rows={1}
                         className="w-full px-2 py-1.5 text-xs focus:outline-none focus:bg-blue-50 rounded resize-none transition-colors overflow-hidden"
                       />
-                    </td>
-                    <td className="border border-gray-200 px-1 text-center">
                       <button
                         onClick={() => deleteItem(idx)}
-                        className="p-1 text-gray-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                        className="absolute top-1 right-1 p-1 text-gray-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
                       >
                         <Trash2 size={13} />
                       </button>
@@ -318,7 +314,6 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
                   <td colSpan={2} className="border border-gray-200 px-3 py-3 text-center text-sm text-red-600">
                     {VAT_LABEL[state.vatType]}
                   </td>
-                  <td className="border border-gray-200" />
                 </tr>
               </tfoot>
             </table>
