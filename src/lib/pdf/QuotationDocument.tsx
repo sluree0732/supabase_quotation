@@ -246,7 +246,7 @@ function TotalRow({ total, vatType }: { total: number; vatType: VatType }) {
   return (
     <View style={S.totalRow}>
       <View style={S.totalLabel}>
-        <Text style={{ fontSize: 8.5, fontWeight: 'bold' }}>합  계 (부가세포함)</Text>
+        <Text style={{ fontSize: 8.5, fontWeight: 'bold' }}>{`합  계${VAT_MAP[vatType] ? ` (${VAT_MAP[vatType]})` : ''}`}</Text>
       </View>
       <View style={S.totalAmount}>
         <Text style={{ fontSize: 8.5, fontWeight: 'bold' }}>{fmtNum(total)}</Text>

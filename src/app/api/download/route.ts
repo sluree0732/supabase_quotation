@@ -247,7 +247,7 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
   ws.getRow(totalRow).height = 22
   ws.mergeCells(`A${totalRow}:C${totalRow}`)
   const totalLabelCell = ws.getCell(`A${totalRow}`)
-  totalLabelCell.value = '합  계 (부가세포함)'
+  totalLabelCell.value = `합  계${VAT_MAP[vatType] ? ` (${VAT_MAP[vatType]})` : ''}`
   totalLabelCell.font = { bold: true, size: 9 }
   totalLabelCell.alignment = { horizontal: 'left', vertical: 'middle' }
   applyBorder(totalLabelCell)
