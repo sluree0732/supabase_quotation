@@ -70,19 +70,17 @@ const S = StyleSheet.create({
   tableRow: { flexDirection: 'row', borderBottomWidth: 0.5, borderColor: '#d0d0d0' },
   tableLastRow: { flexDirection: 'row' },
   colCat:   { width: '10%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 3, paddingVertical: 3 },
-  colName:  { width: '18%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 3, paddingVertical: 3 },
-  colPer:   { width: '9%',  borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingVertical: 3 },
+  colName:  { width: '27%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 3, paddingVertical: 3 },
   colUnit:  { width: '13%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'flex-end', paddingHorizontal: 3, paddingVertical: 3 },
-  colTotal: { width: '13%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'flex-end', paddingHorizontal: 3, paddingVertical: 3 },
   colNote:  { flex: 1, justifyContent: 'flex-start', paddingHorizontal: 4, paddingVertical: 4 },
   noteText: { fontSize: 7, lineHeight: 1.6 },
   headerText: { fontSize: 8, fontWeight: 'bold', textAlign: 'center' },
   cellText: { fontSize: 7.5 },
   // 합계 행
   totalRow: { flexDirection: 'row', borderWidth: 1, borderColor: '#333' },
-  totalLabel: { flex: 1, paddingHorizontal: 6, paddingVertical: 4, justifyContent: 'center' },
-  totalAmount: { width: '20%', paddingHorizontal: 6, paddingVertical: 4, justifyContent: 'center', alignItems: 'flex-end', borderLeftWidth: 0.5, borderColor: '#d0d0d0' },
-  totalVat: { width: '16%', paddingHorizontal: 4, paddingVertical: 4, justifyContent: 'center', alignItems: 'center', borderLeftWidth: 0.5, borderColor: '#d0d0d0' },
+  totalLabel: { width: '37%', paddingHorizontal: 6, paddingVertical: 4, justifyContent: 'center' },
+  totalAmount: { width: '13%', paddingHorizontal: 6, paddingVertical: 4, justifyContent: 'center', alignItems: 'flex-end', borderLeftWidth: 0.5, borderColor: '#d0d0d0' },
+  totalVat: { flex: 1, paddingHorizontal: 4, paddingVertical: 4, justifyContent: 'center', alignItems: 'center', borderLeftWidth: 0.5, borderColor: '#d0d0d0' },
 })
 
 // ── 유틸 ──────────────────────────────────────────────────
@@ -211,9 +209,8 @@ function ItemsTable({ items }: { items: QuotationItem[] }) {
     <View style={S.table}>
       {/* 헤더 */}
       <View style={S.tableHeader}>
-        <View style={[S.colCat, S.colName, { width: '28%' }]}><Text style={S.headerText}>상  품</Text></View>
+        <View style={[S.colCat, S.colName, { width: '37%' }]}><Text style={S.headerText}>상  품</Text></View>
         <View style={[S.colUnit, { alignItems: 'center' }]}><Text style={S.headerText}>금  액</Text></View>
-        <View style={[S.colTotal, { alignItems: 'center' }]}><Text style={S.headerText}>총  액</Text></View>
         <View style={S.colNote}><Text style={S.headerText}>비  고</Text></View>
       </View>
       {/* 서브헤더 (대분류 / 상품명 구분) */}
@@ -221,7 +218,6 @@ function ItemsTable({ items }: { items: QuotationItem[] }) {
         <View style={S.colCat}><Text style={[S.headerText, { fontSize: 7 }]}>대분류</Text></View>
         <View style={S.colName}><Text style={[S.headerText, { fontSize: 7 }]}>상품명</Text></View>
         <View style={S.colUnit}></View>
-        <View style={S.colTotal}></View>
         <View style={S.colNote}></View>
       </View>
       {/* 데이터 행 */}
@@ -233,7 +229,6 @@ function ItemsTable({ items }: { items: QuotationItem[] }) {
             <View style={S.colCat}><Text style={S.cellText}>{item.category}</Text></View>
             <View style={S.colName}><Text style={S.cellText}>{item.item_name}</Text></View>
             <View style={S.colUnit}><Text style={S.cellText}>{fmtNum(item.unit_price)}</Text></View>
-            <View style={S.colTotal}><Text style={S.cellText}>{fmtNum(item.total_price)}</Text></View>
             <View style={S.colNote}>
               {noteLines(item.note).map((line, li) => (
                 <Text key={li} style={S.noteText}>{line}</Text>

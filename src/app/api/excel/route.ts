@@ -169,22 +169,21 @@ export async function POST(req: NextRequest) {
 
     // ── 테이블 헤더 ───────────────────────────────────────
     ws.getRow(headerRow).height = 22
-    ws.mergeCells(`A${headerRow}:B${headerRow}`)
+    ws.mergeCells(`A${headerRow}:C${headerRow}`)
     headerCell(ws.getCell(`A${headerRow}`), '상  품')
-    headerCell(ws.getCell(`C${headerRow}`), '기간(월)')
     headerCell(ws.getCell(`D${headerRow}`), '금  액')
-    headerCell(ws.getCell(`E${headerRow}`), '총  액')
-    headerCell(ws.getCell(`F${headerRow}`), '비  고')
+    ws.mergeCells(`E${headerRow}:F${headerRow}`)
+    headerCell(ws.getCell(`E${headerRow}`), '비  고')
 
     // 서브헤더
     const subRow = headerRow + 1
     ws.getRow(subRow).height = 16
     headerCell(ws.getCell(`A${subRow}`), '대분류')
+    ws.mergeCells(`B${subRow}:C${subRow}`)
     headerCell(ws.getCell(`B${subRow}`), '상품명')
-    headerCell(ws.getCell(`C${subRow}`), '')
     headerCell(ws.getCell(`D${subRow}`), '')
+    ws.mergeCells(`E${subRow}:F${subRow}`)
     headerCell(ws.getCell(`E${subRow}`), '')
-    headerCell(ws.getCell(`F${subRow}`), '')
 
     // ── 비고 줄 수 기반 행 높이 계산 ─────────────────────
     function calcRowHeight(note: string): number {
@@ -203,35 +202,35 @@ export async function POST(req: NextRequest) {
       const r = dataStartRow + i
       ws.getRow(r).height = calcRowHeight(item.note ?? '')
       dataCell(ws.getCell(`A${r}`), item.category ?? '', 'center')
+      ws.mergeCells(`B${r}:C${r}`)
       dataCell(ws.getCell(`B${r}`), item.item_name ?? '', 'center')
-      dataCell(ws.getCell(`C${r}`), period, 'center')
       dataCell(ws.getCell(`D${r}`), item.unit_price ?? 0, 'right')
-      dataCell(ws.getCell(`E${r}`), item.total_price ?? 0, 'right')
-      dataCell(ws.getCell(`F${r}`), item.note ?? '', 'left')
+      ws.mergeCells(`E${r}:F${r}`)
+      dataCell(ws.getCell(`E${r}`), item.note ?? '', 'left')
 
-      // 금액/총액 숫자 포맷
+      // 금액 숫자 포맷
       ws.getCell(`D${r}`).numFmt = '#,##0'
-      ws.getCell(`E${r}`).numFmt = '#,##0'
     })
 
     // ── 합계 행 ───────────────────────────────────────────
     const totalRow = dataStartRow + items.length
     ws.getRow(totalRow).height = 22
-    ws.mergeCells(`A${totalRow}:D${totalRow}`)
+    ws.mergeCells(`A${totalRow}:C${totalRow}`)
     const totalLabelCell = ws.getCell(`A${totalRow}`)
     totalLabelCell.value = '합  계 (부가세포함)'
     totalLabelCell.font = { bold: true, size: 9 }
     totalLabelCell.alignment = { horizontal: 'left', vertical: 'middle' }
     applyBorder(totalLabelCell)
 
-    const totalAmountCell = ws.getCell(`E${totalRow}`)
+    const totalAmountCell = ws.getCell(`D${totalRow}`)
     totalAmountCell.value = totalAmount
     totalAmountCell.numFmt = '#,##0'
     totalAmountCell.font = { bold: true, size: 9 }
     totalAmountCell.alignment = { horizontal: 'right', vertical: 'middle' }
     applyBorder(totalAmountCell)
 
-    const vatCell = ws.getCell(`F${totalRow}`)
+    ws.mergeCells(`E${totalRow}:F${totalRow}`)
+    const vatCell = ws.getCell(`E${totalRow}`)
     vatCell.value = VAT_MAP[vatType] ?? ''
     vatCell.font = { bold: true, size: 9, color: { argb: 'FFCC0000' } }
     vatCell.alignment = { horizontal: 'center', vertical: 'middle' }

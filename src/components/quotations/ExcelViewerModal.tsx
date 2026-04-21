@@ -47,7 +47,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
     }).catch(() => {})
   }, [])
 
-  const total = items.reduce((s, i) => s + i.total_price, 0)
+  const total = items.reduce((s, i) => s + i.unit_price, 0)
 
   function updateItem(idx: number, patch: Partial<EditableItem>) {
     setItems(prev => prev.map((it, i) => {
@@ -238,21 +238,17 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
               <thead>
                 {/* 1단 헤더 */}
                 <tr className="bg-gray-50">
-                  <th colSpan={2} className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568]">상&nbsp;&nbsp;품</th>
-                  <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568]" style={{ minWidth: '70px' }}>기간(월)</th>
+                  <th colSpan={3} className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568]">상&nbsp;&nbsp;품</th>
                   <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568]" style={{ minWidth: '110px' }}>금&nbsp;&nbsp;액</th>
-                  <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568]" style={{ minWidth: '110px' }}>총&nbsp;&nbsp;액</th>
-                  <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568]" style={{ minWidth: '140px' }}>비&nbsp;&nbsp;고</th>
+                  <th colSpan={2} className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568]" style={{ minWidth: '140px' }}>비&nbsp;&nbsp;고</th>
                   <th className="border border-gray-200" style={{ width: '32px' }} />
                 </tr>
                 {/* 2단 헤더 */}
                 <tr className="bg-gray-50">
                   <th className="border border-gray-200 px-3 py-1.5 text-center font-semibold text-[#4a5568] text-xs" style={{ minWidth: '90px' }}>대분류</th>
-                  <th className="border border-gray-200 px-3 py-1.5 text-center font-semibold text-[#4a5568] text-xs" style={{ minWidth: '120px' }}>상품명</th>
+                  <th colSpan={2} className="border border-gray-200 px-3 py-1.5 text-center font-semibold text-[#4a5568] text-xs" style={{ minWidth: '120px' }}>상품명</th>
                   <th className="border border-gray-200" />
-                  <th className="border border-gray-200" />
-                  <th className="border border-gray-200" />
-                  <th className="border border-gray-200" />
+                  <th colSpan={2} className="border border-gray-200" />
                   <th className="border border-gray-200" />
                 </tr>
               </thead>
@@ -266,20 +262,11 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
                         className="w-full px-2 py-1.5 text-center text-sm focus:outline-none focus:bg-blue-50 rounded transition-colors"
                       />
                     </td>
-                    <td className="border border-gray-200 p-1">
+                    <td colSpan={2} className="border border-gray-200 p-1">
                       <input
                         value={item.item_name}
                         onChange={e => updateItem(idx, { item_name: e.target.value })}
                         className="w-full px-2 py-1.5 text-sm focus:outline-none focus:bg-blue-50 rounded transition-colors"
-                      />
-                    </td>
-                    <td className="border border-gray-200 p-1">
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        value={item.period || ''}
-                        onChange={e => updateItem(idx, { period: parseInt(e.target.value.replace(/[^0-9]/g, ''), 10) || 0 })}
-                        className="w-full px-2 py-1.5 text-center text-sm text-[#e67e22] font-medium focus:outline-none focus:bg-blue-50 rounded transition-colors"
                       />
                     </td>
                     <td className="border border-gray-200 p-1">
@@ -291,10 +278,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
                         className="w-full px-2 py-1.5 text-right text-sm focus:outline-none focus:bg-blue-50 rounded transition-colors"
                       />
                     </td>
-                    <td className="border border-gray-200 px-3 py-2 text-right text-sm text-[#1e2a3a] font-medium">
-                      {item.total_price.toLocaleString()}
-                    </td>
-                    <td className="border border-gray-200 p-1">
+                    <td colSpan={2} className="border border-gray-200 p-1">
                       <textarea
                         value={item.note}
                         onChange={e => {
@@ -325,13 +309,13 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
               </tbody>
               <tfoot>
                 <tr className="bg-gray-50 font-bold">
-                  <td colSpan={4} className="border border-gray-200 px-4 py-3 text-left text-sm text-[#1e2a3a]">
+                  <td colSpan={3} className="border border-gray-200 px-4 py-3 text-left text-sm text-[#1e2a3a]">
                     합&nbsp;&nbsp;계 {VAT_LABEL[state.vatType] ? `(${VAT_LABEL[state.vatType]})` : ''}
                   </td>
                   <td className="border border-gray-200 px-3 py-3 text-right text-sm text-[#1e2a3a]">
                     {total.toLocaleString()}원
                   </td>
-                  <td className="border border-gray-200 px-3 py-3 text-center text-sm text-red-600">
+                  <td colSpan={2} className="border border-gray-200 px-3 py-3 text-center text-sm text-red-600">
                     {VAT_LABEL[state.vatType]}
                   </td>
                   <td className="border border-gray-200" />
