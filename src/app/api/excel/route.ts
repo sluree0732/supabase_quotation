@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import ExcelJS from 'exceljs'
-import path from 'path'
 import { getStampBuffer } from '@/lib/getStampBuffer'
 
 const VAT_MAP: Record<string, string> = {
@@ -11,20 +10,32 @@ const VAT_MAP: Record<string, string> = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { quoteDate, recipient, projectName, items, totalAmount, vatType, period = 1, senderCompanyId, senderInfo } = await req.json()
+    const { quoteDate, recipient, projectName, items, totalAmount, vatType, senderCompanyId, senderInfo } = await req.json()
 
     const wb = new ExcelJS.Workbook()
     const ws = wb.addWorksheet('견적서')
 
-    // ── 열 너비 설정 ──────────────────────────────────────
+    // ── 열 너비 ───────────────────────────────────────────
     ws.columns = [
-      { width: 12 }, // A: 대분류
-      { width: 24 }, // B: 상품명
-      { width: 10 }, // C: 기간(월)
-      { width: 14 }, // D: 금액
-      { width: 14 }, // E: 총액
-      { width: 48 }, // F: 비고
+      { width: 10 }, // A: 대분류
+      { width: 18 }, // B: 상품명
+      { width: 7  }, // C: 수량
+      { width: 12 }, // D: 금액
+      { width: 12 }, // E: 총액
+      { width: 42 }, // F: 비고
     ]
+
+    // ── 인쇄 설정 (A4 한 장) ─────────────────────────────
+    ws.pageSetup = {
+      paperSize: 9,
+      orientation: 'portrait',
+      fitToPage: true,
+      fitToWidth: 1,
+      fitToHeight: 1,
+    } as any
+    ;(ws as any).pageSetup.margins = {
+      left: 0.4, right: 0.4, top: 0.6, bottom: 0.6, header: 0.3, footer: 0.3,
+    }
 
     // ── 공통 스타일 헬퍼 ──────────────────────────────────
     function applyBorder(cell: ExcelJS.Cell) {
@@ -59,7 +70,7 @@ export async function POST(req: NextRequest) {
     titleCell.alignment = { horizontal: 'center', vertical: 'middle' }
     ws.getRow(1).height = 40
 
-    // ── 날짜 / 수신 + 공급자 정보 ─────────────────────────
+    // ── 공급자 정보 ───────────────────────────────────────
     const s = {
       name: senderInfo?.name ?? '',
       ceo: senderInfo?.ceo ?? '',
@@ -71,12 +82,11 @@ export async function POST(req: NextRequest) {
       bank: senderInfo?.bank ?? '',
     }
 
-    ws.getRow(2).height = 28  // 도장 이미지 수용을 위해 높임
-    ws.getRow(3).height = 28  // 도장 이미지 수용을 위해 높임
-    ws.getRow(4).height = 18
-    ws.getRow(5).height = 18
-    ws.getRow(6).height = 18
-    ws.getRow(7).height = 18
+    ws.getRow(2).height = 24
+    ws.getRow(3).height = 24
+    ws.getRow(4).height = 24
+    ws.getRow(5).height = 24
+    ws.getRow(6).height = 24
 
     // 왼쪽: 날짜, 수신
     ws.getCell('A2').value = quoteDate
@@ -97,7 +107,7 @@ export async function POST(req: NextRequest) {
     ws.getCell('A5').font = { bold: true, size: 9 }
     ws.mergeCells('A5:B5')
 
-    // 오른쪽: 공급자 테이블 (C~F, 행 2~6)
+    // 오른쪽: 공급자 테이블
     const supplierData = [
       ['상  호', s.name, '사업자 등록번호', s.business_no],
       ['대표자', s.ceo, '연  락  처', s.phone],
@@ -118,14 +128,12 @@ export async function POST(req: NextRequest) {
       applyBorder(labelCell1)
 
       if (l2) {
-        // v1: col D
         const val1Cell = ws.getCell(rowNum, 4)
         val1Cell.value = v1
         val1Cell.font = { size: 8 }
         val1Cell.alignment = { horizontal: 'left', vertical: 'middle' }
         applyBorder(val1Cell)
 
-        // col E: label2
         const labelCell2 = ws.getCell(rowNum, 5)
         labelCell2.value = l2
         labelCell2.font = { bold: true, size: 8 }
@@ -133,18 +141,15 @@ export async function POST(req: NextRequest) {
         labelCell2.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9D9D9' } }
         applyBorder(labelCell2)
 
-        // col F: 상호/대표자 행(ri≤1)은 가운데 정렬, 나머지는 왼쪽
         const val2Cell = ws.getCell(rowNum, 6)
         val2Cell.value = v2
         val2Cell.font = { size: 8 }
         val2Cell.alignment = { horizontal: ri <= 1 ? 'center' : 'left', vertical: 'middle' }
         applyBorder(val2Cell)
       } else {
-        // 사업장/계좌정보: D~F 병합
         ws.mergeCells(rowNum, 4, rowNum, 6)
         const wideCell = ws.getCell(rowNum, 4)
         if (l1 === '계좌정보') {
-          // 계좌번호 부분만 빨간색 Rich Text
           const parts = v1.trim().split(' ')
           wideCell.value = {
             richText: parts.map((part: string, i: number) => {
@@ -164,32 +169,21 @@ export async function POST(req: NextRequest) {
       }
     })
 
-    // ── 빈 행 (구분) ──────────────────────────────────────
+    // ── 테이블 헤더 (단일 행, 서브헤더 없음) ─────────────
     const headerRow = 8
-
-    // ── 테이블 헤더 ───────────────────────────────────────
     ws.getRow(headerRow).height = 22
-    ws.mergeCells(`A${headerRow}:C${headerRow}`)
-    headerCell(ws.getCell(`A${headerRow}`), '상  품')
-    headerCell(ws.getCell(`D${headerRow}`), '금  액')
-    ws.mergeCells(`E${headerRow}:F${headerRow}`)
-    headerCell(ws.getCell(`E${headerRow}`), '비  고')
 
-    // 서브헤더
-    const subRow = headerRow + 1
-    ws.getRow(subRow).height = 16
-    headerCell(ws.getCell(`A${subRow}`), '대분류')
-    ws.mergeCells(`B${subRow}:C${subRow}`)
-    headerCell(ws.getCell(`B${subRow}`), '상품명')
-    headerCell(ws.getCell(`D${subRow}`), '')
-    ws.mergeCells(`E${subRow}:F${subRow}`)
-    headerCell(ws.getCell(`E${subRow}`), '')
+    headerCell(ws.getCell(`A${headerRow}`), '대분류')
+    headerCell(ws.getCell(`B${headerRow}`), '상품명')
+    headerCell(ws.getCell(`C${headerRow}`), '수량')
+    headerCell(ws.getCell(`D${headerRow}`), '금  액')
+    headerCell(ws.getCell(`E${headerRow}`), '총  액')
+    headerCell(ws.getCell(`F${headerRow}`), '비  고')
 
     // ── 비고 줄 수 기반 행 높이 계산 ─────────────────────
     function calcRowHeight(note: string): number {
       if (!note) return 40
       const lines = note.split('\n').filter(Boolean)
-      // F열 너비(48) 기준 약 28자당 1줄로 추정
       const totalLines = lines.reduce((acc, line) => {
         return acc + Math.max(1, Math.ceil(line.length / 28))
       }, 0)
@@ -197,50 +191,66 @@ export async function POST(req: NextRequest) {
     }
 
     // ── 데이터 행 ─────────────────────────────────────────
-    let dataStartRow = subRow + 1
+    const dataStartRow = headerRow + 1
+
+    // 비-카테고리 셀 먼저 작성
     items.forEach((item: any, i: number) => {
       const r = dataStartRow + i
       ws.getRow(r).height = calcRowHeight(item.note ?? '')
-      dataCell(ws.getCell(`A${r}`), item.category ?? '', 'center')
-      ws.mergeCells(`B${r}:C${r}`)
-      dataCell(ws.getCell(`B${r}`), item.item_name ?? '', 'center')
-      dataCell(ws.getCell(`D${r}`), item.unit_price ?? 0, 'right')
-      ws.mergeCells(`E${r}:F${r}`)
-      dataCell(ws.getCell(`E${r}`), item.note ?? '', 'left')
-
-      // 금액 숫자 포맷
-      ws.getCell(`D${r}`).numFmt = '#,##0'
+      dataCell(ws.getCell(r, 2), item.item_name ?? '', 'center')
+      dataCell(ws.getCell(r, 3), item.period ?? 1, 'center')
+      dataCell(ws.getCell(r, 4), item.unit_price ?? 0, 'center')
+      dataCell(ws.getCell(r, 5), item.total_price ?? item.unit_price ?? 0, 'center')
+      dataCell(ws.getCell(r, 6), item.note ?? '', 'left')
+      ws.getCell(r, 4).numFmt = '#,##0'
+      ws.getCell(r, 5).numFmt = '#,##0'
     })
+
+    // 대분류: 연속 같은 카테고리 세로 병합
+    let gi = 0
+    while (gi < items.length) {
+      let gj = gi
+      while (gj + 1 < items.length && items[gj + 1].category === items[gi].category) gj++
+      const startRow = dataStartRow + gi
+      const endRow = dataStartRow + gj
+      dataCell(ws.getCell(startRow, 1), items[gi].category ?? '', 'center')
+      if (endRow > startRow) {
+        ws.mergeCells(startRow, 1, endRow, 1)
+        ws.getCell(startRow, 1).alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }
+      }
+      gi = gj + 1
+    }
 
     // ── 합계 행 ───────────────────────────────────────────
     const totalRow = dataStartRow + items.length
     ws.getRow(totalRow).height = 22
-    ws.mergeCells(`A${totalRow}:C${totalRow}`)
+
+    const vatLabel = VAT_MAP[vatType] ?? ''
+    ws.mergeCells(`A${totalRow}:D${totalRow}`)
     const totalLabelCell = ws.getCell(`A${totalRow}`)
-    totalLabelCell.value = '합  계 (부가세포함)'
+    totalLabelCell.value = vatLabel ? `합  계 (${vatLabel})` : '합  계'
     totalLabelCell.font = { bold: true, size: 9 }
     totalLabelCell.alignment = { horizontal: 'left', vertical: 'middle' }
     applyBorder(totalLabelCell)
 
-    const totalAmountCell = ws.getCell(`D${totalRow}`)
+    const totalAmountCell = ws.getCell(`E${totalRow}`)
     totalAmountCell.value = totalAmount
     totalAmountCell.numFmt = '#,##0'
     totalAmountCell.font = { bold: true, size: 9 }
-    totalAmountCell.alignment = { horizontal: 'right', vertical: 'middle' }
+    totalAmountCell.alignment = { horizontal: 'center', vertical: 'middle' }
     applyBorder(totalAmountCell)
 
-    ws.mergeCells(`E${totalRow}:F${totalRow}`)
-    const vatCell = ws.getCell(`E${totalRow}`)
-    vatCell.value = VAT_MAP[vatType] ?? ''
+    const vatCell = ws.getCell(`F${totalRow}`)
+    vatCell.value = vatLabel
     vatCell.font = { bold: true, size: 9, color: { argb: 'FFCC0000' } }
     vatCell.alignment = { horizontal: 'center', vertical: 'middle' }
     applyBorder(vatCell)
 
-    // ── 도장 이미지 삽입 (E2:E3 오버레이) ────────────────
+    // ── 도장 이미지 삽입 ──────────────────────────────────
     const stampBuffer = await getStampBuffer(senderCompanyId)
     const stampId = wb.addImage({ buffer: stampBuffer as any, extension: 'png' })
     ws.addImage(stampId, {
-      tl: { col: 5.08, row: 1.12 },  // F2 (사업자 등록번호 값 앞에 오버레이, 칼럼선 노출)
+      tl: { col: 5.08, row: 1.12 },
       ext: { width: 65, height: 65 },
       editAs: 'oneCell',
     } as any)

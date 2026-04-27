@@ -32,7 +32,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
       item_name: it.item_name,
       period: it.period ?? 1,
       unit_price: it.unit_price,
-      total_price: it.total_price,
+      total_price: it.total_price ?? it.unit_price * (it.period ?? 1),
       note: it.note,
     }))
   )
@@ -47,7 +47,15 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
     }).catch(() => {})
   }, [])
 
-  const total = items.reduce((s, i) => s + i.unit_price, 0)
+  const total = items.reduce((s, i) => s + (i.total_price ?? i.unit_price), 0)
+
+  // 연속된 같은 대분류 → rowspan 계산
+  const categoryRowSpans = items.map((item, i) => {
+    if (i > 0 && item.category === items[i - 1].category) return null
+    let count = 1
+    while (i + count < items.length && items[i + count].category === items[i].category) count++
+    return count
+  })
 
   function updateItem(idx: number, patch: Partial<EditableItem>) {
     setItems(prev => prev.map((it, i) => {
@@ -58,6 +66,15 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
       }
       return updated
     }))
+  }
+
+  // 병합된 대분류 셀 편집 시 그룹 전체 업데이트
+  function updateCategory(idx: number, value: string) {
+    const rowSpan = categoryRowSpans[idx]
+    if (rowSpan === null) return
+    setItems(prev => prev.map((it, i) =>
+      i >= idx && i < idx + rowSpan ? { ...it, category: value } : it
+    ))
   }
 
   function deleteItem(idx: number) {
@@ -165,7 +182,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
       <div className="flex-1 overflow-auto p-4 md:p-8 bg-gray-50">
         <div className="max-w-5xl mx-auto bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
 
-          {/* 견적서 제목 */}
+          {/* 제목 */}
           <div className="text-center py-6 border-b border-gray-100">
             <h1 className="text-2xl font-bold tracking-widest text-[#1e2a3a]">견&nbsp;&nbsp;적&nbsp;&nbsp;서</h1>
           </div>
@@ -183,49 +200,39 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
               <p className="text-[#718096] mt-2 pt-2 border-t border-gray-50">아래와 같이 견적합니다.</p>
             </div>
 
-            {/* 발신 업체 정보 - 엑셀과 동일한 테이블 구조 (5열: label1|value1|label2|stamp|value2) */}
+            {/* 발신 업체 정보 */}
             <div>
               <table className="w-full text-xs border-collapse">
                 <tbody>
-                  {/* 행1: 상호 / 사업자등록번호 + 도장(rowSpan=2) */}
                   <tr>
-                    <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">상&nbsp;&nbsp;호</td>
-                    <td className="px-2 py-1 border border-gray-200">{state.senderInfo?.name ?? ''}</td>
-                    <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">사업자 등록번호</td>
+                    <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">상&nbsp;&nbsp;호</td>
+                    <td className="px-2 py-2.5 border border-gray-200">{state.senderInfo?.name ?? ''}</td>
+                    <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">사업자 등록번호</td>
                     <td rowSpan={2} className="border border-gray-200 p-0.5 text-center" style={{ width: '52px', borderRight: 'none' }}>
-                      <img
-                        src={stampUrl}
-                        alt="도장"
-                        className="w-11 h-11 object-contain opacity-90 pointer-events-none"
-                      />
+                      <img src={stampUrl} alt="도장" className="w-11 h-11 object-contain opacity-90 pointer-events-none" />
                     </td>
-                    <td className="px-2 py-1 border border-gray-200" style={{ borderLeft: 'none' }}>{state.senderInfo?.business_no ?? ''}</td>
+                    <td className="px-2 py-2.5 border border-gray-200" style={{ borderLeft: 'none' }}>{state.senderInfo?.business_no ?? ''}</td>
                   </tr>
-                  {/* 행2: 대표자 / 연락처 */}
                   <tr>
-                    <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">대&nbsp;&nbsp;표&nbsp;&nbsp;자</td>
-                    <td className="px-2 py-1 border border-gray-200">{state.senderInfo?.ceo ?? ''}</td>
-                    <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">연&nbsp;&nbsp;락&nbsp;&nbsp;처</td>
-                    {/* stamp cell continues via rowSpan */}
-                    <td className="px-2 py-1 border border-gray-200" style={{ borderLeft: 'none' }}>{state.senderInfo?.phone ?? ''}</td>
+                    <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">대&nbsp;&nbsp;표&nbsp;&nbsp;자</td>
+                    <td className="px-2 py-2.5 border border-gray-200">{state.senderInfo?.ceo ?? ''}</td>
+                    <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">연&nbsp;&nbsp;락&nbsp;&nbsp;처</td>
+                    <td className="px-2 py-2.5 border border-gray-200" style={{ borderLeft: 'none' }}>{state.senderInfo?.phone ?? ''}</td>
                   </tr>
-                  {/* 행3: 사업장 (value colSpan=4) */}
                   <tr>
-                    <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">사&nbsp;&nbsp;업&nbsp;&nbsp;장</td>
-                    <td colSpan={4} className="px-2 py-1 border border-gray-200">{state.senderInfo?.address ?? ''}</td>
+                    <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">사&nbsp;&nbsp;업&nbsp;&nbsp;장</td>
+                    <td colSpan={4} className="px-2 py-2.5 border border-gray-200">{state.senderInfo?.address ?? ''}</td>
                   </tr>
-                  {/* 행4: 업태 / 종목 (stamp 없음) */}
                   <tr>
-                    <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">업&nbsp;&nbsp;&nbsp;&nbsp;태</td>
-                    <td className="px-2 py-1 border border-gray-200">{state.senderInfo?.business_type ?? ''}</td>
-                    <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">종&nbsp;&nbsp;&nbsp;&nbsp;목</td>
+                    <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">업&nbsp;&nbsp;&nbsp;&nbsp;태</td>
+                    <td className="px-2 py-2.5 border border-gray-200">{state.senderInfo?.business_type ?? ''}</td>
+                    <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">종&nbsp;&nbsp;&nbsp;&nbsp;목</td>
                     <td className="border border-gray-200" style={{ borderLeft: 'none', borderRight: 'none' }} />
-                    <td className="px-2 py-1 border border-gray-200" style={{ borderLeft: 'none' }}>{state.senderInfo?.business_item ?? ''}</td>
+                    <td className="px-2 py-2.5 border border-gray-200" style={{ borderLeft: 'none' }}>{state.senderInfo?.business_item ?? ''}</td>
                   </tr>
-                  {/* 행5: 계좌정보 (value colSpan=4) */}
                   <tr>
-                    <td className="bg-gray-100 font-semibold px-2 py-1 whitespace-nowrap border border-gray-200 text-center">계좌정보</td>
-                    <td colSpan={4} className="px-2 py-1 border border-gray-200">{state.senderInfo?.bank ?? ''}</td>
+                    <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">계좌정보</td>
+                    <td colSpan={4} className="px-2 py-2.5 border border-gray-200">{state.senderInfo?.bank ?? ''}</td>
                   </tr>
                 </tbody>
               </table>
@@ -236,35 +243,44 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
           <div className="overflow-x-auto">
             <table className="text-sm border-collapse" style={{ minWidth: '700px', width: '100%' }}>
               <thead>
-                {/* 1단 헤더 */}
                 <tr className="bg-gray-50">
-                  <th colSpan={3} className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568]">상&nbsp;&nbsp;품</th>
-                  <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568]" style={{ width: '130px' }}>금&nbsp;&nbsp;액</th>
-                  <th colSpan={2} className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568]">비&nbsp;&nbsp;고</th>
-                </tr>
-                {/* 2단 헤더 */}
-                <tr className="bg-gray-50">
-                  <th className="border border-gray-200 px-3 py-1.5 text-center font-semibold text-[#4a5568] text-xs" style={{ minWidth: '90px' }}>대분류</th>
-                  <th colSpan={2} className="border border-gray-200 px-3 py-1.5 text-center font-semibold text-[#4a5568] text-xs" style={{ minWidth: '120px' }}>상품명</th>
-                  <th className="border border-gray-200" />
-                  <th colSpan={2} className="border border-gray-200" />
+                  <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568] text-xs" style={{ width: '80px' }}>대분류</th>
+                  <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568] text-xs" style={{ minWidth: '100px' }}>상품명</th>
+                  <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568] text-xs" style={{ width: '60px' }}>수량</th>
+                  <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568] text-xs" style={{ width: '110px' }}>금액</th>
+                  <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568] text-xs" style={{ width: '110px' }}>총액</th>
+                  <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568] text-xs">비고</th>
                 </tr>
               </thead>
               <tbody>
                 {items.map((item, idx) => (
                   <tr key={idx} className="group">
+                    {categoryRowSpans[idx] !== null && (
+                      <td
+                        rowSpan={categoryRowSpans[idx]!}
+                        className="border border-gray-200 p-1 align-middle"
+                      >
+                        <input
+                          value={item.category}
+                          onChange={e => updateCategory(idx, e.target.value)}
+                          className="w-full px-2 py-1.5 text-center text-sm focus:outline-none focus:bg-blue-50 rounded transition-colors"
+                        />
+                      </td>
+                    )}
                     <td className="border border-gray-200 p-1">
-                      <input
-                        value={item.category}
-                        onChange={e => updateItem(idx, { category: e.target.value })}
-                        className="w-full px-2 py-1.5 text-center text-sm focus:outline-none focus:bg-blue-50 rounded transition-colors"
-                      />
-                    </td>
-                    <td colSpan={2} className="border border-gray-200 p-1">
                       <input
                         value={item.item_name}
                         onChange={e => updateItem(idx, { item_name: e.target.value })}
-                        className="w-full px-2 py-1.5 text-sm focus:outline-none focus:bg-blue-50 rounded transition-colors"
+                        className="w-full px-2 py-1.5 text-center text-sm focus:outline-none focus:bg-blue-50 rounded transition-colors"
+                      />
+                    </td>
+                    <td className="border border-gray-200 p-1">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={item.period}
+                        onChange={e => updateItem(idx, { period: parseInt(e.target.value) || 1 })}
+                        className="w-full px-2 py-1.5 text-center text-sm focus:outline-none focus:bg-blue-50 rounded transition-colors"
                       />
                     </td>
                     <td className="border border-gray-200 p-1">
@@ -273,10 +289,13 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
                         inputMode="numeric"
                         value={item.unit_price ? item.unit_price.toLocaleString() : ''}
                         onChange={e => updateItem(idx, { unit_price: parsePriceInput(e.target.value) })}
-                        className="w-full px-2 py-1.5 text-right text-sm focus:outline-none focus:bg-blue-50 rounded transition-colors"
+                        className="w-full px-2 py-1.5 text-center text-sm focus:outline-none focus:bg-blue-50 rounded transition-colors"
                       />
                     </td>
-                    <td colSpan={2} className="border border-gray-200 p-1 relative">
+                    <td className="border border-gray-200 px-3 py-2 text-center text-sm align-middle">
+                      {(item.total_price ?? item.unit_price).toLocaleString()}
+                    </td>
+                    <td className="border border-gray-200 p-1 relative">
                       <textarea
                         value={item.note}
                         onChange={e => {
@@ -305,13 +324,13 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
               </tbody>
               <tfoot>
                 <tr className="bg-gray-50 font-bold">
-                  <td colSpan={3} className="border border-gray-200 px-4 py-3 text-left text-sm text-[#1e2a3a]">
+                  <td colSpan={4} className="border border-gray-200 px-4 py-3 text-left text-sm text-[#1e2a3a]">
                     합&nbsp;&nbsp;계 {VAT_LABEL[state.vatType] ? `(${VAT_LABEL[state.vatType]})` : ''}
                   </td>
-                  <td className="border border-gray-200 px-3 py-3 text-right text-sm text-[#1e2a3a]">
+                  <td className="border border-gray-200 px-3 py-3 text-center text-sm text-[#1e2a3a]">
                     {total.toLocaleString()}원
                   </td>
-                  <td colSpan={2} className="border border-gray-200 px-3 py-3 text-center text-sm text-red-600">
+                  <td className="border border-gray-200 px-3 py-3 text-center text-sm text-red-600">
                     {VAT_LABEL[state.vatType]}
                   </td>
                 </tr>

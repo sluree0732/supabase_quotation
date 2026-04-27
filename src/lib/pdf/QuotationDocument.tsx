@@ -19,7 +19,7 @@ const S = StyleSheet.create({
   page: {
     fontFamily: 'NanumGothic',
     fontSize: 8,
-    paddingHorizontal: 18 * 2.835,   // 18mm → pt
+    paddingHorizontal: 18 * 2.835,
     paddingVertical: 16 * 2.835,
     color: '#1a1a1a',
   },
@@ -30,7 +30,6 @@ const S = StyleSheet.create({
     marginBottom: 16,
     letterSpacing: 6,
   },
-  // 날짜+수신 / 공급자 섹션
   infoRow: { flexDirection: 'row', marginBottom: 10 },
   infoLeft: { flex: 0.38, paddingRight: 8 },
   infoRight: { flex: 0.62 },
@@ -38,28 +37,28 @@ const S = StyleSheet.create({
   infoBold: { fontSize: 8.5, fontWeight: 'bold', lineHeight: 1.6 },
   // 공급자 테이블
   supplierTable: { borderWidth: 1, borderColor: '#333' },
-  supplierRow: { flexDirection: 'row', borderBottomWidth: 0.5, borderColor: '#333', minHeight: 16 },
-  supplierLastRow: { flexDirection: 'row', minHeight: 16 },
+  supplierRow: { flexDirection: 'row', borderBottomWidth: 0.5, borderColor: '#333', minHeight: 20 },
+  supplierLastRow: { flexDirection: 'row', minHeight: 20 },
   supplierLabel: {
     width: '13%', backgroundColor: '#d9d9d9',
     borderRightWidth: 0.5, borderColor: '#333',
     justifyContent: 'center', alignItems: 'center',
-    paddingVertical: 2,
+    paddingVertical: 4,
   },
   supplierLabel2: {
     width: '16%', backgroundColor: '#d9d9d9',
     borderRightWidth: 0.5, borderColor: '#333',
     justifyContent: 'center', alignItems: 'center',
-    paddingVertical: 2,
+    paddingVertical: 4,
   },
   supplierVal: {
     width: '22%',
     borderRightWidth: 0.5, borderColor: '#333',
-    justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 2,
+    justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 4,
   },
   supplierValWide: {
     flex: 1, justifyContent: 'center',
-    paddingHorizontal: 3, paddingVertical: 2,
+    paddingHorizontal: 3, paddingVertical: 4,
   },
   labelText: { fontSize: 7.5, fontWeight: 'bold', textAlign: 'center' },
   valText: { fontSize: 7.5 },
@@ -69,17 +68,21 @@ const S = StyleSheet.create({
   tableHeader: { flexDirection: 'row', backgroundColor: '#d9d9d9', borderBottomWidth: 1, borderColor: '#333', minHeight: 20 },
   tableRow: { flexDirection: 'row', borderBottomWidth: 0.5, borderColor: '#d0d0d0' },
   tableLastRow: { flexDirection: 'row' },
-  colCat:   { width: '10%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 3, paddingVertical: 3 },
-  colName:  { width: '27%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 3, paddingVertical: 3 },
-  colUnit:  { width: '13%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'flex-end', paddingHorizontal: 3, paddingVertical: 3 },
+  colCat:   { width: '9%',  borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
+  colName:  { width: '17%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
+  colQty:   { width: '7%',  borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
+  colUnit:  { width: '12%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
+  colTotal: { width: '12%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
   colNote:  { flex: 1, justifyContent: 'flex-start', paddingHorizontal: 4, paddingVertical: 4 },
   noteText: { fontSize: 7, lineHeight: 1.6 },
   headerText: { fontSize: 8, fontWeight: 'bold', textAlign: 'center' },
-  cellText: { fontSize: 7.5 },
+  cellText: { fontSize: 7.5, textAlign: 'center' },
   // 합계 행
   totalRow: { flexDirection: 'row', borderWidth: 1, borderColor: '#333' },
-  totalLabel: { width: '37%', paddingHorizontal: 6, paddingVertical: 4, justifyContent: 'center' },
-  totalAmount: { width: '13%', paddingHorizontal: 6, paddingVertical: 4, justifyContent: 'center', alignItems: 'flex-end', borderLeftWidth: 0.5, borderColor: '#d0d0d0' },
+  totalLabel: { width: '26%', paddingHorizontal: 6, paddingVertical: 4, justifyContent: 'center' },
+  totalQtyBlank: { width: '7%', borderLeftWidth: 0.5, borderColor: '#d0d0d0' },
+  totalUnitBlank: { width: '12%', borderLeftWidth: 0.5, borderColor: '#d0d0d0' },
+  totalAmount: { width: '12%', paddingHorizontal: 4, paddingVertical: 4, justifyContent: 'center', alignItems: 'center', borderLeftWidth: 0.5, borderColor: '#d0d0d0' },
   totalVat: { flex: 1, paddingHorizontal: 4, paddingVertical: 4, justifyContent: 'center', alignItems: 'center', borderLeftWidth: 0.5, borderColor: '#d0d0d0' },
 })
 
@@ -92,12 +95,9 @@ function noteLines(note: string): string[] {
 }
 
 function formatBank(bank: string) {
-  // 계좌번호 부분을 분리해서 반환 (색상 처리는 별도 컴포넌트)
-  const parts = bank.trim().split(' ')
-  return parts
+  return bank.trim().split(' ')
 }
 
-// ── VAT 표기 ──────────────────────────────────────────────
 const VAT_MAP: Record<VatType, string> = {
   excluded: '부가세 별도',
   included: '부가세 포함',
@@ -130,34 +130,32 @@ function SupplierTable({ stampSrc, senderInfo }: { stampSrc: string; senderInfo?
 
   return (
     <View style={S.supplierTable}>
-      {/* row 0+1: 상호/대표자 — 3컬럼 구조 (좌측 51% + 도장 12% + 값 flex:1) */}
+      {/* row 0+1: 상호/대표자 */}
       <View style={{ flexDirection: 'row', borderBottomWidth: 0.5, borderColor: '#333' }}>
-        {/* Column A (51%): label+value 2행 스택 — 내부 비율은 전체 기준 재계산 */}
         <View style={{ width: '51%' }}>
-          <View style={{ flexDirection: 'row', borderBottomWidth: 0.5, borderColor: '#333', minHeight: 16 }}>
-            <View style={{ width: '25.5%', backgroundColor: '#d9d9d9', borderRightWidth: 0.5, borderColor: '#333', justifyContent: 'center', alignItems: 'center', paddingVertical: 2 }}>
+          <View style={{ flexDirection: 'row', borderBottomWidth: 0.5, borderColor: '#333', minHeight: 20 }}>
+            <View style={{ width: '25.5%', backgroundColor: '#d9d9d9', borderRightWidth: 0.5, borderColor: '#333', justifyContent: 'center', alignItems: 'center', paddingVertical: 4 }}>
               <Text style={S.labelText}>상  호</Text>
             </View>
-            <View style={{ width: '43.1%', borderRightWidth: 0.5, borderColor: '#333', justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 2 }}>
+            <View style={{ width: '43.1%', borderRightWidth: 0.5, borderColor: '#333', justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 4 }}>
               <Text style={S.valText}>{name}</Text>
             </View>
-            <View style={{ flex: 1, backgroundColor: '#d9d9d9', justifyContent: 'center', alignItems: 'center', paddingVertical: 2 }}>
+            <View style={{ flex: 1, backgroundColor: '#d9d9d9', justifyContent: 'center', alignItems: 'center', paddingVertical: 4 }}>
               <Text style={S.labelText}>사업자 등록번호</Text>
             </View>
           </View>
-          <View style={{ flexDirection: 'row', minHeight: 16 }}>
-            <View style={{ width: '25.5%', backgroundColor: '#d9d9d9', borderRightWidth: 0.5, borderColor: '#333', justifyContent: 'center', alignItems: 'center', paddingVertical: 2 }}>
+          <View style={{ flexDirection: 'row', minHeight: 20 }}>
+            <View style={{ width: '25.5%', backgroundColor: '#d9d9d9', borderRightWidth: 0.5, borderColor: '#333', justifyContent: 'center', alignItems: 'center', paddingVertical: 4 }}>
               <Text style={S.labelText}>대표자</Text>
             </View>
-            <View style={{ width: '43.1%', borderRightWidth: 0.5, borderColor: '#333', justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 2 }}>
+            <View style={{ width: '43.1%', borderRightWidth: 0.5, borderColor: '#333', justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 4 }}>
               <Text style={S.valText}>{ceo}</Text>
             </View>
-            <View style={{ flex: 1, backgroundColor: '#d9d9d9', justifyContent: 'center', alignItems: 'center', paddingVertical: 2 }}>
+            <View style={{ flex: 1, backgroundColor: '#d9d9d9', justifyContent: 'center', alignItems: 'center', paddingVertical: 4 }}>
               <Text style={S.labelText}>연  락  처</Text>
             </View>
           </View>
         </View>
-        {/* Column B+C: 도장 + 값 (세로줄 없이 자연스럽게 배치) */}
         <View style={{ flex: 1, borderLeftWidth: 0.5, borderColor: '#333' }}>
           <View style={{ flex: 1, borderBottomWidth: 0.5, borderColor: '#333', flexDirection: 'row', alignItems: 'center' }}>
             <View style={{ width: 42, justifyContent: 'center', alignItems: 'center', paddingVertical: 1 }}>
@@ -171,7 +169,7 @@ function SupplierTable({ stampSrc, senderInfo }: { stampSrc: string; senderInfo?
           </View>
         </View>
       </View>
-      {/* row 2: 사업장 (full width) */}
+      {/* row 2: 사업장 */}
       <View style={S.supplierRow}>
         <View style={S.supplierLabel}><Text style={S.labelText}>사업장</Text></View>
         <View style={S.supplierValWide}><Text style={S.valText}>{address}</Text></View>
@@ -183,7 +181,7 @@ function SupplierTable({ stampSrc, senderInfo }: { stampSrc: string; senderInfo?
         <View style={S.supplierLabel2}><Text style={S.labelText}>종  목</Text></View>
         <View style={S.supplierValWide}><Text style={S.valText}>{businessItem}</Text></View>
       </View>
-      {/* row 4: 계좌정보 (계좌번호 빨간색) */}
+      {/* row 4: 계좌정보 */}
       <View style={S.supplierLastRow}>
         <View style={S.supplierLabel}><Text style={S.labelText}>계좌정보</Text></View>
         <View style={S.supplierValWide}>
@@ -205,20 +203,21 @@ function SupplierTable({ stampSrc, senderInfo }: { stampSrc: string; senderInfo?
 
 // ── 항목 테이블 ───────────────────────────────────────────
 function ItemsTable({ items }: { items: QuotationItem[] }) {
+  // 연속 같은 대분류: 첫 행에만 표시
+  const showCategory = items.map((item, i) =>
+    i === 0 || item.category !== items[i - 1].category
+  )
+
   return (
     <View style={S.table}>
-      {/* 헤더 */}
+      {/* 단일 헤더 행 */}
       <View style={S.tableHeader}>
-        <View style={[S.colCat, S.colName, { width: '37%' }]}><Text style={S.headerText}>상  품</Text></View>
-        <View style={[S.colUnit, { alignItems: 'center' }]}><Text style={S.headerText}>금  액</Text></View>
-        <View style={S.colNote}><Text style={S.headerText}>비  고</Text></View>
-      </View>
-      {/* 서브헤더 (대분류 / 상품명 구분) */}
-      <View style={[S.tableRow, { backgroundColor: '#f5f5f5' }]}>
-        <View style={S.colCat}><Text style={[S.headerText, { fontSize: 7 }]}>대분류</Text></View>
-        <View style={S.colName}><Text style={[S.headerText, { fontSize: 7 }]}>상품명</Text></View>
-        <View style={S.colUnit}></View>
-        <View style={S.colNote}></View>
+        <View style={S.colCat}><Text style={S.headerText}>대분류</Text></View>
+        <View style={S.colName}><Text style={S.headerText}>상품명</Text></View>
+        <View style={S.colQty}><Text style={S.headerText}>수량</Text></View>
+        <View style={S.colUnit}><Text style={S.headerText}>금액</Text></View>
+        <View style={S.colTotal}><Text style={S.headerText}>총액</Text></View>
+        <View style={S.colNote}><Text style={S.headerText}>비고</Text></View>
       </View>
       {/* 데이터 행 */}
       {items.map((item, i) => {
@@ -226,9 +225,21 @@ function ItemsTable({ items }: { items: QuotationItem[] }) {
         const RowStyle = isLast ? S.tableLastRow : S.tableRow
         return (
           <View key={i} style={RowStyle} wrap={false}>
-            <View style={S.colCat}><Text style={S.cellText}>{item.category}</Text></View>
-            <View style={S.colName}><Text style={S.cellText}>{item.item_name}</Text></View>
-            <View style={S.colUnit}><Text style={S.cellText}>{fmtNum(item.unit_price)}</Text></View>
+            <View style={S.colCat}>
+              <Text style={S.cellText}>{showCategory[i] ? item.category : ''}</Text>
+            </View>
+            <View style={S.colName}>
+              <Text style={S.cellText}>{item.item_name}</Text>
+            </View>
+            <View style={S.colQty}>
+              <Text style={S.cellText}>{item.period ?? 1}</Text>
+            </View>
+            <View style={S.colUnit}>
+              <Text style={S.cellText}>{fmtNum(item.unit_price)}</Text>
+            </View>
+            <View style={S.colTotal}>
+              <Text style={S.cellText}>{fmtNum(item.total_price ?? item.unit_price)}</Text>
+            </View>
             <View style={S.colNote}>
               {noteLines(item.note).map((line, li) => (
                 <Text key={li} style={S.noteText}>{line}</Text>
@@ -243,16 +254,21 @@ function ItemsTable({ items }: { items: QuotationItem[] }) {
 
 // ── 합계 행 ───────────────────────────────────────────────
 function TotalRow({ total, vatType }: { total: number; vatType: VatType }) {
+  const vatLabel = VAT_MAP[vatType]
   return (
     <View style={S.totalRow}>
       <View style={S.totalLabel}>
-        <Text style={{ fontSize: 8.5, fontWeight: 'bold' }}>{`합  계${VAT_MAP[vatType] ? ` (${VAT_MAP[vatType]})` : ''}`}</Text>
+        <Text style={{ fontSize: 8.5, fontWeight: 'bold' }}>
+          {`합  계${vatLabel ? ` (${vatLabel})` : ''}`}
+        </Text>
       </View>
+      <View style={S.totalQtyBlank} />
+      <View style={S.totalUnitBlank} />
       <View style={S.totalAmount}>
         <Text style={{ fontSize: 8.5, fontWeight: 'bold' }}>{fmtNum(total)}</Text>
       </View>
       <View style={S.totalVat}>
-        <Text style={{ fontSize: 8, color: 'red', fontWeight: 'bold' }}>{VAT_MAP[vatType]}</Text>
+        <Text style={{ fontSize: 8, color: 'red', fontWeight: 'bold' }}>{vatLabel}</Text>
       </View>
     </View>
   )
@@ -276,10 +292,8 @@ export default function QuotationDocument({
   return (
     <Document>
       <Page size="A4" style={S.page}>
-        {/* 제목 */}
         <Text style={S.title}>견  적  서</Text>
 
-        {/* 날짜+수신 / 공급자 */}
         <View style={S.infoRow}>
           <View style={S.infoLeft}>
             <Text style={S.infoText}>{quoteDate}</Text>
@@ -294,10 +308,7 @@ export default function QuotationDocument({
           </View>
         </View>
 
-        {/* 항목 테이블 */}
         <ItemsTable items={items} />
-
-        {/* 합계 */}
         <TotalRow total={totalAmount} vatType={vatType} />
       </Page>
     </Document>
