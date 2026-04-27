@@ -17,12 +17,11 @@ export async function POST(req: NextRequest) {
 
     // ── 열 너비 ───────────────────────────────────────────
     ws.columns = [
-      { width: 10 }, // A: 대분류
-      { width: 18 }, // B: 상품명
-      { width: 7  }, // C: 수량
-      { width: 12 }, // D: 금액
-      { width: 12 }, // E: 총액
-      { width: 42 }, // F: 비고
+      { width: 28 }, // A: 상품(대분류+상품명)
+      { width: 7  }, // B: 수량
+      { width: 14 }, // C: 금액
+      { width: 14 }, // D: 총액
+      { width: 55 }, // E: 비고
     ]
 
     // ── 인쇄 설정 (A4 한 장) ─────────────────────────────
@@ -168,16 +167,15 @@ export async function POST(req: NextRequest) {
       }
     })
 
-    // ── 테이블 헤더 (단일 행, 서브헤더 없음) ─────────────
+    // ── 테이블 헤더 ──────────────────────────────────────
     const headerRow = 8
     ws.getRow(headerRow).height = 22
 
-    headerCell(ws.getCell(`A${headerRow}`), '대분류')
-    headerCell(ws.getCell(`B${headerRow}`), '상품명')
-    headerCell(ws.getCell(`C${headerRow}`), '수량')
-    headerCell(ws.getCell(`D${headerRow}`), '금  액')
-    headerCell(ws.getCell(`E${headerRow}`), '총  액')
-    headerCell(ws.getCell(`F${headerRow}`), '비  고')
+    headerCell(ws.getCell(`A${headerRow}`), '상  품')
+    headerCell(ws.getCell(`B${headerRow}`), '수  량')
+    headerCell(ws.getCell(`C${headerRow}`), '금  액')
+    headerCell(ws.getCell(`D${headerRow}`), '총  액')
+    headerCell(ws.getCell(`E${headerRow}`), '비  고')
 
     // ── 비고 줄 수 기반 행 높이 계산 ─────────────────────
     function calcRowHeight(note: string): number {
@@ -192,54 +190,39 @@ export async function POST(req: NextRequest) {
     // ── 데이터 행 ─────────────────────────────────────────
     const dataStartRow = headerRow + 1
 
-    // 비-카테고리 셀 먼저 작성
     items.forEach((item: any, i: number) => {
       const r = dataStartRow + i
       ws.getRow(r).height = calcRowHeight(item.note ?? '')
-      dataCell(ws.getCell(r, 2), item.item_name ?? '', 'center')
-      dataCell(ws.getCell(r, 3), item.period ?? 1, 'center')
-      dataCell(ws.getCell(r, 4), item.unit_price ?? 0, 'center')
-      dataCell(ws.getCell(r, 5), item.total_price ?? item.unit_price ?? 0, 'center')
-      dataCell(ws.getCell(r, 6), item.note ?? '', 'left')
+      const productLabel = [item.category, item.item_name].filter(Boolean).join(', ')
+      dataCell(ws.getCell(r, 1), productLabel, 'center')
+      dataCell(ws.getCell(r, 2), item.period ?? 1, 'center')
+      dataCell(ws.getCell(r, 3), item.unit_price ?? 0, 'center')
+      dataCell(ws.getCell(r, 4), item.total_price ?? item.unit_price ?? 0, 'center')
+      dataCell(ws.getCell(r, 5), item.note ?? '', 'left')
+      ws.getCell(r, 3).numFmt = '#,##0'
       ws.getCell(r, 4).numFmt = '#,##0'
-      ws.getCell(r, 5).numFmt = '#,##0'
     })
-
-    // 대분류: 연속 같은 카테고리 세로 병합
-    let gi = 0
-    while (gi < items.length) {
-      let gj = gi
-      while (gj + 1 < items.length && items[gj + 1].category === items[gi].category) gj++
-      const startRow = dataStartRow + gi
-      const endRow = dataStartRow + gj
-      dataCell(ws.getCell(startRow, 1), items[gi].category ?? '', 'center')
-      if (endRow > startRow) {
-        ws.mergeCells(startRow, 1, endRow, 1)
-        ws.getCell(startRow, 1).alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }
-      }
-      gi = gj + 1
-    }
 
     // ── 합계 행 ───────────────────────────────────────────
     const totalRow = dataStartRow + items.length
     ws.getRow(totalRow).height = 22
 
     const vatLabel = VAT_MAP[vatType] ?? ''
-    ws.mergeCells(`A${totalRow}:D${totalRow}`)
+    ws.mergeCells(`A${totalRow}:C${totalRow}`)
     const totalLabelCell = ws.getCell(`A${totalRow}`)
     totalLabelCell.value = vatLabel ? `합  계 (${vatLabel})` : '합  계'
     totalLabelCell.font = { bold: true, size: 9 }
     totalLabelCell.alignment = { horizontal: 'left', vertical: 'middle' }
     applyBorder(totalLabelCell)
 
-    const totalAmountCell = ws.getCell(`E${totalRow}`)
+    const totalAmountCell = ws.getCell(`D${totalRow}`)
     totalAmountCell.value = totalAmount
     totalAmountCell.numFmt = '#,##0'
     totalAmountCell.font = { bold: true, size: 9 }
     totalAmountCell.alignment = { horizontal: 'center', vertical: 'middle' }
     applyBorder(totalAmountCell)
 
-    const vatCell = ws.getCell(`F${totalRow}`)
+    const vatCell = ws.getCell(`E${totalRow}`)
     vatCell.value = vatLabel
     vatCell.font = { bold: true, size: 9, color: { argb: 'FFCC0000' } }
     vatCell.alignment = { horizontal: 'center', vertical: 'middle' }
@@ -249,7 +232,7 @@ export async function POST(req: NextRequest) {
     const stampBuffer = await getStampBuffer(senderCompanyId)
     const stampId = wb.addImage({ buffer: stampBuffer as any, extension: 'png' })
     ws.addImage(stampId, {
-      tl: { col: 5.08, row: 1.12 },
+      tl: { col: 4.08, row: 1.12 },
       ext: { width: 65, height: 65 },
       editAs: 'oneCell',
     } as any)
