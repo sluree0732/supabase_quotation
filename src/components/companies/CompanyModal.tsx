@@ -108,12 +108,6 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
   async function handleSave() {
     if (!companyType) { setError('업체 구분을 선택해주세요.'); return }
     if (!name.trim()) { setError('업체명을 입력해주세요.'); return }
-    if (!address.trim()) { setError('주소를 입력해주세요.'); return }
-    if (!businessNo.trim()) { setError('사업자 등록번호를 입력해주세요.'); return }
-    if (!email.trim()) { setError('이메일을 입력해주세요.'); return }
-    if (!phone.trim()) { setError('연락처를 입력해주세요.'); return }
-    if (!ceo.trim()) { setError('대표자를 입력해주세요.'); return }
-    if (companyType === 'sender' && !bank.trim()) { setError('결제계좌를 입력해주세요.'); return }
 
     setLoading(true)
     setError('')
@@ -302,7 +296,11 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
               />
             </Field>
 
-            <Field label="주소 *">
+            {/* 구분선 */}
+            <div className="border-t border-gray-100" />
+            <p className="text-xs font-semibold text-[#718096] uppercase tracking-wide">선택 정보</p>
+
+            <Field label="주소">
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -323,7 +321,7 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
               </div>
             </Field>
 
-            <Field label="사업자 등록번호 *">
+            <Field label="사업자 등록번호">
               <input
                 type="text"
                 inputMode="numeric"
@@ -334,7 +332,7 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
               />
             </Field>
 
-            <Field label="이메일 *">
+            <Field label="이메일">
               <input
                 type="email"
                 inputMode="email"
@@ -345,7 +343,7 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
               />
             </Field>
 
-            <Field label="연락처 *">
+            <Field label="연락처">
               <input
                 type="tel"
                 inputMode="numeric"
@@ -356,7 +354,7 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
               />
             </Field>
 
-            <Field label="대표자 *">
+            <Field label="대표자">
               <input
                 type="text"
                 value={ceo}
@@ -368,7 +366,7 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
 
             {/* 자사 업체 전용: 결제계좌 */}
             {companyType === 'sender' && (
-              <Field label="결제계좌 *">
+              <Field label="결제계좌">
                 <input
                   type="text"
                   value={bank}
@@ -423,10 +421,6 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
                 )}
               </Field>
             )}
-
-            {/* 구분선 */}
-            <div className="border-t border-gray-100" />
-            <p className="text-xs font-semibold text-[#718096] uppercase tracking-wide">선택 정보</p>
 
             <Field label="업태">
               <input
