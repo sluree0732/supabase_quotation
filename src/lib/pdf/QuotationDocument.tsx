@@ -68,7 +68,8 @@ const S = StyleSheet.create({
   tableHeader: { flexDirection: 'row', backgroundColor: '#d9d9d9', borderBottomWidth: 1, borderColor: '#333', minHeight: 20 },
   tableRow: { flexDirection: 'row', borderBottomWidth: 0.5, borderColor: '#d0d0d0' },
   tableLastRow: { flexDirection: 'row' },
-  colProduct: { width: '26%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
+  colCat:   { width: '9%',  borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
+  colName:  { width: '17%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
   colQty:   { width: '7%',  borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
   colUnit:  { width: '12%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
   colTotal: { width: '12%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
@@ -202,11 +203,16 @@ function SupplierTable({ stampSrc, senderInfo }: { stampSrc: string; senderInfo?
 
 // ── 항목 테이블 ───────────────────────────────────────────
 function ItemsTable({ items }: { items: QuotationItem[] }) {
+  const showCategory = items.map((item, i) =>
+    i === 0 || item.category !== items[i - 1].category
+  )
+
   return (
     <View style={S.table}>
       {/* 단일 헤더 행 */}
       <View style={S.tableHeader}>
-        <View style={S.colProduct}><Text style={S.headerText}>상  품</Text></View>
+        <View style={S.colCat}><Text style={S.headerText}>대분류</Text></View>
+        <View style={S.colName}><Text style={S.headerText}>상품명</Text></View>
         <View style={S.colQty}><Text style={S.headerText}>수량</Text></View>
         <View style={S.colUnit}><Text style={S.headerText}>금액</Text></View>
         <View style={S.colTotal}><Text style={S.headerText}>총액</Text></View>
@@ -218,8 +224,11 @@ function ItemsTable({ items }: { items: QuotationItem[] }) {
         const RowStyle = isLast ? S.tableLastRow : S.tableRow
         return (
           <View key={i} style={RowStyle} wrap={false}>
-            <View style={S.colProduct}>
-              <Text style={S.cellText}>{item.category}, {item.item_name}</Text>
+            <View style={S.colCat}>
+              <Text style={S.cellText}>{showCategory[i] ? item.category : ''}</Text>
+            </View>
+            <View style={S.colName}>
+              <Text style={S.cellText}>{item.item_name}</Text>
             </View>
             <View style={S.colQty}>
               <Text style={S.cellText}>{item.period ?? 1}</Text>
