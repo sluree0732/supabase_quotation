@@ -32,10 +32,9 @@ export async function POST(req: NextRequest) {
       fitToPage: true,
       fitToWidth: 1,
       fitToHeight: 1,
+      scale: undefined,
+      margins: { left: 0.4, right: 0.4, top: 0.6, bottom: 0.6, header: 0.3, footer: 0.3 },
     } as any
-    ;(ws as any).pageSetup.margins = {
-      left: 0.4, right: 0.4, top: 0.6, bottom: 0.6, header: 0.3, footer: 0.3,
-    }
 
     // ── 공통 스타일 헬퍼 ──────────────────────────────────
     function applyBorder(cell: ExcelJS.Cell) {
