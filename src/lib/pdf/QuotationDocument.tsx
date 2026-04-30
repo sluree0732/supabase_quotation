@@ -158,7 +158,7 @@ function SupplierTable({ stampSrc, senderInfo }: { stampSrc: string; senderInfo?
         </View>
         <View style={{ flex: 1, borderLeftWidth: 0.5, borderColor: '#333' }}>
           <View style={{ flex: 1, borderBottomWidth: 0.5, borderColor: '#333', flexDirection: 'row', alignItems: 'center' }}>
-            <View style={{ width: 42, justifyContent: 'center', alignItems: 'center', paddingVertical: 1 }}>
+            <View style={{ width: 42, justifyContent: 'center', alignItems: 'center', paddingVertical: 1, paddingLeft: 2 }}>
               <Image src={stampSrc} style={{ width: 40, height: 40 }} />
             </View>
             <Text style={[S.valText, { flex: 1, paddingHorizontal: 3 }]}>{businessNo}</Text>
