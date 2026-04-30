@@ -225,8 +225,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
                     <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">업&nbsp;&nbsp;&nbsp;&nbsp;태</td>
                     <td className="px-2 py-2.5 border border-gray-200 text-center">{state.senderInfo?.business_type ?? ''}</td>
                     <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">종&nbsp;&nbsp;&nbsp;&nbsp;목</td>
-                    <td className="border border-gray-200" style={{ borderLeft: 'none', borderRight: 'none' }} />
-                    <td className="px-2 py-2.5 border border-gray-200 text-center" style={{ borderLeft: 'none', textAlign: 'center' }}>{state.senderInfo?.business_item ?? ''}</td>
+                    <td colSpan={2} className="px-2 py-2.5 border border-gray-200 text-center">{state.senderInfo?.business_item ?? ''}</td>
                   </tr>
                   <tr>
                     <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">계좌정보</td>
