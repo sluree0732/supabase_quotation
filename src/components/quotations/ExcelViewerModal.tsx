@@ -186,7 +186,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
           </div>
 
           {/* 기본 정보 */}
-          <div className="px-6 py-4 border-b border-gray-100 grid gap-4 text-sm" style={{ gridTemplateColumns: '38% 62%' }}>
+          <div className="px-6 py-4 border-b border-gray-100 grid gap-4 text-sm" style={{ gridTemplateColumns: '25% 75%' }}>
             <div className="space-y-1.5">
               <p className="text-[#718096]">{state.quoteDate}</p>
               {state.recipient && (
@@ -204,33 +204,33 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
                 <tbody>
                   <tr>
                     <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">상&nbsp;&nbsp;호</td>
-                    <td className="px-2 py-2.5 border border-gray-200 whitespace-nowrap">{state.senderInfo?.name ?? ''}</td>
+                    <td className="px-2 py-2.5 border border-gray-200 whitespace-nowrap text-center">{state.senderInfo?.name ?? ''}</td>
                     <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">사업자 등록번호</td>
                     <td rowSpan={2} className="border border-gray-200 p-0.5 text-center" style={{ width: '52px', borderRight: 'none' }}>
                       <img src={stampUrl} alt="도장" className="w-11 h-11 object-contain opacity-90 pointer-events-none" />
                     </td>
-                    <td className="px-2 py-2.5 border border-gray-200 whitespace-nowrap" style={{ borderLeft: 'none' }}>{state.senderInfo?.business_no ?? ''}</td>
+                    <td className="px-2 py-2.5 border border-gray-200 whitespace-nowrap text-center" style={{ borderLeft: 'none' }}>{state.senderInfo?.business_no ?? ''}</td>
                   </tr>
                   <tr>
                     <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">대&nbsp;&nbsp;표&nbsp;&nbsp;자</td>
-                    <td className="px-2 py-2.5 border border-gray-200">{state.senderInfo?.ceo ?? ''}</td>
+                    <td className="px-2 py-2.5 border border-gray-200 text-center">{state.senderInfo?.ceo ?? ''}</td>
                     <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">연&nbsp;&nbsp;락&nbsp;&nbsp;처</td>
-                    <td className="px-2 py-2.5 border border-gray-200 whitespace-nowrap" style={{ borderLeft: 'none' }}>{state.senderInfo?.phone ?? ''}</td>
+                    <td className="px-2 py-2.5 border border-gray-200 whitespace-nowrap text-center" style={{ borderLeft: 'none' }}>{state.senderInfo?.phone ?? ''}</td>
                   </tr>
                   <tr>
                     <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">사&nbsp;&nbsp;업&nbsp;&nbsp;장</td>
-                    <td colSpan={4} className="px-2 py-2.5 border border-gray-200">{state.senderInfo?.address ?? ''}</td>
+                    <td colSpan={4} className="px-2 py-2.5 border border-gray-200 text-center">{state.senderInfo?.address ?? ''}</td>
                   </tr>
                   <tr>
                     <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">업&nbsp;&nbsp;&nbsp;&nbsp;태</td>
-                    <td className="px-2 py-2.5 border border-gray-200">{state.senderInfo?.business_type ?? ''}</td>
+                    <td className="px-2 py-2.5 border border-gray-200 text-center">{state.senderInfo?.business_type ?? ''}</td>
                     <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">종&nbsp;&nbsp;&nbsp;&nbsp;목</td>
                     <td className="border border-gray-200" style={{ borderLeft: 'none', borderRight: 'none' }} />
-                    <td className="px-2 py-2.5 border border-gray-200" style={{ borderLeft: 'none' }}>{state.senderInfo?.business_item ?? ''}</td>
+                    <td className="px-2 py-2.5 border border-gray-200 text-center" style={{ borderLeft: 'none' }}>{state.senderInfo?.business_item ?? ''}</td>
                   </tr>
                   <tr>
                     <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">계좌정보</td>
-                    <td colSpan={4} className="px-2 py-2.5 border border-gray-200">{state.senderInfo?.bank ?? ''}</td>
+                    <td colSpan={4} className="px-2 py-2.5 border border-gray-200 text-center">{state.senderInfo?.bank ?? ''}</td>
                   </tr>
                 </tbody>
               </table>
@@ -308,7 +308,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
                           }
                         }}
                         rows={1}
-                        className="w-full px-2 py-1.5 text-xs focus:outline-none focus:bg-blue-50 rounded resize-none transition-colors overflow-hidden"
+                        className="w-full px-2 py-1.5 text-xs text-center focus:outline-none focus:bg-blue-50 rounded resize-none transition-colors overflow-hidden"
                       />
                       <button
                         onClick={() => deleteItem(idx)}
@@ -322,7 +322,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
               </tbody>
               <tfoot>
                 <tr className="bg-gray-50 font-bold">
-                  <td colSpan={4} className="border border-gray-200 px-4 py-3 text-left text-sm text-[#1e2a3a]">
+                  <td colSpan={4} className="border border-gray-200 px-4 py-3 text-center text-sm text-[#1e2a3a]">
                     합&nbsp;&nbsp;계 {VAT_LABEL[state.vatType] ? `(${VAT_LABEL[state.vatType]})` : ''}
                   </td>
                   <td className="border border-gray-200 px-3 py-3 text-center text-sm text-[#1e2a3a]">

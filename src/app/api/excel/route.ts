@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
         const val1Cell = ws.getCell(rowNum, 4)
         val1Cell.value = v1
         val1Cell.font = { size: 8 }
-        val1Cell.alignment = { horizontal: 'left', vertical: 'middle' }
+        val1Cell.alignment = { horizontal: 'center', vertical: 'middle' }
         applyBorder(val1Cell)
 
         const labelCell2 = ws.getCell(rowNum, 5)
@@ -149,7 +149,7 @@ export async function POST(req: NextRequest) {
         const val2Cell = ws.getCell(rowNum, 6)
         val2Cell.value = v2
         val2Cell.font = { size: 8 }
-        val2Cell.alignment = { horizontal: ri <= 1 ? 'center' : 'left', vertical: 'middle' }
+        val2Cell.alignment = { horizontal: 'center', vertical: 'middle' }
         applyBorder(val2Cell)
       } else {
         ws.mergeCells(rowNum, 4, rowNum, 6)
@@ -169,7 +169,7 @@ export async function POST(req: NextRequest) {
           wideCell.value = v1
           wideCell.font = { size: 8 }
         }
-        wideCell.alignment = { horizontal: 'left', vertical: 'middle' }
+        wideCell.alignment = { horizontal: 'center', vertical: 'middle' }
         applyBorder(wideCell)
       }
     })
@@ -205,7 +205,7 @@ export async function POST(req: NextRequest) {
       dataCell(ws.getCell(r, 3), item.period ?? 1, 'center')
       dataCell(ws.getCell(r, 4), item.unit_price ?? 0, 'center')
       dataCell(ws.getCell(r, 5), item.total_price ?? item.unit_price ?? 0, 'center')
-      dataCell(ws.getCell(r, 6), item.note ?? '', 'left')
+      dataCell(ws.getCell(r, 6), item.note ?? '', 'center')
       ws.getCell(r, 4).numFmt = '#,##0'
       ws.getCell(r, 5).numFmt = '#,##0'
     })
@@ -234,7 +234,7 @@ export async function POST(req: NextRequest) {
     const totalLabelCell = ws.getCell(`A${totalRow}`)
     totalLabelCell.value = vatLabel ? `합  계 (${vatLabel})` : '합  계'
     totalLabelCell.font = { bold: true, size: 9 }
-    totalLabelCell.alignment = { horizontal: 'left', vertical: 'middle' }
+    totalLabelCell.alignment = { horizontal: 'center', vertical: 'middle' }
     applyBorder(totalLabelCell)
 
     const totalAmountCell = ws.getCell(`E${totalRow}`)

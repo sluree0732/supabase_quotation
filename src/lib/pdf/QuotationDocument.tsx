@@ -61,20 +61,21 @@ const S = StyleSheet.create({
     paddingHorizontal: 3, paddingVertical: 4,
   },
   labelText: { fontSize: 7.5, fontWeight: 'bold', textAlign: 'center' },
-  valText: { fontSize: 7.5 },
+  valText: { fontSize: 7.5, textAlign: 'center' },
   bankText: { fontSize: 7.5, color: 'red' },
   // 항목 테이블
   table: { borderWidth: 1, borderColor: '#333', marginBottom: 4 },
   tableHeader: { flexDirection: 'row', backgroundColor: '#d9d9d9', borderBottomWidth: 1, borderColor: '#333', minHeight: 20 },
   tableRow: { flexDirection: 'row', borderBottomWidth: 0.5, borderColor: '#d0d0d0' },
   tableLastRow: { flexDirection: 'row' },
+  colProduct: { width: '26%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
   colCat:   { width: '9%',  borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
   colName:  { width: '17%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
   colQty:   { width: '7%',  borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
   colUnit:  { width: '12%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
   colTotal: { width: '12%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
   colNote:  { flex: 1, justifyContent: 'flex-start', paddingHorizontal: 4, paddingVertical: 4 },
-  noteText: { fontSize: 7, lineHeight: 1.6 },
+  noteText: { fontSize: 7, lineHeight: 1.6, textAlign: 'center' },
   headerText: { fontSize: 8, fontWeight: 'bold', textAlign: 'center' },
   cellText: { fontSize: 7.5, textAlign: 'center' },
   // 합계 행
@@ -211,8 +212,7 @@ function ItemsTable({ items }: { items: QuotationItem[] }) {
     <View style={S.table}>
       {/* 단일 헤더 행 */}
       <View style={S.tableHeader}>
-        <View style={S.colCat}><Text style={S.headerText}>대분류</Text></View>
-        <View style={S.colName}><Text style={S.headerText}>상품명</Text></View>
+        <View style={S.colProduct}><Text style={S.headerText}>상  품</Text></View>
         <View style={S.colQty}><Text style={S.headerText}>수량</Text></View>
         <View style={S.colUnit}><Text style={S.headerText}>금액</Text></View>
         <View style={S.colTotal}><Text style={S.headerText}>총액</Text></View>
