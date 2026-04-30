@@ -202,11 +202,22 @@ function SupplierTable({ stampSrc, senderInfo }: { stampSrc: string; senderInfo?
   )
 }
 
+// ── 카테고리 그룹 묶기 ────────────────────────────────────
+function groupItems(items: QuotationItem[]) {
+  const groups: { category: string; items: QuotationItem[]; startIdx: number }[] = []
+  let i = 0
+  while (i < items.length) {
+    let j = i
+    while (j + 1 < items.length && items[j + 1].category === items[i].category) j++
+    groups.push({ category: items[i].category ?? '', items: items.slice(i, j + 1), startIdx: i })
+    i = j + 1
+  }
+  return groups
+}
+
 // ── 항목 테이블 ───────────────────────────────────────────
 function ItemsTable({ items }: { items: QuotationItem[] }) {
-  const showCategory = items.map((item, i) =>
-    i === 0 || item.category !== items[i - 1].category
-  )
+  const groups = groupItems(items)
 
   return (
     <View style={S.table}>
@@ -218,31 +229,45 @@ function ItemsTable({ items }: { items: QuotationItem[] }) {
         <View style={S.colTotal}><Text style={S.headerText}>총액</Text></View>
         <View style={S.colNote}><Text style={S.headerText}>비고</Text></View>
       </View>
-      {/* 데이터 행 */}
-      {items.map((item, i) => {
-        const isLast = i === items.length - 1
-        const RowStyle = isLast ? S.tableLastRow : S.tableRow
+      {/* 데이터 행 - 그룹 단위 렌더링 */}
+      {groups.map((group, gi) => {
+        const isLastGroup = gi === groups.length - 1
         return (
-          <View key={i} style={RowStyle} wrap={false}>
-            <View style={S.colCat}>
-              <Text style={S.cellText}>{showCategory[i] ? item.category : ''}</Text>
+          <View key={gi} style={{ flexDirection: 'row' }}>
+            {/* 카테고리: 그룹 전체 높이 세로 중앙 */}
+            <View style={[S.colCat, {
+              borderBottomWidth: isLastGroup ? 0 : 0.5,
+              borderColor: '#d0d0d0',
+            }]}>
+              <Text style={S.cellText}>{group.category}</Text>
             </View>
-            <View style={S.colName}>
-              <Text style={S.cellText}>{item.item_name}</Text>
-            </View>
-            <View style={S.colQty}>
-              <Text style={S.cellText}>{item.period ?? 1}</Text>
-            </View>
-            <View style={S.colUnit}>
-              <Text style={S.cellText}>{fmtNum(item.unit_price)}</Text>
-            </View>
-            <View style={S.colTotal}>
-              <Text style={S.cellText}>{fmtNum(item.total_price ?? item.unit_price)}</Text>
-            </View>
-            <View style={S.colNote}>
-              {noteLines(item.note).map((line, li) => (
-                <Text key={li} style={S.noteText}>{line}</Text>
-              ))}
+            {/* 아이템 스택 */}
+            <View style={{ flex: 1 }}>
+              {group.items.map((item, ii) => {
+                const isLastItem = isLastGroup && ii === group.items.length - 1
+                const RowStyle = isLastItem ? S.tableLastRow : S.tableRow
+                return (
+                  <View key={ii} style={RowStyle} wrap={false}>
+                    <View style={S.colName}>
+                      <Text style={S.cellText}>{item.item_name}</Text>
+                    </View>
+                    <View style={S.colQty}>
+                      <Text style={S.cellText}>{item.period ?? 1}</Text>
+                    </View>
+                    <View style={S.colUnit}>
+                      <Text style={S.cellText}>{fmtNum(item.unit_price)}</Text>
+                    </View>
+                    <View style={S.colTotal}>
+                      <Text style={S.cellText}>{fmtNum(item.total_price ?? item.unit_price)}</Text>
+                    </View>
+                    <View style={S.colNote}>
+                      {noteLines(item.note).map((line, li) => (
+                        <Text key={li} style={S.noteText}>{line}</Text>
+                      ))}
+                    </View>
+                  </View>
+                )
+              })}
             </View>
           </View>
         )

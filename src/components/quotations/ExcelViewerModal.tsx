@@ -185,8 +185,8 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
             <h1 className="text-2xl font-bold tracking-widest text-[#1e2a3a]">견&nbsp;&nbsp;적&nbsp;&nbsp;서</h1>
           </div>
 
-          {/* 기본 정보 */}
-          <div className="px-6 py-4 border-b border-gray-100 grid gap-4 text-sm" style={{ gridTemplateColumns: '25% 75%' }}>
+          {/* 기본 정보 - 상단 전체 너비 */}
+          <div className="px-6 py-4 border-b border-gray-50 text-sm">
             <div className="space-y-1.5">
               <p className="text-[#718096]">{state.quoteDate}</p>
               {state.recipient && (
@@ -197,17 +197,19 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
               )}
               <p className="text-[#718096] mt-2 pt-2 border-t border-gray-50">아래와 같이 견적합니다.</p>
             </div>
+          </div>
 
-            {/* 발신 업체 정보 */}
-            <div>
+          {/* 발신 업체 정보 - 우측 배치 */}
+          <div className="px-6 py-3 border-b border-gray-100 flex justify-end">
+            <div style={{ width: '72%' }}>
               <table className="w-full text-xs border-collapse">
                 <tbody>
                   <tr>
                     <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">상&nbsp;&nbsp;호</td>
                     <td className="px-2 py-2.5 border border-gray-200 whitespace-nowrap text-center">{state.senderInfo?.name ?? ''}</td>
                     <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">사업자 등록번호</td>
-                    <td rowSpan={2} className="border border-gray-200 p-0.5 text-center" style={{ width: '52px', borderRight: 'none' }}>
-                      <img src={stampUrl} alt="도장" className="w-11 h-11 object-contain opacity-90 pointer-events-none" />
+                    <td rowSpan={2} className="border border-gray-200 p-0.5 text-center" style={{ width: '68px', borderRight: 'none' }}>
+                      <img src={stampUrl} alt="도장" className="w-14 h-14 object-contain opacity-90 pointer-events-none" />
                     </td>
                     <td className="px-2 py-2.5 border border-gray-200 whitespace-nowrap text-center" style={{ borderLeft: 'none' }}>{state.senderInfo?.business_no ?? ''}</td>
                   </tr>
