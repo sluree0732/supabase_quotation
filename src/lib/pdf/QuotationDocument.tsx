@@ -75,6 +75,11 @@ const S = StyleSheet.create({
   colUnit:  { width: '12%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
   colTotal: { width: '12%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
   colNote:  { flex: 1, justifyContent: 'flex-start', paddingHorizontal: 4, paddingVertical: 4 },
+  // 데이터 행 전용: items stack(91%)이 컨테이너이므로 비율 보정 (헤더/합계는 테이블 직접 자식)
+  dataColName:  { width: '18.68%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
+  dataColQty:   { width: '7.69%',  borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
+  dataColUnit:  { width: '13.19%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
+  dataColTotal: { width: '13.19%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
   noteText: { fontSize: 7, lineHeight: 1.6, textAlign: 'center' },
   headerText: { fontSize: 8, fontWeight: 'bold', textAlign: 'center' },
   cellText: { fontSize: 7.5, textAlign: 'center' },
@@ -248,16 +253,16 @@ function ItemsTable({ items }: { items: QuotationItem[] }) {
                 const RowStyle = isLastItem ? S.tableLastRow : S.tableRow
                 return (
                   <View key={ii} style={RowStyle} wrap={false}>
-                    <View style={S.colName}>
+                    <View style={S.dataColName}>
                       <Text style={S.cellText}>{item.item_name}</Text>
                     </View>
-                    <View style={S.colQty}>
+                    <View style={S.dataColQty}>
                       <Text style={S.cellText}>{item.period ?? 1}</Text>
                     </View>
-                    <View style={S.colUnit}>
+                    <View style={S.dataColUnit}>
                       <Text style={S.cellText}>{fmtNum(item.unit_price)}</Text>
                     </View>
-                    <View style={S.colTotal}>
+                    <View style={S.dataColTotal}>
                       <Text style={S.cellText}>{fmtNum(item.total_price ?? item.unit_price)}</Text>
                     </View>
                     <View style={S.colNote}>

@@ -185,9 +185,10 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
             <h1 className="text-2xl font-bold tracking-widest text-[#1e2a3a]">견&nbsp;&nbsp;적&nbsp;&nbsp;서</h1>
           </div>
 
-          {/* 기본 정보 - 상단 전체 너비 */}
-          <div className="px-6 py-4 border-b border-gray-50 text-sm">
-            <div className="space-y-1.5">
+          {/* 기본 정보 + 공급자 정보 - 2컬럼 그리드 */}
+          <div className="px-6 py-4 border-b border-gray-100" style={{ display: 'grid', gridTemplateColumns: '40% 60%', gap: '16px' }}>
+            {/* 좌측: 날짜/수신/프로젝트 */}
+            <div className="text-sm space-y-1.5 self-start">
               <p className="text-[#718096]">{state.quoteDate}</p>
               {state.recipient && (
                 <p className="text-[#718096]">수 신 : <span className="text-[#1e2a3a] font-medium">{state.recipient}</span></p>
@@ -197,11 +198,8 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
               )}
               <p className="text-[#718096] mt-2 pt-2 border-t border-gray-50">아래와 같이 견적합니다.</p>
             </div>
-          </div>
-
-          {/* 발신 업체 정보 - 우측 배치 */}
-          <div className="px-6 py-3 border-b border-gray-100 flex justify-end">
-            <div style={{ width: '72%' }}>
+            {/* 우측: 공급자 테이블 */}
+            <div>
               <table className="w-full text-xs border-collapse">
                 <tbody>
                   <tr>
