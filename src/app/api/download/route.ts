@@ -206,13 +206,15 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
     }
   })
 
+  // ── 테이블 헤더 (PDF와 동일 구조) ────────────────────
   const headerRow = 8
   ws.getRow(headerRow).height = 22
-  ws.mergeCells(`A${headerRow}:C${headerRow}`)
+  ws.mergeCells(`A${headerRow}:B${headerRow}`)
   headerCell(ws.getCell(`A${headerRow}`), '상  품')
+  headerCell(ws.getCell(`C${headerRow}`), '수  량')
   headerCell(ws.getCell(`D${headerRow}`), '금  액')
-  ws.mergeCells(`E${headerRow}:F${headerRow}`)
-  headerCell(ws.getCell(`E${headerRow}`), '비  고')
+  headerCell(ws.getCell(`E${headerRow}`), '총  액')
+  headerCell(ws.getCell(`F${headerRow}`), '비  고')
 
   function calcRowHeight(note: string): number {
     if (!note) return 40
@@ -223,19 +225,20 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
 
   const dataStartRow = headerRow + 1
 
-  // 데이터 행 (상품명·금액·비고)
+  // 데이터 행: 상품명(B), 수량(C), 금액(D), 총액(E), 비고(F)
   items.forEach((item: any, i: number) => {
     const r = dataStartRow + i
     ws.getRow(r).height = calcRowHeight(item.note ?? '')
-    ws.mergeCells(`B${r}:C${r}`)
     dataCell(ws.getCell(`B${r}`), item.item_name ?? '', 'center')
+    dataCell(ws.getCell(`C${r}`), item.period ?? 1, 'center')
     dataCell(ws.getCell(`D${r}`), item.unit_price ?? 0, 'center')
-    ws.mergeCells(`E${r}:F${r}`)
-    dataCell(ws.getCell(`E${r}`), item.note ?? '', 'center')
+    dataCell(ws.getCell(`E${r}`), item.total_price ?? item.unit_price ?? 0, 'center')
+    dataCell(ws.getCell(`F${r}`), item.note ?? '', 'center')
     ws.getCell(`D${r}`).numFmt = '#,##0'
+    ws.getCell(`E${r}`).numFmt = '#,##0'
   })
 
-  // 대분류: 연속 같은 카테고리 세로 병합
+  // 대분류(A): 연속 같은 카테고리 세로 병합
   let gi = 0
   while (gi < items.length) {
     let gj = gi
@@ -250,24 +253,24 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
     gi = gj + 1
   }
 
+  // 합계 행: A:D merged / E=금액 / F=VAT
   const totalRow = dataStartRow + items.length
   ws.getRow(totalRow).height = 22
-  ws.mergeCells(`A${totalRow}:C${totalRow}`)
+  ws.mergeCells(`A${totalRow}:D${totalRow}`)
   const totalLabelCell = ws.getCell(`A${totalRow}`)
   totalLabelCell.value = `합  계${VAT_MAP[vatType] ? ` (${VAT_MAP[vatType]})` : ''}`
   totalLabelCell.font = { bold: true, size: 9 }
   totalLabelCell.alignment = { horizontal: 'center', vertical: 'middle' }
   applyBorder(totalLabelCell)
 
-  const totalAmountCell = ws.getCell(`D${totalRow}`)
+  const totalAmountCell = ws.getCell(`E${totalRow}`)
   totalAmountCell.value = totalAmount
   totalAmountCell.numFmt = '#,##0'
   totalAmountCell.font = { bold: true, size: 9 }
   totalAmountCell.alignment = { horizontal: 'center', vertical: 'middle' }
   applyBorder(totalAmountCell)
 
-  ws.mergeCells(`E${totalRow}:F${totalRow}`)
-  const vatCell = ws.getCell(`E${totalRow}`)
+  const vatCell = ws.getCell(`F${totalRow}`)
   vatCell.value = VAT_MAP[vatType] ?? ''
   vatCell.font = { bold: true, size: 9, color: { argb: 'FFCC0000' } }
   vatCell.alignment = { horizontal: 'center', vertical: 'middle' }
