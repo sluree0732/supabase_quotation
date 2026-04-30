@@ -85,7 +85,7 @@ const S = StyleSheet.create({
   cellText: { fontSize: 7.5, textAlign: 'center' },
   // 합계 행
   totalRow: { flexDirection: 'row', borderWidth: 1, borderColor: '#333' },
-  totalLabel: { width: '26%', paddingHorizontal: 6, paddingVertical: 4, justifyContent: 'center' },
+  totalLabel: { width: '26%', paddingHorizontal: 6, paddingVertical: 4, justifyContent: 'center', alignItems: 'center' },
   totalQtyBlank: { width: '7%', borderLeftWidth: 0.5, borderColor: '#d0d0d0' },
   totalUnitBlank: { width: '12%', borderLeftWidth: 0.5, borderColor: '#d0d0d0' },
   totalAmount: { width: '12%', paddingHorizontal: 4, paddingVertical: 4, justifyContent: 'center', alignItems: 'center', borderLeftWidth: 0.5, borderColor: '#d0d0d0' },
@@ -287,7 +287,7 @@ function TotalRow({ total, vatType }: { total: number; vatType: VatType }) {
   return (
     <View style={S.totalRow}>
       <View style={S.totalLabel}>
-        <Text style={{ fontSize: 8.5, fontWeight: 'bold' }}>
+        <Text style={{ fontSize: 8.5, fontWeight: 'bold', textAlign: 'center' }}>
           {`합  계${vatLabel ? ` (${vatLabel})` : ''}`}
         </Text>
       </View>
