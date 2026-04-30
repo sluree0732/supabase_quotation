@@ -176,7 +176,7 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
     if (l2) {
       const val1Cell = ws.getCell(rowNum, 4)
       val1Cell.value = v1; val1Cell.font = { size: 8 }
-      val1Cell.alignment = { horizontal: 'left', vertical: 'middle' }
+      val1Cell.alignment = { horizontal: 'center', vertical: 'middle' }
       applyBorder(val1Cell)
       const labelCell2 = ws.getCell(rowNum, 5)
       labelCell2.value = l2; labelCell2.font = { bold: true, size: 8 }
@@ -185,7 +185,7 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
       applyBorder(labelCell2)
       const val2Cell = ws.getCell(rowNum, 6)
       val2Cell.value = v2; val2Cell.font = { size: 8 }
-      val2Cell.alignment = { horizontal: ri <= 1 ? 'center' : 'left', vertical: 'middle' }
+      val2Cell.alignment = { horizontal: 'center', vertical: 'middle' }
       applyBorder(val2Cell)
     } else {
       ws.mergeCells(rowNum, 4, rowNum, 6)
@@ -201,7 +201,7 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
       } else {
         wideCell.value = v1; wideCell.font = { size: 8 }
       }
-      wideCell.alignment = { horizontal: 'left', vertical: 'middle' }
+      wideCell.alignment = { horizontal: 'center', vertical: 'middle' }
       applyBorder(wideCell)
     }
   })
@@ -214,15 +214,6 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
   ws.mergeCells(`E${headerRow}:F${headerRow}`)
   headerCell(ws.getCell(`E${headerRow}`), '비  고')
 
-  const subRow = headerRow + 1
-  ws.getRow(subRow).height = 16
-  headerCell(ws.getCell(`A${subRow}`), '대분류')
-  ws.mergeCells(`B${subRow}:C${subRow}`)
-  headerCell(ws.getCell(`B${subRow}`), '상품명')
-  headerCell(ws.getCell(`D${subRow}`), '')
-  ws.mergeCells(`E${subRow}:F${subRow}`)
-  headerCell(ws.getCell(`E${subRow}`), '')
-
   function calcRowHeight(note: string): number {
     if (!note) return 40
     const lines = note.split('\n').filter(Boolean)
@@ -230,18 +221,34 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
     return Math.max(40, totalLines * 14 + 10)
   }
 
-  const dataStartRow = subRow + 1
+  const dataStartRow = headerRow + 1
+
+  // 데이터 행 (상품명·금액·비고)
   items.forEach((item: any, i: number) => {
     const r = dataStartRow + i
     ws.getRow(r).height = calcRowHeight(item.note ?? '')
-    dataCell(ws.getCell(`A${r}`), item.category ?? '', 'center')
     ws.mergeCells(`B${r}:C${r}`)
     dataCell(ws.getCell(`B${r}`), item.item_name ?? '', 'center')
-    dataCell(ws.getCell(`D${r}`), item.unit_price ?? 0, 'right')
+    dataCell(ws.getCell(`D${r}`), item.unit_price ?? 0, 'center')
     ws.mergeCells(`E${r}:F${r}`)
-    dataCell(ws.getCell(`E${r}`), item.note ?? '', 'left')
+    dataCell(ws.getCell(`E${r}`), item.note ?? '', 'center')
     ws.getCell(`D${r}`).numFmt = '#,##0'
   })
+
+  // 대분류: 연속 같은 카테고리 세로 병합
+  let gi = 0
+  while (gi < items.length) {
+    let gj = gi
+    while (gj + 1 < items.length && items[gj + 1].category === items[gi].category) gj++
+    const startRow = dataStartRow + gi
+    const endRow   = dataStartRow + gj
+    dataCell(ws.getCell(startRow, 1), items[gi].category ?? '', 'center')
+    if (endRow > startRow) {
+      ws.mergeCells(startRow, 1, endRow, 1)
+      ws.getCell(startRow, 1).alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }
+    }
+    gi = gj + 1
+  }
 
   const totalRow = dataStartRow + items.length
   ws.getRow(totalRow).height = 22
@@ -249,14 +256,14 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
   const totalLabelCell = ws.getCell(`A${totalRow}`)
   totalLabelCell.value = `합  계${VAT_MAP[vatType] ? ` (${VAT_MAP[vatType]})` : ''}`
   totalLabelCell.font = { bold: true, size: 9 }
-  totalLabelCell.alignment = { horizontal: 'left', vertical: 'middle' }
+  totalLabelCell.alignment = { horizontal: 'center', vertical: 'middle' }
   applyBorder(totalLabelCell)
 
   const totalAmountCell = ws.getCell(`D${totalRow}`)
   totalAmountCell.value = totalAmount
   totalAmountCell.numFmt = '#,##0'
   totalAmountCell.font = { bold: true, size: 9 }
-  totalAmountCell.alignment = { horizontal: 'right', vertical: 'middle' }
+  totalAmountCell.alignment = { horizontal: 'center', vertical: 'middle' }
   applyBorder(totalAmountCell)
 
   ws.mergeCells(`E${totalRow}:F${totalRow}`)
