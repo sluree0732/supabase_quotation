@@ -64,7 +64,7 @@ const S = StyleSheet.create({
   valText: { fontSize: 7.5, textAlign: 'center' },
   bankText: { fontSize: 7.5, color: 'red' },
   // 항목 테이블
-  table: { borderWidth: 1, borderColor: '#333', marginBottom: 4 },
+  table: { borderWidth: 1, borderColor: '#333' },
   tableHeader: { flexDirection: 'row', backgroundColor: '#d9d9d9', borderBottomWidth: 1, borderColor: '#333', minHeight: 20 },
   tableRow: { flexDirection: 'row', borderBottomWidth: 0.5, borderColor: '#d0d0d0' },
   tableLastRow: { flexDirection: 'row' },
@@ -84,7 +84,7 @@ const S = StyleSheet.create({
   headerText: { fontSize: 8, fontWeight: 'bold', textAlign: 'center' },
   cellText: { fontSize: 7.5, textAlign: 'center' },
   // 합계 행
-  totalRow: { flexDirection: 'row', borderWidth: 1, borderColor: '#333' },
+  totalRow: { flexDirection: 'row', borderTopWidth: 1, borderColor: '#333' },
   totalLabel: { width: '45%', paddingHorizontal: 6, paddingVertical: 4, justifyContent: 'center', alignItems: 'center' },
   totalAmount: { width: '12%', paddingHorizontal: 4, paddingVertical: 4, justifyContent: 'center', alignItems: 'center', borderLeftWidth: 0.5, borderColor: '#d0d0d0' },
   totalVat: { flex: 1, paddingHorizontal: 4, paddingVertical: 4, justifyContent: 'center', alignItems: 'center', borderLeftWidth: 0.5, borderColor: '#d0d0d0' },
@@ -219,8 +219,9 @@ function groupItems(items: QuotationItem[]) {
 }
 
 // ── 항목 테이블 ───────────────────────────────────────────
-function ItemsTable({ items }: { items: QuotationItem[] }) {
+function ItemsTable({ items, total, vatType }: { items: QuotationItem[]; total: number; vatType: VatType }) {
   const groups = groupItems(items)
+  const vatLabel = VAT_MAP[vatType]
 
   return (
     <View style={S.table}>
@@ -275,25 +276,19 @@ function ItemsTable({ items }: { items: QuotationItem[] }) {
           </View>
         )
       })}
-    </View>
-  )
-}
-
-// ── 합계 행 ───────────────────────────────────────────────
-function TotalRow({ total, vatType }: { total: number; vatType: VatType }) {
-  const vatLabel = VAT_MAP[vatType]
-  return (
-    <View style={S.totalRow}>
-      <View style={S.totalLabel}>
-        <Text style={{ fontSize: 8.5, fontWeight: 'bold', textAlign: 'center' }}>
-          {`합  계${vatLabel ? ` (${vatLabel})` : ''}`}
-        </Text>
-      </View>
-      <View style={S.totalAmount}>
-        <Text style={{ fontSize: 8.5, fontWeight: 'bold' }}>{fmtNum(total)}</Text>
-      </View>
-      <View style={S.totalVat}>
-        <Text style={{ fontSize: 8, color: 'red', fontWeight: 'bold' }}>{vatLabel}</Text>
+      {/* 합계 행 - 테이블 내부에 배치하여 공백 제거 */}
+      <View style={S.totalRow}>
+        <View style={S.totalLabel}>
+          <Text style={{ fontSize: 8.5, fontWeight: 'bold', textAlign: 'center' }}>
+            {`합  계${vatLabel ? ` (${vatLabel})` : ''}`}
+          </Text>
+        </View>
+        <View style={S.totalAmount}>
+          <Text style={{ fontSize: 8.5, fontWeight: 'bold' }}>{fmtNum(total)}</Text>
+        </View>
+        <View style={S.totalVat}>
+          <Text style={{ fontSize: 8, color: 'red', fontWeight: 'bold' }}>{vatLabel}</Text>
+        </View>
       </View>
     </View>
   )
@@ -333,8 +328,7 @@ export default function QuotationDocument({
           </View>
         </View>
 
-        <ItemsTable items={items} />
-        <TotalRow total={totalAmount} vatType={vatType} />
+        <ItemsTable items={items} total={totalAmount} vatType={vatType} />
       </Page>
     </Document>
   )
