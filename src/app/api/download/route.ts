@@ -91,7 +91,7 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
 
   ws.columns = [
     { width: 12 }, { width: 24 }, { width: 10 },
-    { width: 14 }, { width: 9  }, { width: 14 }, { width: 48 },
+    { width: 14 }, { width: 9  }, { width: 18 }, { width: 48 },
   ]
 
   function applyBorder(cell: ExcelJS.Cell) {
@@ -103,7 +103,7 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
 
   function headerCell(cell: ExcelJS.Cell, value: string) {
     cell.value = value
-    cell.font = { bold: true, size: 9 }
+    cell.font = { bold: true, size: 10 }
     cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }
     cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9D9D9' } }
     applyBorder(cell)
@@ -111,7 +111,7 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
 
   function dataCell(cell: ExcelJS.Cell, value: string | number, align: 'left' | 'center' | 'right' = 'center') {
     cell.value = value
-    cell.font = { size: 9 }
+    cell.font = { size: 10 }
     cell.alignment = { horizontal: align, vertical: 'middle', wrapText: true }
     applyBorder(cell)
   }
@@ -135,36 +135,36 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
   }
   ws.getRow(2).height = 28
   ws.getRow(3).height = 28
-  ws.getRow(4).height = 18
-  ws.getRow(5).height = 12
-  ws.getRow(6).height = 18
-  ws.getRow(7).height = 16
-  ws.getRow(8).height = 26
+  ws.getRow(4).height = 20
+  ws.getRow(5).height = 20
+  ws.getRow(6).height = 20
+  ws.getRow(7).height = 22
+  ws.getRow(8).height = 28
   ws.getRow(9).height = 12
 
   ws.getCell('A2').value = quoteDate
-  ws.getCell('A2').font = { size: 9 }
+  ws.getCell('A2').font = { size: 10 }
   ws.mergeCells('A2:B2')
   ws.getCell('A3').value = `수 신 : ${recipient}`
-  ws.getCell('A3').font = { size: 9 }
+  ws.getCell('A3').font = { size: 10 }
   ws.mergeCells('A3:B3')
   if (projectName) {
     ws.getCell('A4').value = `프로젝트 : ${projectName}`
-    ws.getCell('A4').font = { size: 9 }
+    ws.getCell('A4').font = { size: 10 }
     ws.mergeCells('A4:B4')
   }
   ws.getCell('A6').value = '아래와 같이 견적합니다.'
-  ws.getCell('A6').font = { bold: true, size: 9 }
+  ws.getCell('A6').font = { bold: true, size: 10 }
   ws.mergeCells('A6:B6')
 
   ws.getCell('A7').value = '합계 금액'
-  ws.getCell('A7').font = { size: 8, color: { argb: 'FF718096' } }
+  ws.getCell('A7').font = { size: 12, color: { argb: 'FF718096' } }
   ws.getCell('A7').alignment = { horizontal: 'left', vertical: 'middle' }
   ws.mergeCells('A7:B7')
 
   const grandTotal = vatType === 'excluded' ? Math.round(totalAmount * 1.1) : totalAmount
   ws.getCell('A8').value = `${grandTotal.toLocaleString()}원`
-  ws.getCell('A8').font = { bold: true, size: 13 }
+  ws.getCell('A8').font = { bold: true, size: 14 }
   ws.getCell('A8').alignment = { horizontal: 'left', vertical: 'middle' }
   ws.mergeCells('A8:B8')
 
@@ -181,7 +181,7 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
     const [l1, v1, l2, v2] = row
     const labelCell1 = ws.getCell(rowNum, 3)
     labelCell1.value = l1
-    labelCell1.font = { bold: true, size: 8 }
+    labelCell1.font = { bold: true, size: 10 }
     labelCell1.alignment = { horizontal: 'center', vertical: 'middle' }
     labelCell1.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9D9D9' } }
     applyBorder(labelCell1)
@@ -190,24 +190,24 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
       if (l1 === '업  태') {
         ws.mergeCells(rowNum, 4, rowNum, 5)
         const val1Cell = ws.getCell(rowNum, 4)
-        val1Cell.value = v1; val1Cell.font = { size: 8 }
+        val1Cell.value = v1; val1Cell.font = { size: 10 }
         val1Cell.alignment = { horizontal: 'center', vertical: 'middle' }
         applyBorder(val1Cell)
       } else {
         const val1Cell = ws.getCell(rowNum, 4)
-        val1Cell.value = v1; val1Cell.font = { size: 8 }
+        val1Cell.value = v1; val1Cell.font = { size: 10 }
         val1Cell.alignment = { horizontal: 'center', vertical: 'middle' }
         applyBorder(val1Cell)
         const stampCell = ws.getCell(rowNum, 5)
         applyBorder(stampCell)
       }
       const labelCell2 = ws.getCell(rowNum, 6)
-      labelCell2.value = l2; labelCell2.font = { bold: true, size: 8 }
+      labelCell2.value = l2; labelCell2.font = { bold: true, size: 10 }
       labelCell2.alignment = { horizontal: 'center', vertical: 'middle' }
       labelCell2.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9D9D9' } }
       applyBorder(labelCell2)
       const val2Cell = ws.getCell(rowNum, 7)
-      val2Cell.value = v2; val2Cell.font = { size: 8 }
+      val2Cell.value = v2; val2Cell.font = { size: 10 }
       val2Cell.alignment = { horizontal: 'center', vertical: 'middle' }
       applyBorder(val2Cell)
     } else {
@@ -218,11 +218,11 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
         wideCell.value = {
           richText: parts.map((part: string, i: number) => {
             const isAccount = /\d/.test(part) && part.includes('-')
-            return { text: (i > 0 ? ' ' : '') + part, font: { size: 8, color: isAccount ? { argb: 'FFCC0000' } : undefined } }
+            return { text: (i > 0 ? ' ' : '') + part, font: { size: 10, color: isAccount ? { argb: 'FFCC0000' } : undefined } }
           }),
         }
       } else {
-        wideCell.value = v1; wideCell.font = { size: 8 }
+        wideCell.value = v1; wideCell.font = { size: 10 }
       }
       wideCell.alignment = { horizontal: 'center', vertical: 'middle' }
       applyBorder(wideCell)
@@ -284,7 +284,7 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
   ws.mergeCells(`A${totalRow}:D${totalRow}`)
   const totalLabelCell = ws.getCell(`A${totalRow}`)
   totalLabelCell.value = '합  계'
-  totalLabelCell.font = { bold: true, size: 9 }
+  totalLabelCell.font = { bold: true, size: 10 }
   totalLabelCell.alignment = { horizontal: 'center', vertical: 'middle' }
   applyBorder(totalLabelCell)
 
@@ -292,13 +292,13 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
   const totalAmountCell = ws.getCell(`E${totalRow}`)
   totalAmountCell.value = totalAmount
   totalAmountCell.numFmt = '#,##0'
-  totalAmountCell.font = { bold: true, size: 9 }
+  totalAmountCell.font = { bold: true, size: 10 }
   totalAmountCell.alignment = { horizontal: 'center', vertical: 'middle' }
   applyBorder(totalAmountCell)
 
   const vatCell = ws.getCell(`G${totalRow}`)
   vatCell.value = VAT_MAP[vatType] ?? ''
-  vatCell.font = { bold: true, size: 9, color: { argb: 'FFCC0000' } }
+  vatCell.font = { bold: true, size: 10, color: { argb: 'FFCC0000' } }
   vatCell.alignment = { horizontal: 'center', vertical: 'middle' }
   applyBorder(vatCell)
 
@@ -346,7 +346,7 @@ async function generateContractExcel(payload: Record<string, any>): Promise<Buff
 
   function headerCell(cell: ExcelJS.Cell, value: string) {
     cell.value = value
-    cell.font = { bold: true, size: 9 }
+    cell.font = { bold: true, size: 10 }
     cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }
     cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9D9D9' } }
     applyBorder(cell)
@@ -354,7 +354,7 @@ async function generateContractExcel(payload: Record<string, any>): Promise<Buff
 
   function dataCell(cell: ExcelJS.Cell, value: string | number, align: 'left' | 'center' | 'right' = 'center') {
     cell.value = value
-    cell.font = { size: 9 }
+    cell.font = { size: 10 }
     cell.alignment = { horizontal: align, vertical: 'middle', wrapText: true }
     applyBorder(cell)
   }
