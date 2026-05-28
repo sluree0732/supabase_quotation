@@ -104,7 +104,9 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
       const prefix = state.company?.name ?? state.clientInfo?.name ?? ''
       const filename = prefix ? `${prefix}_견적서(${dateStr}).xlsx` : `견적서(${dateStr}).xlsx`
       const companyName = state.company?.name ?? state.clientInfo?.name ?? ''
-      const recipientLabel = [companyName, state.recipient].filter(Boolean).join(', ')
+      const recipientLabel = companyName && state.recipient
+        ? `${companyName}(${state.recipient})`
+        : companyName || state.recipient || ''
       await triggerTokenDownload('excel', filename, {
         quoteDate: state.quoteDate,
         recipient: recipientLabel,
@@ -128,7 +130,9 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
       const prefix = state.company?.name ?? state.clientInfo?.name ?? ''
       const filename = prefix ? `${prefix}_견적서(${dateStr}).pdf` : `견적서(${dateStr}).pdf`
       const companyName = state.company?.name ?? state.clientInfo?.name ?? ''
-      const recipientLabel = [companyName, state.recipient].filter(Boolean).join(', ')
+      const recipientLabel = companyName && state.recipient
+        ? `${companyName}(${state.recipient})`
+        : companyName || state.recipient || ''
       await triggerTokenDownload('pdf', filename, {
         quoteDate: state.quoteDate,
         recipient: recipientLabel,
@@ -196,7 +200,9 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
               <p className="text-[#718096]">{state.quoteDate}</p>
               {(() => {
                 const companyName = state.company?.name ?? state.clientInfo?.name ?? ''
-                const recipientLabel = [companyName, state.recipient].filter(Boolean).join(', ')
+                const recipientLabel = companyName && state.recipient
+                  ? `${companyName}(${state.recipient})`
+                  : companyName || state.recipient || ''
                 return recipientLabel ? (
                   <p className="text-[#718096]">수 신 : <span className="text-[#1e2a3a] font-medium">{recipientLabel}</span></p>
                 ) : null
@@ -206,7 +212,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
               )}
               <p className="text-[#718096] mt-2 pt-2 border-t border-gray-50">아래와 같이 견적합니다.</p>
               {items.length > 0 && (
-                <div className="mt-2 pt-2 border-t border-gray-100">
+                <div className="mt-4 pt-2 border-t border-gray-100">
                   <p className="text-xs text-[#718096]">합계 금액</p>
                   <p className="text-lg font-bold text-[#1e2a3a]">
                     {(state.vatType === 'excluded' ? Math.round(total * 1.1) : total).toLocaleString()}원

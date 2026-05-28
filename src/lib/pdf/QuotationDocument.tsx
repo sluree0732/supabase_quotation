@@ -161,7 +161,7 @@ function SupplierTable({ stampSrc, senderInfo }: { stampSrc: string; senderInfo?
         </View>
         {/* 사업자등록번호/연락처 + 값 */}
         <View style={{ flex: 1, borderLeftWidth: 0.5, borderColor: '#333' }}>
-          <View style={{ flex: 1, borderBottomWidth: 0.5, borderColor: '#333', flexDirection: 'row', alignItems: 'center' }}>
+          <View style={{ flexDirection: 'row', borderBottomWidth: 0.5, borderColor: '#333', minHeight: 20 }}>
             <View style={{ width: '45%', backgroundColor: '#d9d9d9', borderRightWidth: 0.5, borderColor: '#333', justifyContent: 'center', alignItems: 'center', paddingVertical: 4 }}>
               <Text style={S.labelText}>사업자 등록번호</Text>
             </View>
@@ -169,7 +169,7 @@ function SupplierTable({ stampSrc, senderInfo }: { stampSrc: string; senderInfo?
               <Text style={S.valText}>{businessNo}</Text>
             </View>
           </View>
-          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+          <View style={{ flexDirection: 'row', minHeight: 20 }}>
             <View style={{ width: '45%', backgroundColor: '#d9d9d9', borderRightWidth: 0.5, borderColor: '#333', justifyContent: 'center', alignItems: 'center', paddingVertical: 4 }}>
               <Text style={S.labelText}>연  락  처</Text>
             </View>
