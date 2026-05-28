@@ -5,6 +5,7 @@ import { ChevronRight, Plus, Sparkles, Loader2, Save, FileSignature, ChevronDown
 import { BsFiletypeXlsx } from 'react-icons/bs'
 
 import type { Company, CompanyInfo, QuotationItem, VatType } from '@/types'
+import { updateCompany } from '@/lib/companies'
 import CompanyCombobox from '@/components/shared/CompanyCombobox'
 import ItemModal, { type ItemPrefill } from './ItemModal'
 import ExcelViewerModal from './ExcelViewerModal'
@@ -76,12 +77,14 @@ function CompanyInfoEditor({
   open,
   onOpenChange,
   extraBottom,
+  showBank,
 }: {
   info: CompanyInfo
   onChange: (info: CompanyInfo) => void
   open: boolean
   onOpenChange: (v: boolean) => void
   extraBottom?: React.ReactNode
+  showBank?: boolean
 }) {
   const field = (
     label: string,
@@ -116,10 +119,12 @@ function CompanyInfoEditor({
           {field('주소', 'address')}
           {field('연락처', 'phone')}
           {field('사업자 등록번호', 'business_no', { format: formatBusinessNo, inputMode: 'numeric', placeholder: '000-00-00000' })}
+          {field('대표자', 'ceo', { placeholder: '대표자 이름' })}
           {field('업태', 'business_type')}
           {field('업종', 'business_item')}
           {field('이메일', 'email')}
           {field('팩스', 'fax')}
+          {showBank && field('결제계좌', 'bank', { placeholder: '예: 부산은행 112-13-000000-1 홍길동' })}
           {extraBottom}
         </div>
       )}
@@ -139,6 +144,7 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
   const [showExcelViewer, setShowExcelViewer] = useState(false)
   const [senderInfoOpen, setSenderInfoOpen] = useState(true)
   const [clientInfoOpen, setClientInfoOpen] = useState(true)
+  const [savingCompanyOnly, setSavingCompanyOnly] = useState(false)
 
   const isSaved = state.status === 'saved'
 
@@ -147,6 +153,8 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
     if (!('status' in patch) && isSaved) setIsDirty(true)
   }
   const total = state.items.reduce((s, i) => s + i.total_price, 0)
+  const hasItems = state.items.length > 0
+  const hasCompanyInfo = !!(state.senderCompany && state.senderInfo) || !!(state.company && state.clientInfo)
 
   // ── 항목 조작 ─────────────────────────────────────────
   function addItem(data: Omit<QuotationItem, 'id' | 'quotation_id' | 'sort_order'>) {
@@ -205,7 +213,60 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
   }
 
   async function handleSave(status: 'draft' | 'saved') {
-    if (status === 'saved' && !state.items.length) { alert('항목을 1개 이상 추가해주세요.'); return }
+    // 항목 없음 + 업체 정보 없음
+    if (!hasItems && !hasCompanyInfo) {
+      alert('업체 또는 항목을 추가해주세요.')
+      return
+    }
+
+    // 항목 없음 + 업체 정보 있음 → 업체 정보만 저장
+    if (!hasItems && hasCompanyInfo) {
+      setSavingCompanyOnly(true)
+      try {
+        const updates: Promise<unknown>[] = []
+        if (state.senderCompany && state.senderInfo) {
+          updates.push(updateCompany(state.senderCompany.id, {
+            company_type: state.senderCompany.company_type,
+            name: state.senderInfo.name,
+            address: state.senderInfo.address,
+            phone: state.senderInfo.phone,
+            business_no: state.senderInfo.business_no,
+            business_type: state.senderInfo.business_type,
+            business_item: state.senderInfo.business_item,
+            email: state.senderInfo.email,
+            fax: state.senderInfo.fax,
+            ceo: state.senderInfo.ceo || undefined,
+            bank: state.senderInfo.bank || undefined,
+            stamp_url: state.senderCompany.stamp_url,
+          }))
+        }
+        if (state.company && state.clientInfo) {
+          updates.push(updateCompany(state.company.id, {
+            company_type: state.company.company_type,
+            name: state.clientInfo.name,
+            address: state.clientInfo.address,
+            phone: state.clientInfo.phone,
+            business_no: state.clientInfo.business_no,
+            business_type: state.clientInfo.business_type,
+            business_item: state.clientInfo.business_item,
+            email: state.clientInfo.email,
+            fax: state.clientInfo.fax,
+            ceo: state.clientInfo.ceo || undefined,
+            bank: state.clientInfo.bank || undefined,
+            stamp_url: state.company.stamp_url,
+          }))
+        }
+        await Promise.all(updates)
+        showToast('업체 정보 저장 완료')
+      } catch (e: any) {
+        alert(e.message ?? '저장 실패')
+      } finally {
+        setSavingCompanyOnly(false)
+      }
+      return
+    }
+
+    // 항목 있음 → 견적서 전체 저장
     await onSave(state, status)
     setState(s => ({ ...s, status }))
     setIsDirty(false)
@@ -254,6 +315,7 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
                 onChange={info => set({ senderInfo: info })}
                 open={senderInfoOpen}
                 onOpenChange={setSenderInfoOpen}
+                showBank
               />
             )}
           </Field>
@@ -379,13 +441,13 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
             {/* 저장 */}
             <button
               onClick={() => handleSave(state.status === 'saved' ? 'draft' : 'saved')}
-              disabled={saving}
+              disabled={saving || savingCompanyOnly}
               className={`w-full py-3.5 rounded-xl text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors ${
-                state.status === 'saved' ? 'bg-[#2980b9]' : 'bg-[#27ae60]'
+                hasItems && state.status === 'saved' ? 'bg-[#2980b9]' : 'bg-[#27ae60]'
               }`}
             >
-              {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-              {state.status === 'saved' ? '저장완료' : '저장'}
+              {(saving || savingCompanyOnly) ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+              {!hasItems && hasCompanyInfo ? '업체 정보 저장' : hasItems && state.status === 'saved' ? '저장완료' : '저장'}
             </button>
 
             {/* 미리보기 / 계약서 작성 */}
