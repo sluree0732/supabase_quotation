@@ -205,7 +205,7 @@ export async function POST(req: NextRequest) {
       dataCell(ws.getCell(r, 3), item.period ?? 1, 'center')
       dataCell(ws.getCell(r, 4), item.unit_price ?? 0, 'center')
       dataCell(ws.getCell(r, 5), item.total_price ?? item.unit_price ?? 0, 'center')
-      dataCell(ws.getCell(r, 6), item.note ?? '', 'center')
+      dataCell(ws.getCell(r, 6), item.note ?? '', 'left')
       ws.getCell(r, 4).numFmt = '#,##0'
       ws.getCell(r, 5).numFmt = '#,##0'
     })

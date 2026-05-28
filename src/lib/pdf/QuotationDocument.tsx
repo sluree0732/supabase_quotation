@@ -80,7 +80,7 @@ const S = StyleSheet.create({
   dataColQty:   { width: '7.69%',  borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
   dataColUnit:  { width: '13.19%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
   dataColTotal: { width: '13.19%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
-  noteText: { fontSize: 7, lineHeight: 1.6, textAlign: 'center' },
+  noteText: { fontSize: 7, lineHeight: 1.6, textAlign: 'left' },
   headerText: { fontSize: 8, fontWeight: 'bold', textAlign: 'center' },
   cellText: { fontSize: 7.5, textAlign: 'center' },
   // 합계 행
@@ -280,7 +280,7 @@ function ItemsTable({ items, total, vatType }: { items: QuotationItem[]; total: 
       <View style={S.totalRow}>
         <View style={S.totalLabel}>
           <Text style={{ fontSize: 8.5, fontWeight: 'bold', textAlign: 'center' }}>
-            {`합  계${vatLabel ? ` (${vatLabel})` : ''}`}
+            합  계
           </Text>
         </View>
         <View style={S.totalAmount}>

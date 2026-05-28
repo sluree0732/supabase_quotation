@@ -190,11 +190,23 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
             {/* 좌측: 날짜/수신/프로젝트 */}
             <div className="text-sm space-y-1.5 self-start">
               <p className="text-[#718096]">{state.quoteDate}</p>
-              {state.recipient && (
-                <p className="text-[#718096]">수 신 : <span className="text-[#1e2a3a] font-medium">{state.recipient}</span></p>
-              )}
+              {(() => {
+                const companyName = state.company?.name ?? state.clientInfo?.name ?? ''
+                const recipientLabel = [companyName, state.recipient].filter(Boolean).join(', ')
+                return recipientLabel ? (
+                  <p className="text-[#718096]">수 신 : <span className="text-[#1e2a3a] font-medium">{recipientLabel}</span></p>
+                ) : null
+              })()}
               {state.projectName && (
                 <p className="text-[#718096]">프로젝트&nbsp;&nbsp;<span className="text-[#1e2a3a] font-medium">{state.projectName}</span></p>
+              )}
+              {items.length > 0 && (
+                <div className="mt-2 pt-2 border-t border-gray-100">
+                  <p className="text-xs text-[#718096]">합계 금액</p>
+                  <p className="text-lg font-bold text-[#1e2a3a]">
+                    {(state.vatType === 'excluded' ? Math.round(total * 1.1) : total).toLocaleString()}원
+                  </p>
+                </div>
               )}
               <p className="text-[#718096] mt-2 pt-2 border-t border-gray-50">아래와 같이 견적합니다.</p>
             </div>
@@ -307,7 +319,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
                           }
                         }}
                         rows={1}
-                        className="w-full px-2 py-1.5 text-xs text-center focus:outline-none focus:bg-blue-50 rounded resize-none transition-colors overflow-hidden"
+                        className="w-full px-2 py-1.5 text-xs text-left focus:outline-none focus:bg-blue-50 rounded resize-none transition-colors overflow-hidden"
                       />
                       <button
                         onClick={() => deleteItem(idx)}
@@ -322,7 +334,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
               <tfoot>
                 <tr className="bg-gray-50 font-bold">
                   <td colSpan={4} className="border border-gray-200 px-4 py-3 text-center text-sm text-[#1e2a3a]">
-                    합&nbsp;&nbsp;계 {VAT_LABEL[state.vatType] ? `(${VAT_LABEL[state.vatType]})` : ''}
+                    합&nbsp;&nbsp;계
                   </td>
                   <td className="border border-gray-200 px-3 py-3 text-center text-sm text-[#1e2a3a]">
                     {total.toLocaleString()}원
