@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Building2, ChevronRight, X, Plus, Sparkles, Loader2, Save, FileSignature, ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronRight, Plus, Sparkles, Loader2, Save, FileSignature, ChevronDown, ChevronUp } from 'lucide-react'
 import { BsFiletypeXlsx } from 'react-icons/bs'
 
 import type { Company, CompanyInfo, QuotationItem, VatType } from '@/types'
-import CompanyPickerModal from './CompanyPickerModal'
+import CompanyCombobox from '@/components/shared/CompanyCombobox'
 import ItemModal, { type ItemPrefill } from './ItemModal'
 import ExcelViewerModal from './ExcelViewerModal'
 import RecipientCombobox from '@/components/shared/RecipientCombobox'
@@ -116,8 +116,7 @@ function CompanyInfoEditor({
 
 export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveSuccess, quotationId, itemPrefill }: Props) {
   const [state, setState] = useState<QuotationFormState>(initial)
-  const [showSenderPicker, setShowSenderPicker] = useState(false)
-  const [showClientPicker, setShowClientPicker] = useState(false)
+
   const [editIdx, setEditIdx] = useState<number | null>(null)
   const [showAdd, setShowAdd] = useState(false)
   const prefillAddedRef = useRef(false)
@@ -230,25 +229,12 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
 
           {/* 발신 업체 */}
           <Field label="발신 업체">
-            <button
-              onClick={() => setShowSenderPicker(true)}
-              className="w-full flex items-center gap-3 px-4 py-3 border border-gray-200 rounded-xl bg-white hover:border-[#2980b9] transition-colors text-left"
-            >
-              <Building2 size={18} className="text-[#27ae60] shrink-0" />
-              <span className={`flex-1 text-sm ${state.senderCompany ? 'text-[#1e2a3a] font-medium' : 'text-gray-400'}`}>
-                {state.senderCompany?.name ?? '자사 업체 선택 (선택사항)'}
-              </span>
-              {state.senderCompany ? (
-                <button
-                  onClick={e => { e.stopPropagation(); set({ senderCompany: null, senderInfo: null }) }}
-                  className="p-0.5 text-gray-400 hover:text-gray-600"
-                >
-                  <X size={14} />
-                </button>
-              ) : (
-                <ChevronRight size={16} className="text-gray-400" />
-              )}
-            </button>
+            <CompanyCombobox
+              typeFilter="sender"
+              selected={state.senderCompany}
+              onSelect={company => set({ senderCompany: company, senderCompanyId: company?.id ?? null, senderInfo: company ? companyToInfo(company) : null })}
+              placeholder="자사 업체 선택 또는 등록 (선택사항)"
+            />
             {state.senderInfo && (
               <CompanyInfoEditor
                 info={state.senderInfo}
@@ -261,25 +247,12 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
 
           {/* 수신 업체 */}
           <Field label="수신 업체">
-            <button
-              onClick={() => setShowClientPicker(true)}
-              className="w-full flex items-center gap-3 px-4 py-3 border border-gray-200 rounded-xl bg-white hover:border-[#2980b9] transition-colors text-left"
-            >
-              <Building2 size={18} className="text-[#2980b9] shrink-0" />
-              <span className={`flex-1 text-sm ${state.company ? 'text-[#1e2a3a] font-medium' : 'text-gray-400'}`}>
-                {state.company?.name ?? '광고주 업체 선택 (선택사항)'}
-              </span>
-              {state.company ? (
-                <button
-                  onClick={e => { e.stopPropagation(); set({ company: null, clientInfo: null }) }}
-                  className="p-0.5 text-gray-400 hover:text-gray-600"
-                >
-                  <X size={14} />
-                </button>
-              ) : (
-                <ChevronRight size={16} className="text-gray-400" />
-              )}
-            </button>
+            <CompanyCombobox
+              typeFilter="client"
+              selected={state.company}
+              onSelect={company => set({ company, clientInfo: company ? companyToInfo(company) : null })}
+              placeholder="광고주 업체 선택 또는 등록 (선택사항)"
+            />
             {state.clientInfo && (
               <CompanyInfoEditor
                 info={state.clientInfo}
@@ -451,22 +424,6 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
       )}
 
       {/* ── 모달 ──────────────────────────────────────── */}
-      {showSenderPicker && (
-        <CompanyPickerModal
-          selected={state.senderCompany}
-          typeFilter="sender"
-          onSelect={company => set({ senderCompany: company, senderCompanyId: company.id, senderInfo: companyToInfo(company) })}
-          onClose={() => setShowSenderPicker(false)}
-        />
-      )}
-      {showClientPicker && (
-        <CompanyPickerModal
-          selected={state.company}
-          typeFilter="client"
-          onSelect={company => set({ company, clientInfo: companyToInfo(company) })}
-          onClose={() => setShowClientPicker(false)}
-        />
-      )}
       {showAdd && (
         <ItemModal
           prefill={itemPrefill}

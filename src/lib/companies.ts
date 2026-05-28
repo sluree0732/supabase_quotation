@@ -103,6 +103,17 @@ export async function deleteContact(contactId: string): Promise<void> {
   if (error) throw error
 }
 
+export async function updateContact(contactId: string, name: string, phone: string): Promise<CompanyContact> {
+  const { data, error } = await supabase
+    .from('company_contacts')
+    .update({ name, phone })
+    .eq('id', contactId)
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
 export async function getSenderStampUrl(companyId?: string | null): Promise<string | null> {
   let query = supabase
     .from('companies')

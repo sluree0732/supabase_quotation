@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { X, MapPin, Loader2, Plus, Trash2, UserRound, ImagePlus, Camera } from 'lucide-react'
+import { X, MapPin, Loader2, Plus, Trash2, UserRound, ImagePlus, Camera, Pencil, Check } from 'lucide-react'
 import type { Company, CompanyContact, CompanyType } from '@/types'
 import {
   createCompany, updateCompany, deleteCompany,
-  getContacts, addContact, deleteContact, uploadStamp,
+  getContacts, addContact, deleteContact, updateContact, uploadStamp,
 } from '@/lib/companies'
 import AddressModal from './AddressModal'
 
@@ -56,6 +56,10 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
   const [newContactPhone, setNewContactPhone] = useState('')
   const [addingContact, setAddingContact] = useState(false)
   const [showContactForm, setShowContactForm] = useState(false)
+  const [editingContactId, setEditingContactId] = useState<string | null>(null)
+  const [editContactName, setEditContactName] = useState('')
+  const [editContactPhone, setEditContactPhone] = useState('')
+  const [updatingContact, setUpdatingContact] = useState(false)
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -197,6 +201,20 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
       setContacts(prev => prev.filter(c => c.id !== contactId))
     } catch (e: any) {
       setError(e.message ?? '담당자 삭제 실패')
+    }
+  }
+
+  async function handleUpdateContact(contactId: string) {
+    if (!editContactName.trim()) return
+    setUpdatingContact(true)
+    try {
+      const updated = await updateContact(contactId, editContactName.trim(), editContactPhone.trim())
+      setContacts(prev => prev.map(c => c.id === contactId ? updated : c))
+      setEditingContactId(null)
+    } catch (e: any) {
+      setError(e.message ?? '담당자 수정 실패')
+    } finally {
+      setUpdatingContact(false)
     }
   }
 
@@ -509,19 +527,64 @@ export default function CompanyModal({ company, onClose, onSaved }: CompanyModal
                 {contacts.length > 0 ? (
                   <ul className="space-y-1.5">
                     {contacts.map(c => (
-                      <li key={c.id} className="flex items-center gap-3 bg-white border border-gray-100 rounded-xl px-3 py-2.5">
-                        <UserRound size={15} className="text-[#2980b9] shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-[#1e2a3a]">{c.name}</p>
-                          {c.phone && <p className="text-xs text-[#718096]">{c.phone}</p>}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteContact(c.id)}
-                          className="p-1 text-gray-300 hover:text-red-400 transition-colors"
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                      <li key={c.id} className="bg-white border border-gray-100 rounded-xl px-3 py-2">
+                        {editingContactId === c.id ? (
+                          <div className="flex items-center gap-2">
+                            <UserRound size={15} className="text-[#2980b9] shrink-0" />
+                            <input
+                              type="text"
+                              value={editContactName}
+                              onChange={e => setEditContactName(e.target.value)}
+                              placeholder="이름"
+                              className="flex-1 min-w-0 text-sm px-2 py-1 border border-gray-200 rounded-lg focus:outline-none focus:border-[#2980b9]"
+                            />
+                            <input
+                              type="tel"
+                              inputMode="numeric"
+                              value={editContactPhone}
+                              onChange={e => setEditContactPhone(formatPhone(e.target.value))}
+                              placeholder="연락처"
+                              className="w-28 text-sm px-2 py-1 border border-gray-200 rounded-lg focus:outline-none focus:border-[#2980b9]"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateContact(c.id)}
+                              disabled={updatingContact || !editContactName.trim()}
+                              className="p-1 text-[#2980b9] hover:text-[#1a6a9a] disabled:opacity-40 transition-colors"
+                            >
+                              {updatingContact ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEditingContactId(null)}
+                              className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <UserRound size={15} className="text-[#2980b9] shrink-0" />
+                            <div className="flex-1 min-w-0 flex items-center gap-2">
+                              <span className="text-sm font-medium text-[#1e2a3a]">{c.name}</span>
+                              {c.phone && <span className="text-xs text-[#718096]">{c.phone}</span>}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => { setEditingContactId(c.id); setEditContactName(c.name); setEditContactPhone(c.phone ?? '') }}
+                              className="p-1 text-gray-300 hover:text-[#2980b9] transition-colors"
+                            >
+                              <Pencil size={13} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteContact(c.id)}
+                              className="p-1 text-gray-300 hover:text-red-400 transition-colors"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        )}
                       </li>
                     ))}
                   </ul>

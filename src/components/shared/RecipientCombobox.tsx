@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { ChevronDown, UserRound } from 'lucide-react'
+import { ChevronDown, UserRound, Plus, Loader2 } from 'lucide-react'
 import type { CompanyContact } from '@/types'
-import { getContacts } from '@/lib/companies'
+import { getContacts, addContact } from '@/lib/companies'
 
 interface Props {
   companyId: string | null
@@ -22,6 +22,7 @@ export default function RecipientCombobox({
 }: Props) {
   const [contacts, setContacts] = useState<CompanyContact[]>(initialContacts ?? [])
   const [open, setOpen] = useState(false)
+  const [adding, setAdding] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
   // initialContacts가 바뀌면 즉시 반영 (picker에서 회사 선택 시)
@@ -51,6 +52,24 @@ export default function RecipientCombobox({
     ? contacts.filter(c => c.name.toLowerCase().includes(value.toLowerCase()))
     : contacts
 
+  const exactMatch = contacts.some(c => c.name.toLowerCase() === value.toLowerCase().trim())
+  const canAdd = !!companyId && value.trim().length > 0 && !exactMatch
+
+  async function handleAddNew() {
+    if (!companyId || !value.trim()) return
+    setAdding(true)
+    try {
+      const newContact = await addContact(companyId, value.trim(), '')
+      setContacts(prev => [...prev, newContact])
+      onChange(newContact.name)
+      setOpen(false)
+    } catch {
+      // ignore
+    } finally {
+      setAdding(false)
+    }
+  }
+
   return (
     <div ref={containerRef} className="relative">
       <div className="relative">
@@ -58,25 +77,23 @@ export default function RecipientCombobox({
           type="text"
           value={value}
           onChange={e => onChange(e.target.value)}
-          onFocus={() => { if (contacts.length > 0) setOpen(true) }}
+          onFocus={() => setOpen(true)}
           placeholder={placeholder ?? '예: 홍길동 대표'}
           className="input-base w-full pr-8"
         />
-        {contacts.length > 0 && (
-          <button
-            type="button"
-            onMouseDown={e => { e.preventDefault(); setOpen(v => !v) }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <ChevronDown
-              size={16}
-              className={`transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
-            />
-          </button>
-        )}
+        <button
+          type="button"
+          onMouseDown={e => { e.preventDefault(); setOpen(v => !v) }}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <ChevronDown
+            size={16}
+            className={`transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
+          />
+        </button>
       </div>
 
-      {open && filtered.length > 0 && (
+      {open && (filtered.length > 0 || canAdd) && (
         <ul className="absolute z-[100] left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
           {filtered.map(c => (
             <li key={c.id}>
@@ -90,13 +107,31 @@ export default function RecipientCombobox({
                 className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#ebf5fb] text-left transition-colors"
               >
                 <UserRound size={14} className="text-[#2980b9] shrink-0" />
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-[#1e2a3a]">{c.name}</p>
-                  {c.phone && <p className="text-xs text-[#718096]">{c.phone}</p>}
+                <div className="min-w-0 flex items-center gap-2">
+                  <span className="text-sm font-medium text-[#1e2a3a]">{c.name}</span>
+                  {c.phone && <span className="text-xs text-[#718096]">{c.phone}</span>}
                 </div>
               </button>
             </li>
           ))}
+          {canAdd && (
+            <li>
+              <button
+                type="button"
+                onMouseDown={e => { e.preventDefault(); handleAddNew() }}
+                disabled={adding}
+                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#f0fdf4] text-left transition-colors text-[#27ae60] border-t border-gray-100 disabled:opacity-60"
+              >
+                {adding
+                  ? <Loader2 size={14} className="animate-spin shrink-0" />
+                  : <Plus size={14} className="shrink-0" />
+                }
+                <span className="text-sm font-medium">
+                  {adding ? '등록 중...' : `"${value.trim()}" 새 담당자로 등록`}
+                </span>
+              </button>
+            </li>
+          )}
         </ul>
       )}
     </div>
