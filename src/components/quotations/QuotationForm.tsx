@@ -62,6 +62,13 @@ function companyToInfo(c: Company): CompanyInfo {
   }
 }
 
+function formatBusinessNo(value: string): string {
+  const nums = value.replace(/\D/g, '').slice(0, 10)
+  if (nums.length <= 3) return nums
+  if (nums.length <= 5) return `${nums.slice(0, 3)}-${nums.slice(3)}`
+  return `${nums.slice(0, 3)}-${nums.slice(3, 5)}-${nums.slice(5)}`
+}
+
 // ── 업체 정보 인라인 편집 컴포넌트 ──────────────────────────
 function CompanyInfoEditor({
   info,
@@ -76,13 +83,19 @@ function CompanyInfoEditor({
   onOpenChange: (v: boolean) => void
   extraBottom?: React.ReactNode
 }) {
-  const field = (label: string, key: keyof CompanyInfo) => (
+  const field = (
+    label: string,
+    key: keyof CompanyInfo,
+    options?: { format?: (v: string) => string; inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode']; placeholder?: string }
+  ) => (
     <div className="space-y-1">
       <label className="text-xs text-[#718096]">{label}</label>
       <input
         type="text"
+        inputMode={options?.inputMode}
+        placeholder={options?.placeholder}
         value={info[key] ?? ''}
-        onChange={e => onChange({ ...info, [key]: e.target.value })}
+        onChange={e => onChange({ ...info, [key]: options?.format ? options.format(e.target.value) : e.target.value })}
         className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-[#2980b9] transition-colors"
       />
     </div>
@@ -102,7 +115,7 @@ function CompanyInfoEditor({
           {field('업체명', 'name')}
           {field('주소', 'address')}
           {field('연락처', 'phone')}
-          {field('사업자 등록번호', 'business_no')}
+          {field('사업자 등록번호', 'business_no', { format: formatBusinessNo, inputMode: 'numeric', placeholder: '000-00-00000' })}
           {field('업태', 'business_type')}
           {field('업종', 'business_item')}
           {field('이메일', 'email')}
