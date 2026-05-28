@@ -137,8 +137,8 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
   ws.getRow(3).height = 28
   ws.getRow(4).height = 18
   ws.getRow(5).height = 18
-  ws.getRow(6).height = 18
-  ws.getRow(7).height = 18
+  ws.getRow(6).height = 16
+  ws.getRow(7).height = 26
 
   ws.getCell('A2').value = quoteDate
   ws.getCell('A2').font = { size: 9 }
@@ -154,6 +154,17 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
   ws.getCell('A5').value = '아래와 같이 견적합니다.'
   ws.getCell('A5').font = { bold: true, size: 9 }
   ws.mergeCells('A5:B5')
+
+  ws.getCell('A6').value = '합계 금액'
+  ws.getCell('A6').font = { size: 8, color: { argb: 'FF718096' } }
+  ws.getCell('A6').alignment = { horizontal: 'left', vertical: 'middle' }
+  ws.mergeCells('A6:B6')
+
+  const grandTotal = vatType === 'excluded' ? Math.round(totalAmount * 1.1) : totalAmount
+  ws.getCell('A7').value = `${grandTotal.toLocaleString()}원`
+  ws.getCell('A7').font = { bold: true, size: 13 }
+  ws.getCell('A7').alignment = { horizontal: 'left', vertical: 'middle' }
+  ws.mergeCells('A7:B7')
 
   const supplierData = [
     ['상  호', s.name, '사업자 등록번호', s.business_no],
@@ -233,7 +244,7 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
     dataCell(ws.getCell(`C${r}`), item.period ?? 1, 'center')
     dataCell(ws.getCell(`D${r}`), item.unit_price ?? 0, 'center')
     dataCell(ws.getCell(`E${r}`), item.total_price ?? item.unit_price ?? 0, 'center')
-    dataCell(ws.getCell(`F${r}`), item.note ?? '', 'center')
+    dataCell(ws.getCell(`F${r}`), item.note ?? '', 'left')
     ws.getCell(`D${r}`).numFmt = '#,##0'
     ws.getCell(`E${r}`).numFmt = '#,##0'
   })
@@ -258,7 +269,7 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
   ws.getRow(totalRow).height = 22
   ws.mergeCells(`A${totalRow}:D${totalRow}`)
   const totalLabelCell = ws.getCell(`A${totalRow}`)
-  totalLabelCell.value = `합  계${VAT_MAP[vatType] ? ` (${VAT_MAP[vatType]})` : ''}`
+  totalLabelCell.value = '합  계'
   totalLabelCell.font = { bold: true, size: 9 }
   totalLabelCell.alignment = { horizontal: 'center', vertical: 'middle' }
   applyBorder(totalLabelCell)
@@ -279,7 +290,7 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
   const stampBuffer = await getStampBuffer(senderCompanyId)
   const stampId = wb.addImage({ buffer: stampBuffer as any, extension: 'png' })
   ws.addImage(stampId, {
-    tl: { col: 5.08, row: 1.12 },
+    tl: { col: 3.9, row: 1.12 },
     ext: { width: 65, height: 65 },
     editAs: 'oneCell',
   } as any)

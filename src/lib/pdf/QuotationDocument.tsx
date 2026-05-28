@@ -324,8 +324,9 @@ export default function QuotationDocument({
               <Text style={{ ...S.infoText, marginTop: 4 }}>프로젝트 : {projectName}</Text>
             )}
             <Text style={{ ...S.infoBold, marginTop: 16 }}>아래와 같이 견적합니다.</Text>
-            <Text style={{ ...S.infoBold, marginTop: 8 }}>
-              {`합계 금액  ${fmtNum(vatType === 'excluded' ? Math.round(totalAmount * 1.1) : totalAmount)}원`}
+            <Text style={{ ...S.infoText, marginTop: 20 }}>합계 금액</Text>
+            <Text style={{ fontFamily: 'NanumGothic', fontSize: 12, fontWeight: 'bold', marginTop: 2 }}>
+              {fmtNum(vatType === 'excluded' ? Math.round(totalAmount * 1.1) : totalAmount)}원
             </Text>
           </View>
           <View style={S.infoRight}>

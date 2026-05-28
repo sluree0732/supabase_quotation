@@ -103,9 +103,11 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
       const dateStr = state.quoteDate.replace(/-/g, '')
       const prefix = state.company?.name ?? state.clientInfo?.name ?? ''
       const filename = prefix ? `${prefix}_견적서(${dateStr}).xlsx` : `견적서(${dateStr}).xlsx`
+      const companyName = state.company?.name ?? state.clientInfo?.name ?? ''
+      const recipientLabel = [companyName, state.recipient].filter(Boolean).join(', ')
       await triggerTokenDownload('excel', filename, {
         quoteDate: state.quoteDate,
-        recipient: state.recipient,
+        recipient: recipientLabel,
         projectName: state.projectName ?? null,
         items,
         totalAmount: total,
@@ -125,9 +127,11 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
       const dateStr = state.quoteDate.replace(/-/g, '')
       const prefix = state.company?.name ?? state.clientInfo?.name ?? ''
       const filename = prefix ? `${prefix}_견적서(${dateStr}).pdf` : `견적서(${dateStr}).pdf`
+      const companyName = state.company?.name ?? state.clientInfo?.name ?? ''
+      const recipientLabel = [companyName, state.recipient].filter(Boolean).join(', ')
       await triggerTokenDownload('pdf', filename, {
         quoteDate: state.quoteDate,
-        recipient: state.recipient,
+        recipient: recipientLabel,
         projectName: state.projectName ?? null,
         items,
         totalAmount: total,
