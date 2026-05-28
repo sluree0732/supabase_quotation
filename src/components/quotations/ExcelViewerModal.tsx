@@ -200,6 +200,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
               {state.projectName && (
                 <p className="text-[#718096]">프로젝트&nbsp;&nbsp;<span className="text-[#1e2a3a] font-medium">{state.projectName}</span></p>
               )}
+              <p className="text-[#718096] mt-2 pt-2 border-t border-gray-50">아래와 같이 견적합니다.</p>
               {items.length > 0 && (
                 <div className="mt-2 pt-2 border-t border-gray-100">
                   <p className="text-xs text-[#718096]">합계 금액</p>
@@ -208,7 +209,6 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
                   </p>
                 </div>
               )}
-              <p className="text-[#718096] mt-2 pt-2 border-t border-gray-50">아래와 같이 견적합니다.</p>
             </div>
             {/* 우측: 공급자 테이블 */}
             <div>
@@ -217,17 +217,17 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
                   <tr>
                     <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">상&nbsp;&nbsp;호</td>
                     <td className="px-2 py-2.5 border border-gray-200 whitespace-nowrap text-center">{state.senderInfo?.name ?? ''}</td>
-                    <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">사업자 등록번호</td>
-                    <td rowSpan={2} className="border border-gray-200 p-0.5 text-center" style={{ width: '68px', borderRight: 'none' }}>
+                    <td rowSpan={2} className="border border-gray-200 p-0.5 text-center" style={{ width: '68px' }}>
                       <img src={stampUrl} alt="도장" className="w-14 h-14 object-contain opacity-90 pointer-events-none" />
                     </td>
-                    <td className="px-2 py-2.5 border border-gray-200 whitespace-nowrap text-center" style={{ borderLeft: 'none' }}>{state.senderInfo?.business_no ?? ''}</td>
+                    <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">사업자 등록번호</td>
+                    <td className="px-2 py-2.5 border border-gray-200 whitespace-nowrap text-center">{state.senderInfo?.business_no ?? ''}</td>
                   </tr>
                   <tr>
                     <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">대&nbsp;&nbsp;표&nbsp;&nbsp;자</td>
                     <td className="px-2 py-2.5 border border-gray-200 text-center">{state.senderInfo?.ceo ?? ''}</td>
                     <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">연&nbsp;&nbsp;락&nbsp;&nbsp;처</td>
-                    <td className="px-2 py-2.5 border border-gray-200 whitespace-nowrap text-center" style={{ borderLeft: 'none' }}>{state.senderInfo?.phone ?? ''}</td>
+                    <td className="px-2 py-2.5 border border-gray-200 whitespace-nowrap text-center">{state.senderInfo?.phone ?? ''}</td>
                   </tr>
                   <tr>
                     <td className="bg-gray-100 font-semibold px-2 py-2.5 whitespace-nowrap border border-gray-200 text-center">사&nbsp;&nbsp;업&nbsp;&nbsp;장</td>

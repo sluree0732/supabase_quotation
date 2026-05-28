@@ -134,41 +134,43 @@ function SupplierTable({ stampSrc, senderInfo }: { stampSrc: string; senderInfo?
 
   return (
     <View style={S.supplierTable}>
-      {/* row 0+1: 상호/대표자 */}
+      {/* row 0+1: 상호/대표자 | 도장 | 사업자등록번호/연락처 */}
       <View style={{ flexDirection: 'row', borderBottomWidth: 0.5, borderColor: '#333' }}>
-        <View style={{ width: '51%' }}>
+        {/* 상호/대표자 + 값 */}
+        <View style={{ width: '35%' }}>
           <View style={{ flexDirection: 'row', borderBottomWidth: 0.5, borderColor: '#333', minHeight: 20 }}>
-            <View style={{ width: '25.5%', backgroundColor: '#d9d9d9', borderRightWidth: 0.5, borderColor: '#333', justifyContent: 'center', alignItems: 'center', paddingVertical: 4 }}>
+            <View style={{ width: '37%', backgroundColor: '#d9d9d9', borderRightWidth: 0.5, borderColor: '#333', justifyContent: 'center', alignItems: 'center', paddingVertical: 4 }}>
               <Text style={S.labelText}>상  호</Text>
             </View>
-            <View style={{ width: '43.1%', borderRightWidth: 0.5, borderColor: '#333', justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 4 }}>
+            <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 4 }}>
               <Text style={S.valText}>{name}</Text>
-            </View>
-            <View style={{ flex: 1, backgroundColor: '#d9d9d9', justifyContent: 'center', alignItems: 'center', paddingVertical: 4 }}>
-              <Text style={S.labelText}>사업자 등록번호</Text>
             </View>
           </View>
           <View style={{ flexDirection: 'row', minHeight: 20 }}>
-            <View style={{ width: '25.5%', backgroundColor: '#d9d9d9', borderRightWidth: 0.5, borderColor: '#333', justifyContent: 'center', alignItems: 'center', paddingVertical: 4 }}>
+            <View style={{ width: '37%', backgroundColor: '#d9d9d9', borderRightWidth: 0.5, borderColor: '#333', justifyContent: 'center', alignItems: 'center', paddingVertical: 4 }}>
               <Text style={S.labelText}>대표자</Text>
             </View>
-            <View style={{ width: '43.1%', borderRightWidth: 0.5, borderColor: '#333', justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 4 }}>
+            <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 3, paddingVertical: 4 }}>
               <Text style={S.valText}>{ceo}</Text>
-            </View>
-            <View style={{ flex: 1, backgroundColor: '#d9d9d9', justifyContent: 'center', alignItems: 'center', paddingVertical: 4 }}>
-              <Text style={S.labelText}>연  락  처</Text>
             </View>
           </View>
         </View>
+        {/* 도장 */}
+        <View style={{ width: 42, borderLeftWidth: 0.5, borderColor: '#333', justifyContent: 'center', alignItems: 'center' }}>
+          <Image src={stampSrc} style={{ width: 40, height: 40 }} />
+        </View>
+        {/* 사업자등록번호/연락처 + 값 */}
         <View style={{ flex: 1, borderLeftWidth: 0.5, borderColor: '#333' }}>
           <View style={{ flex: 1, borderBottomWidth: 0.5, borderColor: '#333', flexDirection: 'row', alignItems: 'center' }}>
-            <View style={{ width: 42, justifyContent: 'center', alignItems: 'center', paddingVertical: 1, paddingLeft: 2 }}>
-              <Image src={stampSrc} style={{ width: 40, height: 40 }} />
+            <View style={{ width: '45%', backgroundColor: '#d9d9d9', borderRightWidth: 0.5, borderColor: '#333', justifyContent: 'center', alignItems: 'center', paddingVertical: 4 }}>
+              <Text style={S.labelText}>사업자 등록번호</Text>
             </View>
             <Text style={[S.valText, { flex: 1, paddingHorizontal: 3 }]}>{businessNo}</Text>
           </View>
           <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-            <View style={{ width: 42 }} />
+            <View style={{ width: '45%', backgroundColor: '#d9d9d9', borderRightWidth: 0.5, borderColor: '#333', justifyContent: 'center', alignItems: 'center', paddingVertical: 4 }}>
+              <Text style={S.labelText}>연  락  처</Text>
+            </View>
             <Text style={[S.valText, { flex: 1, paddingHorizontal: 3 }]}>{phone}</Text>
           </View>
         </View>
@@ -322,6 +324,9 @@ export default function QuotationDocument({
               <Text style={{ ...S.infoText, marginTop: 4 }}>프로젝트 : {projectName}</Text>
             )}
             <Text style={{ ...S.infoBold, marginTop: 16 }}>아래와 같이 견적합니다.</Text>
+            <Text style={{ ...S.infoBold, marginTop: 8 }}>
+              {`합계 금액  ${fmtNum(vatType === 'excluded' ? Math.round(totalAmount * 1.1) : totalAmount)}원`}
+            </Text>
           </View>
           <View style={S.infoRight}>
             <SupplierTable stampSrc={stampSrc ?? DEFAULT_STAMP_PATH} senderInfo={senderInfo} />

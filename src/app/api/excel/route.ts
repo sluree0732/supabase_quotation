@@ -232,7 +232,7 @@ export async function POST(req: NextRequest) {
     const vatLabel = VAT_MAP[vatType] ?? ''
     ws.mergeCells(`A${totalRow}:D${totalRow}`)
     const totalLabelCell = ws.getCell(`A${totalRow}`)
-    totalLabelCell.value = vatLabel ? `합  계 (${vatLabel})` : '합  계'
+    totalLabelCell.value = '합  계'
     totalLabelCell.font = { bold: true, size: 9 }
     totalLabelCell.alignment = { horizontal: 'center', vertical: 'middle' }
     applyBorder(totalLabelCell)
@@ -254,7 +254,7 @@ export async function POST(req: NextRequest) {
     const stampBuffer = await getStampBuffer(senderCompanyId)
     const stampId = wb.addImage({ buffer: stampBuffer as any, extension: 'png' })
     ws.addImage(stampId, {
-      tl: { col: 5.08, row: 1.12 },
+      tl: { col: 3.9, row: 1.12 },
       ext: { width: 65, height: 65 },
       editAs: 'oneCell',
     } as any)
