@@ -91,7 +91,7 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
 
   ws.columns = [
     { width: 12 }, { width: 24 }, { width: 10 },
-    { width: 14 }, { width: 14 }, { width: 48 },
+    { width: 14 }, { width: 9  }, { width: 14 }, { width: 48 },
   ]
 
   function applyBorder(cell: ExcelJS.Cell) {
@@ -116,7 +116,7 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
     applyBorder(cell)
   }
 
-  ws.mergeCells('A1:F1')
+  ws.mergeCells('A1:G1')
   const titleCell = ws.getCell('A1')
   titleCell.value = '견  적  서'
   titleCell.font = { bold: true, size: 18 }
@@ -136,9 +136,11 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
   ws.getRow(2).height = 28
   ws.getRow(3).height = 28
   ws.getRow(4).height = 18
-  ws.getRow(5).height = 18
-  ws.getRow(6).height = 16
-  ws.getRow(7).height = 26
+  ws.getRow(5).height = 12
+  ws.getRow(6).height = 18
+  ws.getRow(7).height = 16
+  ws.getRow(8).height = 26
+  ws.getRow(9).height = 12
 
   ws.getCell('A2').value = quoteDate
   ws.getCell('A2').font = { size: 9 }
@@ -151,20 +153,20 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
     ws.getCell('A4').font = { size: 9 }
     ws.mergeCells('A4:B4')
   }
-  ws.getCell('A5').value = '아래와 같이 견적합니다.'
-  ws.getCell('A5').font = { bold: true, size: 9 }
-  ws.mergeCells('A5:B5')
-
-  ws.getCell('A6').value = '합계 금액'
-  ws.getCell('A6').font = { size: 8, color: { argb: 'FF718096' } }
-  ws.getCell('A6').alignment = { horizontal: 'left', vertical: 'middle' }
+  ws.getCell('A6').value = '아래와 같이 견적합니다.'
+  ws.getCell('A6').font = { bold: true, size: 9 }
   ws.mergeCells('A6:B6')
 
-  const grandTotal = vatType === 'excluded' ? Math.round(totalAmount * 1.1) : totalAmount
-  ws.getCell('A7').value = `${grandTotal.toLocaleString()}원`
-  ws.getCell('A7').font = { bold: true, size: 13 }
+  ws.getCell('A7').value = '합계 금액'
+  ws.getCell('A7').font = { size: 8, color: { argb: 'FF718096' } }
   ws.getCell('A7').alignment = { horizontal: 'left', vertical: 'middle' }
   ws.mergeCells('A7:B7')
+
+  const grandTotal = vatType === 'excluded' ? Math.round(totalAmount * 1.1) : totalAmount
+  ws.getCell('A8').value = `${grandTotal.toLocaleString()}원`
+  ws.getCell('A8').font = { bold: true, size: 13 }
+  ws.getCell('A8').alignment = { horizontal: 'left', vertical: 'middle' }
+  ws.mergeCells('A8:B8')
 
   const supplierData = [
     ['상  호', s.name, '사업자 등록번호', s.business_no],
@@ -185,21 +187,31 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
     applyBorder(labelCell1)
 
     if (l2) {
-      const val1Cell = ws.getCell(rowNum, 4)
-      val1Cell.value = v1; val1Cell.font = { size: 8 }
-      val1Cell.alignment = { horizontal: 'center', vertical: 'middle' }
-      applyBorder(val1Cell)
-      const labelCell2 = ws.getCell(rowNum, 5)
+      if (l1 === '업  태') {
+        ws.mergeCells(rowNum, 4, rowNum, 5)
+        const val1Cell = ws.getCell(rowNum, 4)
+        val1Cell.value = v1; val1Cell.font = { size: 8 }
+        val1Cell.alignment = { horizontal: 'center', vertical: 'middle' }
+        applyBorder(val1Cell)
+      } else {
+        const val1Cell = ws.getCell(rowNum, 4)
+        val1Cell.value = v1; val1Cell.font = { size: 8 }
+        val1Cell.alignment = { horizontal: 'center', vertical: 'middle' }
+        applyBorder(val1Cell)
+        const stampCell = ws.getCell(rowNum, 5)
+        applyBorder(stampCell)
+      }
+      const labelCell2 = ws.getCell(rowNum, 6)
       labelCell2.value = l2; labelCell2.font = { bold: true, size: 8 }
       labelCell2.alignment = { horizontal: 'center', vertical: 'middle' }
       labelCell2.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9D9D9' } }
       applyBorder(labelCell2)
-      const val2Cell = ws.getCell(rowNum, 6)
+      const val2Cell = ws.getCell(rowNum, 7)
       val2Cell.value = v2; val2Cell.font = { size: 8 }
       val2Cell.alignment = { horizontal: 'center', vertical: 'middle' }
       applyBorder(val2Cell)
     } else {
-      ws.mergeCells(rowNum, 4, rowNum, 6)
+      ws.mergeCells(rowNum, 4, rowNum, 7)
       const wideCell = ws.getCell(rowNum, 4)
       if (l1 === '계좌정보') {
         const parts = v1.trim().split(' ')
@@ -218,14 +230,15 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
   })
 
   // ── 테이블 헤더 (PDF와 동일 구조) ────────────────────
-  const headerRow = 8
+  const headerRow = 10
   ws.getRow(headerRow).height = 22
   ws.mergeCells(`A${headerRow}:B${headerRow}`)
   headerCell(ws.getCell(`A${headerRow}`), '상  품')
   headerCell(ws.getCell(`C${headerRow}`), '수  량')
   headerCell(ws.getCell(`D${headerRow}`), '금  액')
+  ws.mergeCells(`E${headerRow}:F${headerRow}`)
   headerCell(ws.getCell(`E${headerRow}`), '총  액')
-  headerCell(ws.getCell(`F${headerRow}`), '비  고')
+  headerCell(ws.getCell(`G${headerRow}`), '비  고')
 
   function calcRowHeight(note: string): number {
     if (!note) return 40
@@ -236,15 +249,16 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
 
   const dataStartRow = headerRow + 1
 
-  // 데이터 행: 상품명(B), 수량(C), 금액(D), 총액(E), 비고(F)
+  // 데이터 행: 상품명(B), 수량(C), 금액(D), 총액(E:F merged), 비고(G)
   items.forEach((item: any, i: number) => {
     const r = dataStartRow + i
     ws.getRow(r).height = calcRowHeight(item.note ?? '')
     dataCell(ws.getCell(`B${r}`), item.item_name ?? '', 'center')
     dataCell(ws.getCell(`C${r}`), item.period ?? 1, 'center')
     dataCell(ws.getCell(`D${r}`), item.unit_price ?? 0, 'center')
+    ws.mergeCells(`E${r}:F${r}`)
     dataCell(ws.getCell(`E${r}`), item.total_price ?? item.unit_price ?? 0, 'center')
-    dataCell(ws.getCell(`F${r}`), item.note ?? '', 'left')
+    dataCell(ws.getCell(`G${r}`), item.note ?? '', 'left')
     ws.getCell(`D${r}`).numFmt = '#,##0'
     ws.getCell(`E${r}`).numFmt = '#,##0'
   })
@@ -274,6 +288,7 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
   totalLabelCell.alignment = { horizontal: 'center', vertical: 'middle' }
   applyBorder(totalLabelCell)
 
+  ws.mergeCells(`E${totalRow}:F${totalRow}`)
   const totalAmountCell = ws.getCell(`E${totalRow}`)
   totalAmountCell.value = totalAmount
   totalAmountCell.numFmt = '#,##0'
@@ -281,7 +296,7 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
   totalAmountCell.alignment = { horizontal: 'center', vertical: 'middle' }
   applyBorder(totalAmountCell)
 
-  const vatCell = ws.getCell(`F${totalRow}`)
+  const vatCell = ws.getCell(`G${totalRow}`)
   vatCell.value = VAT_MAP[vatType] ?? ''
   vatCell.font = { bold: true, size: 9, color: { argb: 'FFCC0000' } }
   vatCell.alignment = { horizontal: 'center', vertical: 'middle' }
@@ -290,7 +305,7 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
   const stampBuffer = await getStampBuffer(senderCompanyId)
   const stampId = wb.addImage({ buffer: stampBuffer as any, extension: 'png' })
   ws.addImage(stampId, {
-    tl: { col: 3.9, row: 1.12 },
+    tl: { col: 4.0, row: 1.12 },
     ext: { width: 65, height: 65 },
     editAs: 'oneCell',
   } as any)
