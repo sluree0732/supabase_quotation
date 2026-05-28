@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import type { VatType } from '@/types'
 import { createQuotation, updateQuotation, saveItems, getQuotationWithItems } from '@/lib/quotations'
-import { getCompany } from '@/lib/companies'
+import { getCompany, updateCompany } from '@/lib/companies'
 import QuotationForm, { type QuotationFormState } from '@/components/quotations/QuotationForm'
 import type { ItemPrefill } from '@/components/quotations/ItemModal'
 
@@ -84,6 +84,40 @@ function QuotationPage() {
         client_info: state.clientInfo ?? null,
       }
 
+      const companyUpdates: Promise<unknown>[] = []
+      if (state.senderCompany && state.senderInfo) {
+        companyUpdates.push(updateCompany(state.senderCompany.id, {
+          company_type: state.senderCompany.company_type,
+          name: state.senderInfo.name,
+          address: state.senderInfo.address,
+          phone: state.senderInfo.phone,
+          business_no: state.senderInfo.business_no,
+          business_type: state.senderInfo.business_type,
+          business_item: state.senderInfo.business_item,
+          email: state.senderInfo.email,
+          fax: state.senderInfo.fax,
+          ceo: state.senderInfo.ceo || undefined,
+          bank: state.senderInfo.bank || undefined,
+          stamp_url: state.senderCompany.stamp_url,
+        }))
+      }
+      if (state.company && state.clientInfo) {
+        companyUpdates.push(updateCompany(state.company.id, {
+          company_type: state.company.company_type,
+          name: state.clientInfo.name,
+          address: state.clientInfo.address,
+          phone: state.clientInfo.phone,
+          business_no: state.clientInfo.business_no,
+          business_type: state.clientInfo.business_type,
+          business_item: state.clientInfo.business_item,
+          email: state.clientInfo.email,
+          fax: state.clientInfo.fax,
+          ceo: state.clientInfo.ceo || undefined,
+          bank: state.clientInfo.bank || undefined,
+          stamp_url: state.company.stamp_url,
+        }))
+      }
+
       const existingId = editId ?? savedQuotationId
       if (existingId) {
         await Promise.all([
@@ -94,6 +128,7 @@ function QuotationPage() {
             ...extraFields,
           }),
           saveItems(existingId, state.items),
+          ...companyUpdates,
         ])
       } else {
         const q = await createQuotation(
@@ -105,6 +140,7 @@ function QuotationPage() {
         await Promise.all([
           updateQuotation(q.id, extraFields),
           saveItems(q.id, state.items),
+          ...companyUpdates,
         ])
       }
     } catch (e: any) {

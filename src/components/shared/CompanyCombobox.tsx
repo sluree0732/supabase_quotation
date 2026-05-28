@@ -86,7 +86,8 @@ export default function CompanyCombobox({ typeFilter, selected, onSelect, placeh
           onChange={e => { setInputValue(e.target.value); setOpen(true) }}
           onFocus={() => setOpen(true)}
           placeholder={placeholder ?? '업체명 입력 또는 검색'}
-          className="input-base w-full pl-9 pr-14"
+          className="input-base w-full"
+          style={{ paddingLeft: '2.25rem', paddingRight: '3.5rem' }}
         />
         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
           {selected && (
