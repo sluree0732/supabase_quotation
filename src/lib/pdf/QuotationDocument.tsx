@@ -76,13 +76,13 @@ const S = StyleSheet.create({
   colTotal: { width: '12%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
   colNote:  { flex: 1, justifyContent: 'flex-start', paddingHorizontal: 4, paddingVertical: 4 },
   // 데이터 행 전용: items stack(91%)이 컨테이너이므로 비율 보정 (헤더/합계는 테이블 직접 자식)
-  dataColName:  { width: '18.68%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
+  dataColName:  { width: '18.68%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 5, paddingVertical: 3 },
   dataColQty:   { width: '7.69%',  borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
   dataColUnit:  { width: '13.19%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
   dataColTotal: { width: '13.19%', borderRightWidth: 0.5, borderColor: '#d0d0d0', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 2, paddingVertical: 3 },
   noteText: { fontSize: 7, lineHeight: 1.6, textAlign: 'left' },
   headerText: { fontSize: 8, fontWeight: 'bold', textAlign: 'center' },
-  cellText: { fontSize: 7.5, textAlign: 'center' },
+  cellText: { fontSize: 7.5, textAlign: 'center', lineHeight: 1.5 },
   // 합계 행
   totalRow: { flexDirection: 'row', borderTopWidth: 1, borderColor: '#333' },
   totalLabel: { width: '45%', paddingHorizontal: 6, paddingVertical: 4, justifyContent: 'center', alignItems: 'center' },
@@ -165,13 +165,17 @@ function SupplierTable({ stampSrc, senderInfo }: { stampSrc: string; senderInfo?
             <View style={{ width: '45%', backgroundColor: '#d9d9d9', borderRightWidth: 0.5, borderColor: '#333', justifyContent: 'center', alignItems: 'center', paddingVertical: 4 }}>
               <Text style={S.labelText}>사업자 등록번호</Text>
             </View>
-            <Text style={[S.valText, { flex: 1, paddingHorizontal: 3 }]}>{businessNo}</Text>
+            <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 3 }}>
+              <Text style={S.valText}>{businessNo}</Text>
+            </View>
           </View>
           <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
             <View style={{ width: '45%', backgroundColor: '#d9d9d9', borderRightWidth: 0.5, borderColor: '#333', justifyContent: 'center', alignItems: 'center', paddingVertical: 4 }}>
               <Text style={S.labelText}>연  락  처</Text>
             </View>
-            <Text style={[S.valText, { flex: 1, paddingHorizontal: 3 }]}>{phone}</Text>
+            <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 3 }}>
+              <Text style={S.valText}>{phone}</Text>
+            </View>
           </View>
         </View>
       </View>
@@ -324,7 +328,7 @@ export default function QuotationDocument({
               <Text style={{ ...S.infoText, marginTop: 4 }}>프로젝트 : {projectName}</Text>
             )}
             <Text style={{ ...S.infoBold, marginTop: 16 }}>아래와 같이 견적합니다.</Text>
-            <Text style={{ ...S.infoText, marginTop: 20 }}>합계 금액</Text>
+            <Text style={{ ...S.infoText, marginTop: 32 }}>합계 금액</Text>
             <Text style={{ fontFamily: 'NanumGothic', fontSize: 12, fontWeight: 'bold', marginTop: 2 }}>
               {fmtNum(vatType === 'excluded' ? Math.round(totalAmount * 1.1) : totalAmount)}원
             </Text>

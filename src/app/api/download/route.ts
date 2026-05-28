@@ -91,7 +91,7 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
 
   ws.columns = [
     { width: 12 }, { width: 24 }, { width: 10 },
-    { width: 14 }, { width: 9  }, { width: 18 }, { width: 48 },
+    { width: 22 }, { width: 9  }, { width: 18 }, { width: 48 },
   ]
 
   function applyBorder(cell: ExcelJS.Cell) {
