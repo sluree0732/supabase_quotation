@@ -9,17 +9,12 @@ import {
   updateContractTemplate,
   deleteContractTemplate,
 } from '@/lib/contractTemplates'
-import { DEFAULT_ARTICLES } from '@/lib/contractArticles'
+import { DEFAULT_ARTICLES, DEFAULT_FULL_TEXT, mergeArticles } from '@/lib/contractArticles'
 import type { ContractArticles } from '@/lib/contractArticles'
 
-const ARTICLE_FIELDS: { key: keyof ContractArticles; label: string; rows: number }[] = [
-  { key: 'a1', label: '제1조 목적', rows: 3 },
-  { key: 'a4_payment', label: '제4조 지급 방법', rows: 3 },
-  { key: 'a5', label: '제5조 광고물 승인', rows: 3 },
-  { key: 'a6', label: '제6조 저작권', rows: 3 },
-  { key: 'a7', label: '제7조 비밀유지', rows: 2 },
-  { key: 'a8', label: '제8조 계약의 해지', rows: 3 },
-  { key: 'a9', label: '제9조 관할법원', rows: 2 },
+const HINT_VARS = [
+  '{{견적서내용}}', '{{합계금액}}', '{{부가세금액}}', '{{최종금액}}',
+  '{{부가세}}', '{{계약시작일}}', '{{계약종료일}}', '{{발신업체}}', '{{수신업체}}', '{{담당자}}',
 ]
 
 type TemplateFormState = {
@@ -79,7 +74,7 @@ export default function ContractTemplateManager() {
     setForm({
       name: t.name,
       description: t.description ?? '',
-      articles: { ...DEFAULT_ARTICLES, ...t.articles } as ContractArticles,
+      articles: mergeArticles(t.articles as Partial<ContractArticles> | null),
     })
     setShowForm(true)
   }
@@ -127,12 +122,12 @@ export default function ContractTemplateManager() {
     }
   }
 
-  function setArticle(key: keyof ContractArticles, value: string) {
-    setForm(prev => ({ ...prev, articles: { ...prev.articles, [key]: value } }))
+  function setFullText(value: string) {
+    setForm(prev => ({ ...prev, articles: { fullText: value } }))
   }
 
-  function resetArticle(key: keyof ContractArticles) {
-    setForm(prev => ({ ...prev, articles: { ...prev.articles, [key]: DEFAULT_ARTICLES[key] } }))
+  function insertVar(v: string) {
+    setForm(prev => ({ ...prev, articles: { fullText: prev.articles.fullText + v } }))
   }
 
   return (
@@ -141,7 +136,7 @@ export default function ContractTemplateManager() {
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <span className="text-[#8e44ad] text-lg">✍️</span>
-          <span className="text-sm font-semibold text-[#1e2a3a]">계약서 조항 양식</span>
+          <span className="text-sm font-semibold text-[#1e2a3a]">계약서 양식</span>
           <span className="text-xs text-[#718096]">({templates.length}개)</span>
         </div>
         <button
@@ -155,7 +150,7 @@ export default function ContractTemplateManager() {
 
       {/* 안내 문구 */}
       <p className="text-xs text-[#718096] mb-4 leading-relaxed">
-        자주 사용하는 계약서 조항 양식을 미리 저장해두고, 계약서 작성 시 바로 불러와 사용할 수 있습니다.
+        자주 사용하는 계약서 양식을 미리 저장해두고, 계약서 작성 시 바로 불러와 사용할 수 있습니다.
       </p>
 
       {/* 목록 */}
@@ -180,7 +175,7 @@ export default function ContractTemplateManager() {
       ) : templates.length === 0 ? (
         <div className="text-center py-20">
           <div className="text-5xl mb-3">✍️</div>
-          <p className="text-[#718096] text-sm">저장된 계약서 조항 양식이 없습니다.</p>
+          <p className="text-[#718096] text-sm">저장된 계약서 양식이 없습니다.</p>
           <button onClick={openAdd} className="mt-3 text-[#8e44ad] text-sm underline">
             첫 양식 추가하기
           </button>
@@ -263,34 +258,40 @@ export default function ContractTemplateManager() {
                 />
               </div>
 
-              {/* 7개 조항 */}
+              {/* 전체 계약서 내용 */}
               <div className="border border-gray-200 rounded-xl overflow-hidden">
-                <div className="px-4 py-2.5 bg-gray-50 text-xs font-semibold text-[#4a5568] border-b border-gray-100">
-                  조항 내용 편집
+                <div className="flex items-center justify-between px-4 py-2.5 bg-gray-50 border-b border-gray-100">
+                  <span className="text-xs font-semibold text-[#4a5568]">계약서 전체 내용</span>
+                  {form.articles.fullText !== DEFAULT_FULL_TEXT && (
+                    <button
+                      type="button"
+                      onClick={() => setFullText(DEFAULT_FULL_TEXT)}
+                      className="text-xs text-[#8e44ad] hover:underline"
+                    >
+                      기본값으로 초기화
+                    </button>
+                  )}
                 </div>
-                <div className="px-4 py-4 space-y-4">
-                  {ARTICLE_FIELDS.map(({ key, label, rows }) => (
-                    <div key={key} className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-medium text-[#4a5568]">{label}</label>
-                        {form.articles[key] !== DEFAULT_ARTICLES[key] && (
-                          <button
-                            type="button"
-                            onClick={() => resetArticle(key)}
-                            className="text-xs text-[#8e44ad] hover:underline"
-                          >
-                            초기화
-                          </button>
-                        )}
-                      </div>
-                      <textarea
-                        value={form.articles[key]}
-                        onChange={e => setArticle(key, e.target.value)}
-                        rows={rows}
-                        className="input-base resize-y text-xs"
-                      />
-                    </div>
-                  ))}
+                <div className="px-4 py-3 space-y-2 bg-white">
+                  <div className="flex flex-wrap gap-1">
+                    {HINT_VARS.map(v => (
+                      <button
+                        key={v}
+                        type="button"
+                        onClick={() => insertVar(v)}
+                        className="text-[10px] px-2 py-0.5 bg-[#f5eef8] text-[#8e44ad] rounded-full hover:bg-[#e8d5f0] transition-colors font-medium"
+                      >
+                        {v}
+                      </button>
+                    ))}
+                  </div>
+                  <textarea
+                    value={form.articles.fullText}
+                    onChange={e => setFullText(e.target.value)}
+                    rows={18}
+                    className="input-base resize-y text-xs font-mono leading-relaxed"
+                    placeholder={DEFAULT_FULL_TEXT}
+                  />
                 </div>
               </div>
             </div>

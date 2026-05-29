@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Building2, ChevronRight, X, Plus, Loader2, Save, ChevronLeft, FileDown, ChevronDown, FolderOpen, FileText } from 'lucide-react'
 import type { Company, ContractItem, VatType, ContractStatus, ContractTemplate } from '@/types'
-import { mergeArticles, DEFAULT_ARTICLES } from '@/lib/contractArticles'
+import { mergeArticles, DEFAULT_ARTICLES, DEFAULT_FULL_TEXT, substituteVariables } from '@/lib/contractArticles'
 import type { ContractArticles } from '@/lib/contractArticles'
 import { getContractTemplates } from '@/lib/contractTemplates'
 import {
@@ -12,10 +12,11 @@ import {
   deleteDraftsByQuotationId,
 } from '@/lib/contracts'
 import { getQuotationWithItems } from '@/lib/quotations'
-import { getCompany } from '@/lib/companies'
+import { getCompany, getSenderStampUrl } from '@/lib/companies'
 import CompanyPickerModal from '@/components/quotations/CompanyPickerModal'
 import ItemModal, { type ItemPrefill } from '@/components/quotations/ItemModal'
 import ContractPdfViewerModal from '@/components/contracts/ContractPdfViewerModal'
+import ContractViewerModal from '@/components/contracts/ContractViewerModal'
 import RecipientCombobox from '@/components/shared/RecipientCombobox'
 
 function today() {
@@ -79,6 +80,8 @@ function ContractPage() {
   const [loading, setLoading] = useState(!!(editId || quotationId))
   const autoSaveRef = useRef<(() => void) | null>(null)
   const [showPdfViewer, setShowPdfViewer] = useState(false)
+  const [showContractViewer, setShowContractViewer] = useState(false)
+  const [stampUrl, setStampUrl] = useState<string>('/images/stamp.png')
   const [showCompany, setShowCompany] = useState(false)
   const [showSenderCompany, setShowSenderCompany] = useState(false)
   const [showAdd, setShowAdd] = useState(false)
@@ -109,8 +112,22 @@ function ContractPage() {
     }
   }
 
+  useEffect(() => {
+    const id = form.senderCompanyId ?? form.senderCompany?.id ?? undefined
+    getSenderStampUrl(id).then(url => { if (url) setStampUrl(url) }).catch(() => {})
+  }, [form.senderCompanyId, form.senderCompany?.id])
+
   function applyTemplate(t: ContractTemplate) {
-    set({ articles: { ...DEFAULT_ARTICLES, ...t.articles } as ContractArticles })
+    const merged = mergeArticles(t.articles as Partial<ContractArticles> | null)
+    const ctx = {
+      items: form.items, total, vatType: form.vatType,
+      startDate: form.startDate, endDate: form.endDate,
+      contractDate: form.contractDate,
+      senderName: form.senderCompany?.name, receiverName: form.company?.name,
+      recipient: form.recipient,
+    }
+    const substituted = substituteVariables(merged.fullText, ctx)
+    set({ articles: { fullText: substituted } })
     setShowTemplatePicker(false)
     setShowArticles(true)
     showToast(`"${t.name}" 양식을 불러왔습니다.`)
@@ -468,39 +485,28 @@ function ContractPage() {
                   </button>
                 </div>
                 {showArticles && (
-                  <div className="px-4 py-4 space-y-4 bg-white">
-                    {(
-                      [
-                        { key: 'a1', label: '제1조 목적', rows: 3 },
-                        { key: 'a4_payment', label: '제4조 지급 방법', rows: 3 },
-                        { key: 'a5', label: '제5조 광고물 승인', rows: 3 },
-                        { key: 'a6', label: '제6조 저작권', rows: 3 },
-                        { key: 'a7', label: '제7조 비밀유지', rows: 2 },
-                        { key: 'a8', label: '제8조 계약의 해지', rows: 3 },
-                        { key: 'a9', label: '제9조 관할법원', rows: 2 },
-                      ] as { key: keyof ContractArticles; label: string; rows: number }[]
-                    ).map(({ key, label, rows }) => (
-                      <div key={key} className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <label className="text-xs font-medium text-[#4a5568]">{label}</label>
-                          {form.articles[key] !== DEFAULT_ARTICLES[key] && (
-                            <button
-                              type="button"
-                              onClick={() => set({ articles: { ...form.articles, [key]: DEFAULT_ARTICLES[key] } })}
-                              className="text-xs text-[#2980b9] hover:underline"
-                            >
-                              초기화
-                            </button>
-                          )}
-                        </div>
-                        <textarea
-                          value={form.articles[key]}
-                          onChange={e => set({ articles: { ...form.articles, [key]: e.target.value } })}
-                          rows={rows}
-                          className="input-base resize-y text-xs"
-                        />
-                      </div>
-                    ))}
+                  <div className="px-4 py-4 bg-white space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-medium text-[#4a5568]">계약서 전체 내용</label>
+                      {form.articles.fullText !== DEFAULT_FULL_TEXT && (
+                        <button
+                          type="button"
+                          onClick={() => set({ articles: { fullText: DEFAULT_FULL_TEXT } })}
+                          className="text-xs text-[#2980b9] hover:underline"
+                        >
+                          기본값으로 초기화
+                        </button>
+                      )}
+                    </div>
+                    <textarea
+                      value={form.articles.fullText}
+                      onChange={e => set({ articles: { fullText: e.target.value } })}
+                      rows={16}
+                      className="input-base resize-y text-xs font-mono leading-relaxed"
+                    />
+                    <p className="text-[10px] text-gray-400">
+                      변수: {'{{견적서내용}}'} {'{{합계금액}}'} {'{{부가세금액}}'} {'{{최종금액}}'} {'{{계약시작일}}'} {'{{계약종료일}}'}
+                    </p>
                   </div>
                 )}
               </div>
@@ -574,7 +580,7 @@ function ContractPage() {
                 {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                 {form.status === 'signed' ? '계약 완료' : '저장'}
               </button>
-              <button onClick={() => setShowPdfViewer(true)}
+              <button onClick={() => setShowContractViewer(true)}
                 disabled={!form.items.length}
                 className="w-full py-3 rounded-xl bg-white border border-gray-200 text-[#4a5568] font-medium text-sm flex items-center justify-center gap-1.5 hover:bg-gray-50 disabled:opacity-40 transition-colors">
                 <FileDown size={14} />
@@ -645,6 +651,37 @@ function ContractPage() {
         <ContractPdfViewerModal
           payload={getPdfPayload()}
           onClose={() => setShowPdfViewer(false)}
+        />
+      )}
+      {showContractViewer && (
+        <ContractViewerModal
+          contractDate={form.contractDate}
+          startDate={form.startDate}
+          endDate={form.endDate}
+          recipient={form.recipient}
+          company={form.company}
+          senderCompany={form.senderCompany}
+          items={form.items}
+          total={total}
+          vatType={form.vatType}
+          specialTerms={form.specialTerms}
+          articles={form.articles}
+          stampUrl={stampUrl}
+          onArticlesChange={a => set({ articles: a })}
+          onClose={() => setShowContractViewer(false)}
+          onPdfDownload={async () => {
+            const { ContractPdfViewerModal: _, filename, ...pdfPayload } = getPdfPayload() as any
+            const res = await fetch('/api/download-token', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ type: 'contract-pdf', payload: getPdfPayload(), filename: getPdfPayload().filename }),
+            })
+            if (!res.ok) { alert('다운로드 실패'); return }
+            const { token } = await res.json()
+            const a = document.createElement('a')
+            a.href = `/api/download?token=${token}`
+            a.click()
+          }}
         />
       )}
       {showSenderCompany && (
