@@ -158,7 +158,7 @@ export default function ContractViewerModal({
       </div>
 
       {/* 문서 영역 */}
-      <div className="flex-1 overflow-auto p-6 bg-gray-100 flex justify-center">
+      <div className="flex-1 overflow-auto p-6 bg-gray-100 flex justify-center items-start">
         <div className="bg-white border border-gray-200 shadow-md" style={{ width: '794px' }}>
           {/* 제목 */}
           <div className="text-center py-6 border-b border-gray-100">
