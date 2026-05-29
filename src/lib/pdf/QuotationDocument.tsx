@@ -86,7 +86,7 @@ const S = StyleSheet.create({
   cellText: { fontSize: 7.5, textAlign: 'center', lineHeight: 1.5 },
   // 합계 행
   totalRow: { flexDirection: 'row', borderTopWidth: 1, borderColor: '#333' },
-  totalLabel: { width: '47%', paddingHorizontal: 6, paddingVertical: 4, justifyContent: 'center', alignItems: 'center' },
+  totalLabel: { width: '48%', paddingHorizontal: 6, paddingVertical: 4, justifyContent: 'center', alignItems: 'center' },
   totalAmount: { width: '19%', paddingHorizontal: 4, paddingVertical: 4, justifyContent: 'center', alignItems: 'center', borderLeftWidth: 0.5, borderColor: '#d0d0d0' },
   totalVat: { flex: 1, paddingHorizontal: 4, paddingVertical: 4, justifyContent: 'center', alignItems: 'center', borderLeftWidth: 0.5, borderColor: '#d0d0d0' },
 })

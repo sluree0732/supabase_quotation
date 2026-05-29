@@ -205,7 +205,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
       <div className="flex-1 overflow-auto p-6 bg-gray-100 flex justify-center">
         <div className="bg-white border border-gray-200 shadow-md" style={
           orientation === 'landscape'
-            ? { width: '1123px', minHeight: '794px' }
+            ? { width: '1123px' }
             : { width: '794px', minHeight: '1123px' }
         }>
 
