@@ -32,10 +32,6 @@ const VAT_LABEL: Record<VatType, string> = {
   excluded: '부가세 별도', included: '부가세 포함', none: '',
 }
 
-const HINT_VARS = [
-  '{{견적서내용}}', '{{합계금액}}', '{{부가세금액}}', '{{최종금액}}',
-  '{{부가세}}', '{{계약시작일}}', '{{계약종료일}}',
-]
 
 function fmtNum(n: number) { return n.toLocaleString('ko-KR') }
 function fmtDate(d: string) {
@@ -75,7 +71,7 @@ export default function ContractViewerModal({
 
   function startEdit(no: number, body: string) {
     setEditingNo(no)
-    setEditingContent(body)
+    setEditingContent(substituteVariables(body, ctx))
   }
 
   function saveEdit() {
@@ -92,20 +88,12 @@ export default function ContractViewerModal({
     if (isEditing) {
       return (
         <div className="mt-1.5">
-          <div className="flex flex-wrap gap-1 mb-1.5">
-            {HINT_VARS.map(v => (
-              <button key={v} type="button"
-                onMouseDown={e => { e.preventDefault(); setEditingContent(p => p + v) }}
-                className="text-[10px] px-1.5 py-0.5 bg-purple-50 text-purple-600 rounded-full hover:bg-purple-100 font-medium"
-              >{v}</button>
-            ))}
-          </div>
           <textarea
             ref={textareaRef}
             value={editingContent}
             onChange={e => setEditingContent(e.target.value)}
             onBlur={saveEdit}
-            className="w-full px-3 py-2 text-xs border border-blue-300 rounded-lg resize-none focus:outline-none focus:border-blue-500 bg-blue-50 font-mono leading-relaxed"
+            className="w-full px-3 py-2 text-xs border border-blue-300 rounded-lg resize-none focus:outline-none focus:border-blue-500 bg-blue-50 leading-relaxed"
             style={{ maxHeight: '150px', overflowY: 'auto', minHeight: '80px' }}
           />
           <p className="text-[10px] text-gray-400 mt-1">다른 곳 클릭 시 자동 저장</p>
@@ -117,7 +105,7 @@ export default function ContractViewerModal({
       const parts = art.body.split('{{견적서내용}}')
       return (
         <div onClick={() => startEdit(art.no, art.body)}
-          className="mt-1 cursor-text group hover:bg-blue-50/30 rounded-lg p-1 -m-1 transition-colors">
+          className="mt-1 cursor-text group hover:bg-blue-50/30 rounded-lg p-1 transition-colors">
           {parts[0]?.trim() && (
             <p className="text-xs text-gray-700 whitespace-pre-line mb-2 pl-2">
               {substituteVariables(parts[0], ctx)}
@@ -139,7 +127,7 @@ export default function ContractViewerModal({
     const display = substituteVariables(art.body, ctx)
     return (
       <div onClick={() => startEdit(art.no, art.body)}
-        className="mt-1 cursor-text group hover:bg-blue-50/30 rounded-lg p-1 -m-1 transition-colors">
+        className="mt-1 cursor-text group hover:bg-blue-50/30 rounded-lg p-1 transition-colors">
         <p className="text-xs text-gray-700 whitespace-pre-line pl-2">{display}</p>
         <p className="text-[10px] text-blue-300 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity pl-2">
           클릭하여 편집

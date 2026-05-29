@@ -136,6 +136,16 @@ function ContractPage() {
   const set = (patch: Partial<ContractFormState>) => setForm(s => ({ ...s, ...patch }))
   const total = form.items.reduce((s, i) => s + i.total_price, 0)
 
+  const formCtx = {
+    items: form.items, total, vatType: form.vatType,
+    startDate: form.startDate, endDate: form.endDate,
+    contractDate: form.contractDate,
+    senderName: form.senderCompany?.name,
+    receiverName: form.company?.name,
+    recipient: form.recipient,
+  }
+  const displayedArticleText = substituteVariables(form.articles.fullText, formCtx)
+
   useEffect(() => {
     if (!editId && !quotationId) {
       const raw = sessionStorage.getItem('note_prefill')
@@ -499,7 +509,7 @@ function ContractPage() {
                       )}
                     </div>
                     <textarea
-                      value={form.articles.fullText}
+                      value={displayedArticleText}
                       onChange={e => set({ articles: { fullText: e.target.value } })}
                       rows={16}
                       className="input-base resize-y text-xs font-mono leading-relaxed"
