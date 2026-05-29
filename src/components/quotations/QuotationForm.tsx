@@ -145,7 +145,6 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
   const [senderInfoOpen, setSenderInfoOpen] = useState(true)
   const [clientInfoOpen, setClientInfoOpen] = useState(true)
   const [savingCompanyOnly, setSavingCompanyOnly] = useState(false)
-  const [showCompanyOnlyConfirm, setShowCompanyOnlyConfirm] = useState(false)
 
   const isSaved = state.status === 'saved'
 
@@ -214,7 +213,6 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
   }
 
   async function doCompanyOnlySave() {
-    setShowCompanyOnlyConfirm(false)
     setSavingCompanyOnly(true)
     try {
       const updates: Promise<unknown>[] = []
@@ -251,7 +249,10 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
         }))
       }
       await Promise.all(updates)
-      showToast('업체 정보 저장 완료')
+      const savedNames = [state.senderInfo?.name, state.clientInfo?.name].filter(Boolean)
+      const label = savedNames.length === 1 ? `${savedNames[0]} 업체 정보가` : `업체 정보 ${savedNames.length}건이`
+      setToast(`${label} 저장되었습니다`)
+      setTimeout(() => setToast(null), 3000)
     } catch (e: any) {
       alert(e.message ?? '저장 실패')
     } finally {
@@ -266,7 +267,7 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
     }
 
     if (!hasItems && hasCompanyInfo) {
-      setShowCompanyOnlyConfirm(true)
+      await doCompanyOnlySave()
       return
     }
 
@@ -497,38 +498,6 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
         <div className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-[80] bg-[#1e2a3a] text-white text-sm font-medium px-5 py-3 rounded-2xl shadow-lg flex items-center gap-2 animate-fade-in">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="8" fill="#27ae60"/><path d="M4.5 8l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           {toast}
-        </div>
-      )}
-
-      {/* ── 업체 정보만 저장 확인 모달 ───────────────── */}
-      {showCompanyOnlyConfirm && (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-xl w-[320px] px-6 py-6 space-y-4">
-            <div className="flex flex-col items-center gap-2 text-center">
-              <div className="w-11 h-11 rounded-full bg-[#fef3e2] flex items-center justify-center">
-                <Save size={20} className="text-[#e67e22]" />
-              </div>
-              <h3 className="font-bold text-[#1e2a3a] text-base">견적 항목이 없습니다</h3>
-              <p className="text-sm text-[#718096] leading-relaxed">
-                업체 정보만 저장합니다.<br />
-                견적서는 생성되지 않습니다.
-              </p>
-            </div>
-            <div className="flex gap-2 pt-1">
-              <button
-                onClick={() => setShowCompanyOnlyConfirm(false)}
-                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-[#4a5568] hover:bg-gray-50 transition-colors"
-              >
-                취소
-              </button>
-              <button
-                onClick={doCompanyOnlySave}
-                className="flex-1 py-2.5 rounded-xl bg-[#e67e22] text-white text-sm font-semibold hover:bg-[#d35400] transition-colors"
-              >
-                업체 정보만 저장
-              </button>
-            </div>
-          </div>
         </div>
       )}
 
