@@ -249,9 +249,7 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
         }))
       }
       await Promise.all(updates)
-      const savedNames = [state.senderInfo?.name, state.clientInfo?.name].filter(Boolean)
-      const label = savedNames.length === 1 ? `${savedNames[0]} 업체 정보가` : `업체 정보 ${savedNames.length}건이`
-      setToast(`${label} 저장되었습니다`)
+      setToast('업체 정보가 저장되었습니다')
       setTimeout(() => setToast(null), 3000)
     } catch (e: any) {
       alert(e.message ?? '저장 실패')
