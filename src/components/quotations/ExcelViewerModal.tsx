@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { X, Download, Loader2, Trash2 } from 'lucide-react'
 import type { QuotationFormState } from './QuotationForm'
 import { getSenderStampUrl } from '@/lib/companies'
+import { groupByCategory } from '@/lib/groupItems'
 
 interface Props {
   state: QuotationFormState
@@ -27,7 +28,7 @@ const VAT_LABEL: Record<string, string> = {
 
 export default function ExcelViewerModal({ state, onClose }: Props) {
   const [items, setItems] = useState<EditableItem[]>(
-    state.items.map(it => ({
+    groupByCategory(state.items).map(it => ({
       category: it.category,
       item_name: it.item_name,
       period: it.period ?? 1,

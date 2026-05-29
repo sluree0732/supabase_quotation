@@ -8,6 +8,7 @@ import QuotationDocument from '@/lib/pdf/QuotationDocument'
 import ContractDocument from '@/lib/pdf/ContractDocument'
 import { getStampBuffer, getStampSrc } from '@/lib/getStampBuffer'
 import { getSenderCompanyInfo } from '@/lib/getSenderCompanyInfo'
+import { groupByCategory } from '@/lib/groupItems'
 
 const VAT_MAP: Record<string, string> = {
   excluded: '부가세 별도',
@@ -248,9 +249,10 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
   }
 
   const dataStartRow = headerRow + 1
+  const sortedItems = groupByCategory(items)
 
   // 데이터 행: 상품명(B), 수량(C), 금액(D), 총액(E:F merged), 비고(G)
-  items.forEach((item: any, i: number) => {
+  sortedItems.forEach((item: any, i: number) => {
     const r = dataStartRow + i
     ws.getRow(r).height = calcRowHeight(item.note ?? '')
     dataCell(ws.getCell(`B${r}`), item.item_name ?? '', 'center')
@@ -265,12 +267,12 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
 
   // 대분류(A): 연속 같은 카테고리 세로 병합
   let gi = 0
-  while (gi < items.length) {
+  while (gi < sortedItems.length) {
     let gj = gi
-    while (gj + 1 < items.length && items[gj + 1].category === items[gi].category) gj++
+    while (gj + 1 < sortedItems.length && sortedItems[gj + 1].category === sortedItems[gi].category) gj++
     const startRow = dataStartRow + gi
     const endRow   = dataStartRow + gj
-    dataCell(ws.getCell(startRow, 1), items[gi].category ?? '', 'center')
+    dataCell(ws.getCell(startRow, 1), sortedItems[gi].category ?? '', 'center')
     if (endRow > startRow) {
       ws.mergeCells(startRow, 1, endRow, 1)
       ws.getCell(startRow, 1).alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }
@@ -279,7 +281,7 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
   }
 
   // 합계 행: A:D merged / E=금액 / F=VAT
-  const totalRow = dataStartRow + items.length
+  const totalRow = dataStartRow + sortedItems.length
   ws.getRow(totalRow).height = 22
   ws.mergeCells(`A${totalRow}:D${totalRow}`)
   const totalLabelCell = ws.getCell(`A${totalRow}`)

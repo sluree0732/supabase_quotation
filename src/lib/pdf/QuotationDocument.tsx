@@ -3,6 +3,7 @@ import {
 } from '@react-pdf/renderer'
 import path from 'path'
 import type { QuotationItem, VatType } from '@/types'
+import { groupByCategory } from '@/lib/groupItems'
 
 // ── 폰트 등록 (서버사이드 전용) ───────────────────────────
 const fontDir = path.join(process.cwd(), 'public', 'fonts')
@@ -213,12 +214,13 @@ function SupplierTable({ stampSrc, senderInfo }: { stampSrc: string; senderInfo?
 
 // ── 카테고리 그룹 묶기 ────────────────────────────────────
 function groupItems(items: QuotationItem[]) {
+  const sorted = groupByCategory(items)
   const groups: { category: string; items: QuotationItem[]; startIdx: number }[] = []
   let i = 0
-  while (i < items.length) {
+  while (i < sorted.length) {
     let j = i
-    while (j + 1 < items.length && items[j + 1].category === items[i].category) j++
-    groups.push({ category: items[i].category ?? '', items: items.slice(i, j + 1), startIdx: i })
+    while (j + 1 < sorted.length && sorted[j + 1].category === sorted[i].category) j++
+    groups.push({ category: sorted[i].category ?? '', items: sorted.slice(i, j + 1), startIdx: i })
     i = j + 1
   }
   return groups
