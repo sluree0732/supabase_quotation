@@ -677,7 +677,6 @@ function ContractPage() {
           specialTerms={form.specialTerms}
           articles={form.articles}
           stampUrl={stampUrl}
-          onArticlesChange={a => set({ articles: a })}
           onClose={() => setShowContractViewer(false)}
           onPdfDownload={async () => {
             const { ContractPdfViewerModal: _, filename, ...pdfPayload } = getPdfPayload() as any

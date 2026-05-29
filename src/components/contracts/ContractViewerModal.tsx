@@ -1,12 +1,10 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { X, Download, Loader2 } from 'lucide-react'
 import type { ContractItem, VatType, Company } from '@/types'
 import type { ContractArticles } from '@/lib/contractArticles'
-import {
-  parseArticles, updateArticleBody, substituteVariables, mergeArticles,
-} from '@/lib/contractArticles'
+import { parseArticles, substituteVariables, mergeArticles } from '@/lib/contractArticles'
 import { groupByCategory } from '@/lib/groupItems'
 
 interface Props {
@@ -22,7 +20,6 @@ interface Props {
   specialTerms: string
   articles: ContractArticles
   stampUrl?: string
-  onArticlesChange: (a: ContractArticles) => void
   onClose: () => void
   onPdfDownload: () => Promise<void>
   pdfDownloading?: boolean
@@ -32,8 +29,6 @@ const VAT_LABEL: Record<VatType, string> = {
   excluded: '부가세 별도', included: '부가세 포함', none: '',
 }
 
-
-function fmtNum(n: number) { return n.toLocaleString('ko-KR') }
 function fmtDate(d: string) {
   if (!d) return '미정'
   const [y, m, dd] = d.split('-')
@@ -43,12 +38,8 @@ function fmtDate(d: string) {
 export default function ContractViewerModal({
   contractDate, startDate, endDate, recipient,
   company, senderCompany, items, total, vatType, specialTerms,
-  articles, stampUrl, onArticlesChange, onClose, onPdfDownload, pdfDownloading,
+  articles, stampUrl, onClose, onPdfDownload, pdfDownloading,
 }: Props) {
-  const [editingNo, setEditingNo] = useState<number | null>(null)
-  const [editingContent, setEditingContent] = useState('')
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-
   const A = mergeArticles(articles)
   const parsed = parseArticles(A.fullText)
   const sortedItems = groupByCategory(items)
@@ -65,47 +56,13 @@ export default function ContractViewerModal({
     return () => { document.body.style.overflow = '' }
   }, [])
 
-  useEffect(() => {
-    if (editingNo !== null) setTimeout(() => textareaRef.current?.focus(), 50)
-  }, [editingNo])
-
-  function startEdit(no: number, body: string) {
-    setEditingNo(no)
-    setEditingContent(substituteVariables(body, ctx))
-  }
-
-  function saveEdit() {
-    if (editingNo === null) return
-    const newFullText = updateArticleBody(A.fullText, editingNo, editingContent)
-    onArticlesChange({ fullText: newFullText })
-    setEditingNo(null)
-  }
-
   function renderArticle(art: { no: number; title: string; body: string }) {
-    const isEditing = editingNo === art.no
     const hasItemsVar = art.body.includes('{{견적서내용}}')
-
-    if (isEditing) {
-      return (
-        <div className="mt-1.5">
-          <textarea
-            ref={textareaRef}
-            value={editingContent}
-            onChange={e => setEditingContent(e.target.value)}
-            onBlur={saveEdit}
-            className="w-full px-3 py-2 text-xs border border-blue-300 rounded-lg resize-none focus:outline-none focus:border-blue-500 bg-blue-50 leading-relaxed"
-            style={{ maxHeight: '150px', overflowY: 'auto', minHeight: '80px' }}
-          />
-          <p className="text-[10px] text-gray-400 mt-1">다른 곳 클릭 시 자동 저장</p>
-        </div>
-      )
-    }
 
     if (hasItemsVar) {
       const parts = art.body.split('{{견적서내용}}')
       return (
-        <div onClick={() => startEdit(art.no, art.body)}
-          className="mt-1 cursor-text group hover:bg-blue-50/30 rounded-lg p-1 transition-colors">
+        <div className="mt-1">
           {parts[0]?.trim() && (
             <p className="text-xs text-gray-700 whitespace-pre-line mb-2 pl-2">
               {substituteVariables(parts[0], ctx)}
@@ -117,20 +74,14 @@ export default function ContractViewerModal({
               {substituteVariables(parts[1], ctx)}
             </p>
           )}
-          <p className="text-[10px] text-blue-300 mt-1 opacity-0 group-hover:opacity-100 transition-opacity pl-2">
-            {'클릭하여 텍스트 편집 ({{견적서내용}} 위치 조정 가능)'}
-          </p>
         </div>
       )
     }
 
-    const display = substituteVariables(art.body, ctx)
     return (
-      <div onClick={() => startEdit(art.no, art.body)}
-        className="mt-1 cursor-text group hover:bg-blue-50/30 rounded-lg p-1 transition-colors">
-        <p className="text-xs text-gray-700 whitespace-pre-line pl-2">{display}</p>
-        <p className="text-[10px] text-blue-300 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity pl-2">
-          클릭하여 편집
+      <div className="mt-1 pl-2">
+        <p className="text-xs text-gray-700 whitespace-pre-line">
+          {substituteVariables(art.body, ctx)}
         </p>
       </div>
     )
@@ -142,7 +93,7 @@ export default function ContractViewerModal({
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0">
         <div>
           <h2 className="font-bold text-[#1e2a3a]">계약서 미리보기</h2>
-          <p className="text-xs text-gray-400 mt-0.5">조항을 클릭해 내용을 수정할 수 있습니다</p>
+          <p className="text-xs text-gray-400 mt-0.5">내용 수정은 계약서 작성 화면에서 가능합니다</p>
         </div>
         <div className="flex items-center gap-2">
           <button
