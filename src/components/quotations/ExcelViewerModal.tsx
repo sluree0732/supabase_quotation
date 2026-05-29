@@ -43,6 +43,11 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
   const [orientation, setOrientation] = useState<'landscape' | 'portrait'>('landscape')
 
   useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
+  }, [])
+
+  useEffect(() => {
     const id = state.senderCompanyId ?? state.senderCompany?.id ?? undefined
     getSenderStampUrl(id).then(url => {
       if (url) setStampUrl(url)
