@@ -477,7 +477,7 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
               ) : (
                 <button
                   onClick={() => handleSave('saved')}
-                  disabled={saving}
+                  disabled={saving || savingCompanyOnly}
                   className="py-3 rounded-xl bg-[#8e44ad]/20 text-[#8e44ad] font-medium text-sm flex items-center justify-center gap-1.5 disabled:opacity-40 transition-colors"
                   title="저장 후 계약서 작성 가능합니다"
                 >
