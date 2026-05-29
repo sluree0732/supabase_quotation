@@ -264,10 +264,10 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
             <table className="text-sm border-collapse" style={{ width: '100%' }}>
               <thead>
                 <tr className="bg-gray-50">
-                  <th colSpan={2} className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568] text-xs" style={{ minWidth: '180px' }}>상&nbsp;&nbsp;품</th>
-                  <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568] text-xs" style={{ width: '60px' }}>수량</th>
-                  <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568] text-xs" style={{ width: '110px' }}>금액</th>
-                  <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568] text-xs" style={{ width: '110px' }}>총액</th>
+                  <th colSpan={2} className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568] text-xs" style={{ width: '200px' }}>상&nbsp;&nbsp;품</th>
+                  <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568] text-xs" style={{ width: '56px' }}>수량</th>
+                  <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568] text-xs" style={{ width: '122px' }}>금액</th>
+                  <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568] text-xs" style={{ width: '150px' }}>총액</th>
                   <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-[#4a5568] text-xs">비고</th>
                 </tr>
               </thead>
@@ -278,7 +278,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
                       <td
                         rowSpan={categoryRowSpans[idx]!}
                         className="border border-gray-200 p-1 align-middle"
-                        style={{ width: '80px' }}
+                        style={{ width: '67px' }}
                       >
                         <input
                           value={item.category}
@@ -287,7 +287,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
                         />
                       </td>
                     )}
-                    <td className="border border-gray-200 p-1">
+                    <td className="border border-gray-200 p-1" style={{ width: '133px' }}>
                       <input
                         value={item.item_name}
                         onChange={e => updateItem(idx, { item_name: e.target.value })}
