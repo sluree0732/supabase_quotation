@@ -145,6 +145,7 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
   const [senderInfoOpen, setSenderInfoOpen] = useState(true)
   const [clientInfoOpen, setClientInfoOpen] = useState(true)
   const [savingCompanyOnly, setSavingCompanyOnly] = useState(false)
+  const [showCompanyOnlyConfirm, setShowCompanyOnlyConfirm] = useState(false)
 
   const isSaved = state.status === 'saved'
 
@@ -212,61 +213,63 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
     setTimeout(() => setToast(null), 2000)
   }
 
+  async function doCompanyOnlySave() {
+    setShowCompanyOnlyConfirm(false)
+    setSavingCompanyOnly(true)
+    try {
+      const updates: Promise<unknown>[] = []
+      if (state.senderCompany && state.senderInfo) {
+        updates.push(updateCompany(state.senderCompany.id, {
+          company_type: state.senderCompany.company_type,
+          name: state.senderInfo.name,
+          address: state.senderInfo.address,
+          phone: state.senderInfo.phone,
+          business_no: state.senderInfo.business_no,
+          business_type: state.senderInfo.business_type,
+          business_item: state.senderInfo.business_item,
+          email: state.senderInfo.email,
+          fax: state.senderInfo.fax,
+          ceo: state.senderInfo.ceo || undefined,
+          bank: state.senderInfo.bank || undefined,
+          stamp_url: state.senderCompany.stamp_url,
+        }))
+      }
+      if (state.company && state.clientInfo) {
+        updates.push(updateCompany(state.company.id, {
+          company_type: state.company.company_type,
+          name: state.clientInfo.name,
+          address: state.clientInfo.address,
+          phone: state.clientInfo.phone,
+          business_no: state.clientInfo.business_no,
+          business_type: state.clientInfo.business_type,
+          business_item: state.clientInfo.business_item,
+          email: state.clientInfo.email,
+          fax: state.clientInfo.fax,
+          ceo: state.clientInfo.ceo || undefined,
+          bank: state.clientInfo.bank || undefined,
+          stamp_url: state.company.stamp_url,
+        }))
+      }
+      await Promise.all(updates)
+      showToast('업체 정보 저장 완료')
+    } catch (e: any) {
+      alert(e.message ?? '저장 실패')
+    } finally {
+      setSavingCompanyOnly(false)
+    }
+  }
+
   async function handleSave(status: 'draft' | 'saved') {
-    // 항목 없음 + 업체 정보 없음
     if (!hasItems && !hasCompanyInfo) {
       alert('업체 또는 항목을 추가해주세요.')
       return
     }
 
-    // 항목 없음 + 업체 정보 있음 → 업체 정보만 저장
     if (!hasItems && hasCompanyInfo) {
-      setSavingCompanyOnly(true)
-      try {
-        const updates: Promise<unknown>[] = []
-        if (state.senderCompany && state.senderInfo) {
-          updates.push(updateCompany(state.senderCompany.id, {
-            company_type: state.senderCompany.company_type,
-            name: state.senderInfo.name,
-            address: state.senderInfo.address,
-            phone: state.senderInfo.phone,
-            business_no: state.senderInfo.business_no,
-            business_type: state.senderInfo.business_type,
-            business_item: state.senderInfo.business_item,
-            email: state.senderInfo.email,
-            fax: state.senderInfo.fax,
-            ceo: state.senderInfo.ceo || undefined,
-            bank: state.senderInfo.bank || undefined,
-            stamp_url: state.senderCompany.stamp_url,
-          }))
-        }
-        if (state.company && state.clientInfo) {
-          updates.push(updateCompany(state.company.id, {
-            company_type: state.company.company_type,
-            name: state.clientInfo.name,
-            address: state.clientInfo.address,
-            phone: state.clientInfo.phone,
-            business_no: state.clientInfo.business_no,
-            business_type: state.clientInfo.business_type,
-            business_item: state.clientInfo.business_item,
-            email: state.clientInfo.email,
-            fax: state.clientInfo.fax,
-            ceo: state.clientInfo.ceo || undefined,
-            bank: state.clientInfo.bank || undefined,
-            stamp_url: state.company.stamp_url,
-          }))
-        }
-        await Promise.all(updates)
-        showToast('업체 정보 저장 완료')
-      } catch (e: any) {
-        alert(e.message ?? '저장 실패')
-      } finally {
-        setSavingCompanyOnly(false)
-      }
+      setShowCompanyOnlyConfirm(true)
       return
     }
 
-    // 항목 있음 → 견적서 전체 저장
     await onSave(state, status)
     setState(s => ({ ...s, status }))
     setIsDirty(false)
@@ -443,7 +446,11 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
               onClick={() => handleSave(state.status === 'saved' ? 'draft' : 'saved')}
               disabled={saving || savingCompanyOnly}
               className={`w-full py-3.5 rounded-xl text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors ${
-                hasItems && state.status === 'saved' ? 'bg-[#2980b9]' : 'bg-[#27ae60]'
+                !hasItems && hasCompanyInfo
+                  ? 'bg-[#e67e22] hover:bg-[#d35400]'
+                  : hasItems && state.status === 'saved'
+                  ? 'bg-[#2980b9] hover:bg-[#2471a3]'
+                  : 'bg-[#27ae60] hover:bg-[#219a52]'
               }`}
             >
               {(saving || savingCompanyOnly) ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
@@ -490,6 +497,38 @@ export default function QuotationForm({ initial, isEdit, saving, onSave, onSaveS
         <div className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-[80] bg-[#1e2a3a] text-white text-sm font-medium px-5 py-3 rounded-2xl shadow-lg flex items-center gap-2 animate-fade-in">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="8" fill="#27ae60"/><path d="M4.5 8l2.5 2.5 4.5-4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           {toast}
+        </div>
+      )}
+
+      {/* ── 업체 정보만 저장 확인 모달 ───────────────── */}
+      {showCompanyOnlyConfirm && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-xl w-[320px] px-6 py-6 space-y-4">
+            <div className="flex flex-col items-center gap-2 text-center">
+              <div className="w-11 h-11 rounded-full bg-[#fef3e2] flex items-center justify-center">
+                <Save size={20} className="text-[#e67e22]" />
+              </div>
+              <h3 className="font-bold text-[#1e2a3a] text-base">견적 항목이 없습니다</h3>
+              <p className="text-sm text-[#718096] leading-relaxed">
+                업체 정보만 저장합니다.<br />
+                견적서는 생성되지 않습니다.
+              </p>
+            </div>
+            <div className="flex gap-2 pt-1">
+              <button
+                onClick={() => setShowCompanyOnlyConfirm(false)}
+                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-[#4a5568] hover:bg-gray-50 transition-colors"
+              >
+                취소
+              </button>
+              <button
+                onClick={doCompanyOnlySave}
+                className="flex-1 py-2.5 rounded-xl bg-[#e67e22] text-white text-sm font-semibold hover:bg-[#d35400] transition-colors"
+              >
+                업체 정보만 저장
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
