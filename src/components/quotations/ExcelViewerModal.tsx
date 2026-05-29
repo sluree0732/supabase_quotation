@@ -40,6 +40,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
   const [downloading, setDownloading] = useState(false)
   const [pdfDownloading, setPdfDownloading] = useState(false)
   const [stampUrl, setStampUrl] = useState<string>('/images/stamp.png')
+  const [orientation, setOrientation] = useState<'landscape' | 'portrait'>('landscape')
 
   useEffect(() => {
     const id = state.senderCompanyId ?? state.senderCompany?.id ?? undefined
@@ -163,6 +164,21 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
           <p className="text-xs text-gray-400 mt-0.5">셀을 클릭해 내용을 수정할 수 있습니다</p>
         </div>
         <div className="flex items-center gap-2">
+          {/* 방향 토글 */}
+          <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden text-xs font-medium">
+            <button
+              onClick={() => setOrientation('landscape')}
+              className={`px-2.5 py-1.5 transition-colors ${orientation === 'landscape' ? 'bg-[#1e2a3a] text-white' : 'text-gray-500 hover:bg-gray-50'}`}
+            >
+              가로
+            </button>
+            <button
+              onClick={() => setOrientation('portrait')}
+              className={`px-2.5 py-1.5 transition-colors ${orientation === 'portrait' ? 'bg-[#1e2a3a] text-white' : 'text-gray-500 hover:bg-gray-50'}`}
+            >
+              세로
+            </button>
+          </div>
           <button
             onClick={handleDownload}
             disabled={downloading || !items.length}
@@ -187,7 +203,11 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
 
       {/* 뷰어 */}
       <div className="flex-1 overflow-auto p-6 bg-gray-100 flex justify-center">
-        <div className="bg-white border border-gray-200 shadow-md" style={{ width: '794px', minHeight: '1123px' }}>
+        <div className="bg-white border border-gray-200 shadow-md" style={
+          orientation === 'landscape'
+            ? { width: '1123px', minHeight: '794px' }
+            : { width: '794px', minHeight: '1123px' }
+        }>
 
           {/* 제목 */}
           <div className="text-center py-6 border-b border-gray-100">

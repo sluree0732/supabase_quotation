@@ -319,7 +319,7 @@ export default function QuotationDocument({
 }: QuotationDocProps) {
   return (
     <Document>
-      <Page size="A4" style={S.page}>
+      <Page size="A4" orientation="landscape" style={S.page}>
         <Text style={S.title}>견  적  서</Text>
 
         <View style={S.infoRow}>
