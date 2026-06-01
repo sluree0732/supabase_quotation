@@ -119,15 +119,7 @@ function ContractPage() {
 
   function applyTemplate(t: ContractTemplate) {
     const merged = mergeArticles(t.articles as Partial<ContractArticles> | null)
-    const ctx = {
-      items: form.items, total, vatType: form.vatType,
-      startDate: form.startDate, endDate: form.endDate,
-      contractDate: form.contractDate,
-      senderName: form.senderCompany?.name, receiverName: form.company?.name,
-      recipient: form.recipient,
-    }
-    const substituted = substituteVariables(merged.fullText, ctx)
-    set({ articles: { fullText: substituted } })
+    set({ articles: { fullText: merged.fullText } })
     setShowTemplatePicker(false)
     setShowArticles(true)
     showToast(`"${t.name}" 양식을 불러왔습니다.`)
