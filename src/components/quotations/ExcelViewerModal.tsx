@@ -236,9 +236,9 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
               {state.projectName && (
                 <p className="text-[#718096]">프로젝트&nbsp;&nbsp;<span className="text-[#1e2a3a] font-medium">{state.projectName}</span></p>
               )}
-              <p className="text-[#718096] mt-2 pt-2 border-t border-gray-50">아래와 같이 견적합니다.</p>
+              <p className="text-[#718096] mt-3">아래와 같이 견적합니다.</p>
               {items.length > 0 && (
-                <div className="mt-4 pt-2 border-t border-gray-100">
+                <div className="mt-6">
                   <p className="text-xs text-[#718096]">합계 금액</p>
                   <p className="text-lg font-bold text-[#1e2a3a]">
                     {(state.vatType === 'excluded' ? Math.round(total * 1.1) : total).toLocaleString()}원
