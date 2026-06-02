@@ -285,7 +285,7 @@ export default function ContractDocument({
             부가세(10%): ₩{fmtNum(vatAmountNum)}
           </Text>
           <Text style={[S.articleBody, { paddingLeft: 16, marginTop: 2 }]}>
-            최종 지급액: ₩{fmtNum(finalAmountNum)} ({vatType === 'excluded' ? '부가세 별도' : vatType === 'included' ? '부가세 포함' : '부가세 없음'})
+            최종 지급액: ₩{fmtNum(finalAmountNum)}
           </Text>
           <Text style={[S.articleBody, { paddingLeft: 16, marginTop: 2 }]}>
             • 예산 세부 내역은 별첨된 견적서에 따른다.
