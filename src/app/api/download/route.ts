@@ -139,9 +139,10 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
   ws.getRow(4).height = 20
   ws.getRow(5).height = 20
   ws.getRow(6).height = 20
-  ws.getRow(7).height = 22
-  ws.getRow(8).height = 28
-  ws.getRow(9).height = 12
+  ws.getRow(7).height = 20  // 빈 행 (PDF marginTop:32 간격 재현)
+  ws.getRow(8).height = 22
+  ws.getRow(9).height = 28
+  ws.getRow(10).height = 12
 
   ws.getCell('A2').value = quoteDate
   ws.getCell('A2').font = { size: 10 }
@@ -157,17 +158,18 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
   ws.getCell('A6').value = '아래와 같이 견적합니다.'
   ws.getCell('A6').font = { bold: true, size: 10 }
   ws.mergeCells('A6:B6')
+  // A7: 빈 행 — PDF의 marginTop:32(약 2줄) 간격 재현
 
-  ws.getCell('A7').value = '합계 금액'
-  ws.getCell('A7').font = { size: 12, color: { argb: 'FF718096' } }
-  ws.getCell('A7').alignment = { horizontal: 'left', vertical: 'middle' }
-  ws.mergeCells('A7:B7')
-
-  const grandTotal = vatType === 'excluded' ? Math.round(totalAmount * 1.1) : totalAmount
-  ws.getCell('A8').value = `${grandTotal.toLocaleString()}원`
-  ws.getCell('A8').font = { bold: true, size: 14 }
+  ws.getCell('A8').value = '합계 금액'
+  ws.getCell('A8').font = { size: 12, color: { argb: 'FF718096' } }
   ws.getCell('A8').alignment = { horizontal: 'left', vertical: 'middle' }
   ws.mergeCells('A8:B8')
+
+  const grandTotal = vatType === 'excluded' ? Math.round(totalAmount * 1.1) : totalAmount
+  ws.getCell('A9').value = `${grandTotal.toLocaleString()}원`
+  ws.getCell('A9').font = { bold: true, size: 14 }
+  ws.getCell('A9').alignment = { horizontal: 'left', vertical: 'middle' }
+  ws.mergeCells('A9:B9')
 
   const supplierData = [
     ['상  호', s.name, '사업자 등록번호', s.business_no],
@@ -231,7 +233,7 @@ async function generateExcel(payload: Record<string, any>): Promise<Buffer> {
   })
 
   // ── 테이블 헤더 (PDF와 동일 구조) ────────────────────
-  const headerRow = 10
+  const headerRow = 11
   ws.getRow(headerRow).height = 22
   ws.mergeCells(`A${headerRow}:B${headerRow}`)
   headerCell(ws.getCell(`A${headerRow}`), '상  품')
