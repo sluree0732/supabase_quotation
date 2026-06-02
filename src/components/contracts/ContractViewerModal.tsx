@@ -56,6 +56,10 @@ export default function ContractViewerModal({
     return () => { document.body.style.overflow = '' }
   }, [])
 
+  function cleanVatLabel(text: string) {
+    return text.replace(/\s*\(부가세 별도\)/g, '').replace(/\s*\(부가세 포함\)/g, '').replace(/\s*\(부가세 없음\)/g, '')
+  }
+
   function renderArticle(art: { no: number; title: string; body: string }) {
     const hasItemsVar = art.body.includes('{{견적서내용}}')
 
@@ -65,13 +69,13 @@ export default function ContractViewerModal({
         <div className="mt-1">
           {parts[0]?.trim() && (
             <p className="text-xs text-gray-700 whitespace-pre-line mb-2 pl-2">
-              {substituteVariables(parts[0], ctx)}
+              {cleanVatLabel(substituteVariables(parts[0], ctx))}
             </p>
           )}
           <ItemsTable items={sortedItems} total={total} vatType={vatType} />
           {parts[1]?.trim() && (
             <p className="text-xs text-gray-700 whitespace-pre-line mt-2 pl-2">
-              {substituteVariables(parts[1], ctx)}
+              {cleanVatLabel(substituteVariables(parts[1], ctx))}
             </p>
           )}
         </div>
@@ -81,7 +85,7 @@ export default function ContractViewerModal({
     return (
       <div className="mt-1 pl-2">
         <p className="text-xs text-gray-700 whitespace-pre-line">
-          {substituteVariables(art.body, ctx)}
+          {cleanVatLabel(substituteVariables(art.body, ctx))}
         </p>
       </div>
     )
