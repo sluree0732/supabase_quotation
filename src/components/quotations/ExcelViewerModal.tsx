@@ -238,7 +238,7 @@ export default function ExcelViewerModal({ state, onClose }: Props) {
               )}
               <p className="text-[#718096] mt-3">아래와 같이 견적합니다.</p>
               {items.length > 0 && (
-                <div className="mt-6">
+                <div className="mt-8">
                   <p className="text-xs text-[#718096]">합계 금액</p>
                   <p className="text-lg font-bold text-[#1e2a3a]">
                     {(state.vatType === 'excluded' ? Math.round(total * 1.1) : total).toLocaleString()}원
