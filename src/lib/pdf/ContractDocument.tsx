@@ -133,7 +133,7 @@ const S = StyleSheet.create({
     paddingLeft: 12,
   },
   signLabel: {
-    width: 56,
+    width: 80,
     color: '#333',
   },
   signValue: {

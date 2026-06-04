@@ -166,12 +166,12 @@ export default function ContractViewerModal({
                 <p>&nbsp;&nbsp;- 대 표 자 : {senderCompany?.ceo || ''}</p>
                 <p>&nbsp;&nbsp;- 주&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;소 : {senderCompany?.address || ''}</p>
                 <p>&nbsp;&nbsp;- 사업자 등록번호 : {senderCompany?.business_no || ''}</p>
-                <p className="mt-2">&nbsp;&nbsp;- 서&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;명 :</p>
-                {stampUrl && (
-                  <div className="ml-6 mt-1">
+                <div className="flex items-center gap-2 mt-2">
+                  <span>&nbsp;&nbsp;- 서&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;명 :</span>
+                  {stampUrl && (
                     <img src={stampUrl} alt="도장" className="w-12 h-12 object-contain opacity-90" />
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           </div>
