@@ -76,23 +76,23 @@ const S = StyleSheet.create({
     marginBottom: 12,
     borderRadius: 2,
   },
-  // 제2조 테이블
+  // 제2조 테이블 — border-collapse 흉내: 외곽은 table, 행구분은 row의 borderBottom, 열구분은 셀의 borderRight
   table: {
     marginTop: 4,
     borderWidth: 0.5,
-    borderColor: '#ccc',
+    borderColor: '#e5e7eb',
   },
   tableRow: {
     flexDirection: 'row',
     borderBottomWidth: 0.5,
-    borderColor: '#ccc',
+    borderColor: '#e5e7eb',
   },
   tableHeader: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f9fafb',
   },
   tableCell: {
     borderRightWidth: 0.5,
-    borderColor: '#ccc',
+    borderColor: '#e5e7eb',
     padding: 3,
     fontSize: 7.5,
     justifyContent: 'center',
@@ -319,8 +319,8 @@ export default function ContractDocument({
                 ))
               })
             })()}
-            {/* 합계 행 — 데이터 행과 동일한 6컬럼 구조, 앞 4셀 border 제거로 병합 효과 */}
-            <View style={[S.tableRow, S.tableHeader]}>
+            {/* 합계 행 — 마지막 행이므로 borderBottom 제거(table 외곽선이 담당) */}
+            <View style={[S.tableRow, S.tableHeader, { borderBottomWidth: 0 }]}>
               <View style={[S.tableCell, { width: '8%', borderRightWidth: 0 }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>합 계</Text></View>
               <View style={[S.tableCell, { width: '17%', borderRightWidth: 0 }]}><Text> </Text></View>
               <View style={[S.tableCell, { width: '7%', borderRightWidth: 0 }]}><Text> </Text></View>
