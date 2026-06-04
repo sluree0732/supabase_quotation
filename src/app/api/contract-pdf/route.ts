@@ -5,6 +5,7 @@ import ContractDocument from '@/lib/pdf/ContractDocument'
 import type { VatType } from '@/types'
 import { getStampSrc } from '@/lib/getStampBuffer'
 import { getSenderCompanyInfo } from '@/lib/getSenderCompanyInfo'
+import { injectOpenAction } from '@/lib/pdf/injectOpenAction'
 
 export async function POST(req: NextRequest) {
   try {
@@ -57,7 +58,8 @@ export async function POST(req: NextRequest) {
       articles,
     })
 
-    const buffer = await renderToBuffer(element as any)
+    const rawBuffer = await renderToBuffer(element as any)
+    const buffer = await injectOpenAction(Buffer.from(rawBuffer))
 
     const dateStr = contractDate.replace(/-/g, '')
     const name = companyName || ''

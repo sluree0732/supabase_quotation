@@ -3,6 +3,7 @@ import { renderToBuffer } from '@react-pdf/renderer'
 import { createElement } from 'react'
 import QuotationDocument from '@/lib/pdf/QuotationDocument'
 import type { VatType } from '@/types'
+import { injectOpenAction } from '@/lib/pdf/injectOpenAction'
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,7 +26,8 @@ export async function POST(req: NextRequest) {
       vatType,
     })
 
-    const buffer = await renderToBuffer(element as any)
+    const rawBuffer = await renderToBuffer(element as any)
+    const buffer = await injectOpenAction(Buffer.from(rawBuffer))
 
     // 파일명: 견적서_YYYYMMDD.pdf
     const dateStr = quoteDate.replace(/-/g, '')
