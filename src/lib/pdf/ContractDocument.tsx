@@ -76,6 +76,39 @@ const S = StyleSheet.create({
     marginBottom: 12,
     borderRadius: 2,
   },
+  // 제2조 테이블
+  table: {
+    marginTop: 4,
+    borderWidth: 0.5,
+    borderColor: '#ccc',
+  },
+  tableRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 0.5,
+    borderColor: '#ccc',
+  },
+  tableHeader: {
+    backgroundColor: '#f5f5f5',
+  },
+  tableCell: {
+    borderRightWidth: 0.5,
+    borderColor: '#ccc',
+    padding: 3,
+    fontSize: 7.5,
+    justifyContent: 'center',
+  },
+  tableCellLast: {
+    padding: 3,
+    fontSize: 7.5,
+    justifyContent: 'center',
+  },
+  tableCellText: {
+    textAlign: 'center',
+  },
+  tableCellNoteText: {
+    textAlign: 'left',
+    lineHeight: 1.5,
+  },
   // 서명란
   signDate: {
     fontSize: 10,
@@ -242,33 +275,58 @@ export default function ContractDocument({
           <Text style={S.articleBody}>{getArticleBody(A.fullText, 1)}</Text>
         </Article>
 
-        {/* 제2조 — groupByCategory + 전체 항목 표시 */}
+        {/* 제2조 — 미리보기와 동일한 테이블 구조 */}
         <Article no={2} title="업무의 범위">
           <Text style={S.articleBody}>을은 다음의 업무를 대행한다.</Text>
-          {(() => {
-            const order: string[] = []
-            const groups = new Map<string, ContractItem[]>()
-            for (const it of sortedItems) {
-              const cat = it.category ?? ''
-              if (!groups.has(cat)) { order.push(cat); groups.set(cat, []) }
-              groups.get(cat)!.push(it)
-            }
-            return order.map(cat => (
-              <View key={cat} style={{ marginTop: 4 }}>
-                {cat ? <Text style={[S.articleBody, { fontWeight: 'bold' }]}>[{cat}]</Text> : null}
-                {(groups.get(cat) ?? []).map((it, i) => (
-                  <View key={i} style={{ marginTop: 2 }}>
-                    <Text style={S.itemLine}>
-                      • {it.item_name} — {it.period}개, {fmtNum(it.unit_price)}원 / 총액 {fmtNum(it.total_price)}원
-                    </Text>
-                    {it.note ? it.note.split('\n').filter(Boolean).map((l, li) => (
-                      <Text key={li} style={[S.itemLine, { paddingLeft: 24, fontSize: 7.5 }]}>{l}</Text>
-                    )) : null}
+          <View style={S.table}>
+            {/* 헤더 행 */}
+            <View style={[S.tableRow, S.tableHeader]}>
+              <View style={[S.tableCell, { width: '8%' }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>구분</Text></View>
+              <View style={[S.tableCell, { width: '17%' }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>상품</Text></View>
+              <View style={[S.tableCell, { width: '7%' }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>수량</Text></View>
+              <View style={[S.tableCell, { width: '15%' }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>금액</Text></View>
+              <View style={[S.tableCell, { width: '18%' }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>총액</Text></View>
+              <View style={[S.tableCellLast, { flex: 1 }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>비고</Text></View>
+            </View>
+            {/* 데이터 행 */}
+            {(() => {
+              const order: string[] = []
+              const groups = new Map<string, ContractItem[]>()
+              for (const it of sortedItems) {
+                const cat = it.category ?? ''
+                if (!groups.has(cat)) { order.push(cat); groups.set(cat, []) }
+                groups.get(cat)!.push(it)
+              }
+              return order.map(cat => {
+                const catItems = groups.get(cat) ?? []
+                return catItems.map((it, i) => (
+                  <View key={`${cat}-${i}`} style={S.tableRow}>
+                    {/* 카테고리: 첫 행만 표시, 이후는 빈 셀 */}
+                    <View style={[S.tableCell, { width: '8%' }]}>
+                      {i === 0 && cat
+                        ? <Text style={[S.tableCellText, { fontWeight: 'bold' }]}>{cat}</Text>
+                        : null}
+                    </View>
+                    <View style={[S.tableCell, { width: '17%' }]}><Text style={S.tableCellText}>{it.item_name}</Text></View>
+                    <View style={[S.tableCell, { width: '7%' }]}><Text style={S.tableCellText}>{it.period}</Text></View>
+                    <View style={[S.tableCell, { width: '15%' }]}><Text style={S.tableCellText}>{fmtNum(it.unit_price)}</Text></View>
+                    <View style={[S.tableCell, { width: '18%' }]}><Text style={S.tableCellText}>{fmtNum(it.total_price)}</Text></View>
+                    <View style={[S.tableCellLast, { flex: 1 }]}>
+                      <Text style={S.tableCellNoteText}>{it.note ?? ''}</Text>
+                    </View>
                   </View>
-                ))}
+                ))
+              })
+            })()}
+            {/* 합계 행 */}
+            <View style={[S.tableRow, S.tableHeader]}>
+              <View style={[S.tableCell, { flex: 1 }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>합 계</Text></View>
+              <View style={[S.tableCell, { width: '18%' }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>{fmtNum(totalAmount)}원</Text></View>
+              <View style={[S.tableCellLast, { flex: 1 }]}>
+                <Text style={[S.tableCellText, { color: '#e74c3c', fontWeight: 'bold' }]}>{VAT_MAP[vatType]}</Text>
               </View>
-            ))
-          })()}
+            </View>
+          </View>
         </Article>
 
         {/* 제3조 */}
