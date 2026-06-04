@@ -76,28 +76,29 @@ const S = StyleSheet.create({
     marginBottom: 12,
     borderRadius: 2,
   },
-  // 제2조 테이블 — border-collapse 흉내: 외곽은 table, 행구분은 row의 borderBottom, 열구분은 셀의 borderRight
+  // 제2조 테이블 — 각 셀이 borderLeft+borderTop만 담당, 마지막 행/열이 borderBottom/Right 추가
   table: {
     marginTop: 4,
-    borderWidth: 0.5,
-    borderColor: '#e5e7eb',
   },
   tableRow: {
     flexDirection: 'row',
-    borderBottomWidth: 0.5,
-    borderColor: '#e5e7eb',
   },
   tableHeader: {
     backgroundColor: '#f9fafb',
   },
   tableCell: {
-    borderRightWidth: 0.5,
+    borderLeftWidth: 0.5,
+    borderTopWidth: 0.5,
     borderColor: '#e5e7eb',
     padding: 3,
     fontSize: 7.5,
     justifyContent: 'center',
   },
   tableCellLast: {
+    borderLeftWidth: 0.5,
+    borderTopWidth: 0.5,
+    borderRightWidth: 0.5,
+    borderColor: '#e5e7eb',
     padding: 3,
     fontSize: 7.5,
     justifyContent: 'center',
@@ -282,12 +283,12 @@ export default function ContractDocument({
           <View style={S.table}>
             {/* 헤더 행 */}
             <View style={[S.tableRow, S.tableHeader]}>
-              <View style={[S.tableCell, { width: '8%' }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>구분</Text></View>
-              <View style={[S.tableCell, { width: '17%' }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>상품</Text></View>
-              <View style={[S.tableCell, { width: '7%' }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>수량</Text></View>
-              <View style={[S.tableCell, { width: '15%' }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>금액</Text></View>
-              <View style={[S.tableCell, { width: '18%' }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>총액</Text></View>
-              <View style={[S.tableCellLast, { flex: 1 }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>비고</Text></View>
+              <View style={[S.tableCell, { width: '8%', borderTopWidth: 0.5 }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>구분</Text></View>
+              <View style={[S.tableCell, { width: '17%', borderTopWidth: 0.5 }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>상품</Text></View>
+              <View style={[S.tableCell, { width: '7%', borderTopWidth: 0.5 }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>수량</Text></View>
+              <View style={[S.tableCell, { width: '15%', borderTopWidth: 0.5 }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>금액</Text></View>
+              <View style={[S.tableCell, { width: '18%', borderTopWidth: 0.5 }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>총액</Text></View>
+              <View style={[S.tableCellLast, { flex: 1, borderTopWidth: 0.5 }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>비고</Text></View>
             </View>
             {/* 데이터 행 */}
             {(() => {
@@ -319,14 +320,11 @@ export default function ContractDocument({
                 ))
               })
             })()}
-            {/* 합계 행 — 마지막 행이므로 borderBottom 제거(table 외곽선이 담당) */}
-            <View style={[S.tableRow, S.tableHeader, { borderBottomWidth: 0 }]}>
-              <View style={[S.tableCell, { width: '8%', borderRightWidth: 0 }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>합 계</Text></View>
-              <View style={[S.tableCell, { width: '17%', borderRightWidth: 0 }]}><Text> </Text></View>
-              <View style={[S.tableCell, { width: '7%', borderRightWidth: 0 }]}><Text> </Text></View>
-              <View style={[S.tableCell, { width: '15%' }]}><Text> </Text></View>
-              <View style={[S.tableCell, { width: '18%' }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>{fmtNum(totalAmount)}원</Text></View>
-              <View style={[S.tableCellLast, { flex: 1 }]}>
+            {/* 합계 행 — 2셀 구조로 "합 계" 가운데 정렬, 마지막 행이므로 borderBottom 추가 */}
+            <View style={[S.tableRow, S.tableHeader]}>
+              <View style={[S.tableCell, { width: '47%', borderBottomWidth: 0.5 }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>합 계</Text></View>
+              <View style={[S.tableCell, { width: '18%', borderBottomWidth: 0.5 }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>{fmtNum(totalAmount)}원</Text></View>
+              <View style={[S.tableCellLast, { flex: 1, borderBottomWidth: 0.5 }]}>
                 <Text style={[S.tableCellText, { color: '#e74c3c', fontWeight: 'bold' }]}>{VAT_MAP[vatType]}</Text>
               </View>
             </View>
