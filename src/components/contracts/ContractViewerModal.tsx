@@ -149,28 +149,29 @@ export default function ContractViewerModal({
             )}
 
             {/* 서명 */}
-            <div className="pt-4 space-y-4 border-t border-gray-100">
+            <div className="pt-4 space-y-6 border-t border-gray-100">
               <p className="text-xs text-center text-gray-700">{fmtDate(contractDate)}</p>
-              <div className="grid grid-cols-2 gap-8 text-xs">
-                <div className="space-y-1.5">
-                  <p className="font-bold text-[#1e2a3a]">갑 (광고주)</p>
-                  {company?.name && <p>- 업 체 명 : {company.name}</p>}
-                  <p>- 대 표 자 : {company?.ceo || recipient || ''}</p>
-                  <p>- 주&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;소 : {company?.address || ''}</p>
-                  <p className="mt-2">- 서&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;명 : _____________________</p>
-                </div>
-                <div className="space-y-1.5">
-                  <p className="font-bold text-[#1e2a3a]">을 (대행사)</p>
-                  <p>- 상&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;호 : {senderCompany?.name || ''}</p>
-                  <p>- 대 표 자 : {senderCompany?.ceo || ''}</p>
-                  <p>- 주&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;소 : {senderCompany?.address || ''}</p>
-                  <p>- 사업자 등록번호 : {senderCompany?.business_no || ''}</p>
-                  {stampUrl && (
-                    <div className="mt-1">
-                      <img src={stampUrl} alt="도장" className="w-12 h-12 object-contain opacity-90" />
-                    </div>
-                  )}
-                </div>
+              {/* 갑 */}
+              <div className="space-y-1.5 text-xs">
+                <p className="font-bold text-[#1e2a3a]">갑 (광고주)</p>
+                {company?.name && <p>&nbsp;&nbsp;- 업 체 명 : {company.name}</p>}
+                <p>&nbsp;&nbsp;- 대 표 자 : {company?.ceo || recipient || ''}</p>
+                <p>&nbsp;&nbsp;- 주&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;소 : {company?.address || ''}</p>
+                <p className="mt-2">&nbsp;&nbsp;- 서&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;명 :</p>
+              </div>
+              {/* 을 */}
+              <div className="space-y-1.5 text-xs">
+                <p className="font-bold text-[#1e2a3a]">을 (대행사)</p>
+                <p>&nbsp;&nbsp;- 상&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;호 : {senderCompany?.name || ''}</p>
+                <p>&nbsp;&nbsp;- 대 표 자 : {senderCompany?.ceo || ''}</p>
+                <p>&nbsp;&nbsp;- 주&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;소 : {senderCompany?.address || ''}</p>
+                <p>&nbsp;&nbsp;- 사업자 등록번호 : {senderCompany?.business_no || ''}</p>
+                <p className="mt-2">&nbsp;&nbsp;- 서&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;명 :</p>
+                {stampUrl && (
+                  <div className="ml-6 mt-1">
+                    <img src={stampUrl} alt="도장" className="w-12 h-12 object-contain opacity-90" />
+                  </div>
+                )}
               </div>
             </div>
           </div>
