@@ -319,9 +319,12 @@ export default function ContractDocument({
                 ))
               })
             })()}
-            {/* 합계 행 */}
+            {/* 합계 행 — 데이터 행과 동일한 6컬럼 구조, 앞 4셀 border 제거로 병합 효과 */}
             <View style={[S.tableRow, S.tableHeader]}>
-              <View style={[S.tableCell, { flex: 1 }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>합 계</Text></View>
+              <View style={[S.tableCell, { width: '8%', borderRightWidth: 0 }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>합 계</Text></View>
+              <View style={[S.tableCell, { width: '17%', borderRightWidth: 0 }]}><Text> </Text></View>
+              <View style={[S.tableCell, { width: '7%', borderRightWidth: 0 }]}><Text> </Text></View>
+              <View style={[S.tableCell, { width: '15%' }]}><Text> </Text></View>
               <View style={[S.tableCell, { width: '18%' }]}><Text style={[S.tableCellText, { fontWeight: 'bold' }]}>{fmtNum(totalAmount)}원</Text></View>
               <View style={[S.tableCellLast, { flex: 1 }]}>
                 <Text style={[S.tableCellText, { color: '#e74c3c', fontWeight: 'bold' }]}>{VAT_MAP[vatType]}</Text>
