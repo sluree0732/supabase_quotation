@@ -107,7 +107,8 @@ const S = StyleSheet.create({
   },
   tableCellNoteText: {
     textAlign: 'left',
-    lineHeight: 1.5,
+    fontSize: 7,
+    lineHeight: 1.4,
   },
   // 서명란
   signDate: {
@@ -186,9 +187,9 @@ const VAT_MAP: Record<VatType, string> = {
 }
 
 // ── 조항 컴포넌트 ─────────────────────────────────────────
-function Article({ no, title, children }: { no: number; title: string; children: React.ReactNode }) {
+function Article({ no, title, children, allowWrap = false }: { no: number; title: string; children: React.ReactNode; allowWrap?: boolean }) {
   return (
-    <View style={S.articleWrap} wrap={false}>
+    <View style={S.articleWrap} wrap={allowWrap}>
       <Text style={S.articleTitle}>제{no}조 ({title})</Text>
       {children}
     </View>
@@ -276,7 +277,7 @@ export default function ContractDocument({
         </Article>
 
         {/* 제2조 — 미리보기와 동일한 테이블 구조 */}
-        <Article no={2} title="업무의 범위">
+        <Article no={2} title="업무의 범위" allowWrap={true}>
           <Text style={S.articleBody}>을은 다음의 업무를 대행한다.</Text>
           <View style={S.table}>
             {/* 헤더 행 */}
