@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { BACKEND } from '@/lib/backend'
 
 export default function HomePage() {
   const [draftCount, setDraftCount] = useState(0)
@@ -11,29 +12,34 @@ export default function HomePage() {
   const [noteTemplateCount, setNoteTemplateCount] = useState(0)
 
   useEffect(() => {
-    async function fetchCounts() {
+    async function fetchCountsSupabase() {
       const [draftRes, companyRes, contractDraftRes, noteRes] = await Promise.all([
-        supabase
-          .from('quotations')
-          .select('id', { count: 'exact', head: true })
-          .eq('status', 'draft'),
-        supabase
-          .from('companies')
-          .select('id', { count: 'exact', head: true }),
-        supabase
-          .from('contracts')
-          .select('id', { count: 'exact', head: true })
-          .eq('status', 'draft'),
-        supabase
-          .from('note_templates')
-          .select('id', { count: 'exact', head: true }),
+        supabase.from('quotations').select('id', { count: 'exact', head: true }).eq('status', 'draft'),
+        supabase.from('companies').select('id', { count: 'exact', head: true }),
+        supabase.from('contracts').select('id', { count: 'exact', head: true }).eq('status', 'draft'),
+        supabase.from('note_templates').select('id', { count: 'exact', head: true }),
       ])
       setDraftCount(draftRes.count ?? 0)
       setCompanyCount(companyRes.count ?? 0)
       setContractDraftCount(contractDraftRes.count ?? 0)
       setNoteTemplateCount(noteRes.count ?? 0)
     }
-    fetchCounts()
+
+    async function fetchCountsAzure() {
+      const [draftRes, companyRes, contractRes, noteRes] = await Promise.all([
+        fetch('/api/quotations?status=draft').then(r => r.json()),
+        fetch('/api/companies').then(r => r.json()),
+        fetch('/api/contracts').then(r => r.json()),
+        fetch('/api/note-templates').then(r => r.json()),
+      ])
+      setDraftCount(draftRes.length ?? 0)
+      setCompanyCount(companyRes.length ?? 0)
+      setContractDraftCount(contractRes.filter((c: { status: string }) => c.status === 'draft').length ?? 0)
+      setNoteTemplateCount(noteRes.length ?? 0)
+    }
+
+    if (BACKEND === 'supabase') fetchCountsSupabase()
+    else fetchCountsAzure()
   }, [])
 
   const cards = [
